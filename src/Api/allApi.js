@@ -8,19 +8,19 @@ const allApi = api.injectEndpoints({
     }),
     createFashion: builder.mutation({
       query: (body) => ({
-        url: "fashion/techpacks/table/",
+        url: "fashion/techpack/",
         method: "POST",
         body,
       }),
       invalidatesTags: ["fashion"],
     }),
     getSingleFashion: builder.query({
-      query: (id) => `fashion/techpacks/table/${id}/`,
+      query: (id) => `fashion/techpack/?id=${id}`,
       providesTags: ["fashion"],
     }),
     updateFashion: builder.mutation({
       query: (body) => ({
-        url: `fashion/techpacks/table/${body.id}/`,
+        url: `fashion/techpack/`,
         method: "PATCH",
         body,
       }),
