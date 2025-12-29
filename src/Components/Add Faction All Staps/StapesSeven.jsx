@@ -4,9 +4,7 @@ import { setBom } from "../../Features/addFashionSlice";
 
 export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
   const bomInfo = useSelector((state) => state.addFashion.bom);
-  const allData = useSelector((state) => state.addFashion);
   const dispatch = useDispatch();
-
   const [bomItems, setBomItems] = useState([
     {
       id: 1,
@@ -54,16 +52,9 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const formattedData = bomItems.map(({ id, ...rest }) => rest);
     dispatch(setBom(formattedData));
-    const formData = new FormData();
-    Object.entries(allData).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
-
-    console.log("All Data:", formData);
-
     // goToNextStep();
   };
 

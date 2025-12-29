@@ -8,8 +8,6 @@ const initialState = {
   construction: null,
   artworks: null,
   bom: null,
-  artwork_id: null,
-  front_logo: null,
 };
 
 const addFashionSlice = createSlice({
@@ -38,10 +36,9 @@ const addFashionSlice = createSlice({
       state.bom = action.payload;
     },
     setArtworkId: (state, action) => {
-      state.artwork_id = action.payload;
-    },
-    setFrontLogo: (state, action) => {
-      state.front_logo = action.payload;
+      console.log(action.payload);
+      // state.artwork_id = action.payload;
+      // state[action.payload.name] = action.payload.value;
     },
   },
 });

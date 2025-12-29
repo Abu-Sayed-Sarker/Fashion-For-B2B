@@ -8,28 +8,29 @@ export default function StapesSix({ goToPreviousStep, goToNextStep }) {
   const [artworks, setArtworks] = useState([
     {
       id: 1,
-      artwork_id: "front_logo",
-      artwork_name: "e.g., Brand Logo, Graphic Print",
-      artwork_size: "e.g., 15cm × 10cm",
+      artwork_name: "",
+      artwork_size: "",
       artwork_type: "",
-      color_count: "e.g., 3 colors",
-      placement_location: "e.g., Center chest, Left sleeve",
-      application_method: "e.g., Screen print, Heat transfer",
-      coordinates: "e.g., 10cm from left, 5cm from top",
+      color_count: "",
+      placement_location: "",
+      application_method: "",
+      coordinates: "",
       front_logo: null,
     },
   ]);
 
+  // Update artwork in the state
   const updateArtwork = (id, field, value) => {
-    setArtworks(
-      artworks.map((a) => (a.id === id ? { ...a, [field]: value } : a))
+    setArtworks((prevArtworks) =>
+      prevArtworks.map((a) => (a.id === id ? { ...a, [field]: value } : a))
     );
   };
 
+  // Add a new artwork
   const addArtwork = () => {
+    const newId = Date.now();
     const newArtwork = {
-      id: Date.now(),
-      artwork_id: "",
+      id: newId,
       artwork_name: "",
       artwork_size: "",
       artwork_type: "",
@@ -39,15 +40,15 @@ export default function StapesSix({ goToPreviousStep, goToNextStep }) {
       coordinates: "",
       front_logo: null,
     };
-    setArtworks([...artworks, newArtwork]);
+    setArtworks((prevArtworks) => [...prevArtworks, newArtwork]);
   };
 
+  // Remove an artwork
   const removeArtwork = (id) => {
-    if (artworks.length > 1) {
-      setArtworks(artworks.filter((a) => a.id !== id));
-    }
+    setArtworks((prevArtworks) => prevArtworks.filter((a) => a.id !== id));
   };
 
+  // Handle file upload for artwork
   const handleFileUpload = (id, e) => {
     const file = e.target.files[0];
     if (file) {
@@ -55,13 +56,36 @@ export default function StapesSix({ goToPreviousStep, goToNextStep }) {
     }
   };
 
+  // Handle form submission
   const handleSubmit = () => {
-    console.log("Artwork & Placement Data:", artworks);
-    const formattedData = artworks.map(({ id, ...rest }) => rest);
-    dispatch(setArtworksData(formattedData));
-    goToNextStep();
+    console.log("Artworks Data:", artworks);
+    const formattedData = artworks.map(({ id, ...rest }) => ({
+      artwork_id: rest.artwork_name.split(" ").join("_"),
+      artwork_name: rest.artwork_name,
+      artwork_size: rest.artwork_size,
+      artwork_type: rest.artwork_type,
+      color_count: rest.color_count,
+      placement_location: rest.placement_location,
+      application_method: rest.application_method,
+      coordinates: rest.coordinates,
+      artwork_file_key: rest.artwork_name.split(" ").join("_"),
+    }));
+    const artworkIDAndFile = artworks.map((a) => ({
+      objectOne: {
+        name: a.artwork_name.split(" ").join("_"),
+        value: a.front_logo,
+      },
+      objectTwo: {
+        name: "artwork_id",
+        value: a.artwork_name.split(" ").join("_"),
+      },
+    }));
+
+    // dispatch(setArtworksData(formattedData)); // Uncomment to dispatch to redux
+    // goToNextStep(); // Uncomment to go to the next step
   };
 
+  // Handle "back" button
   const handleBack = () => {
     goToPreviousStep();
   };
@@ -74,6 +98,7 @@ export default function StapesSix({ goToPreviousStep, goToNextStep }) {
     { value: "Patch", label: "Patch" },
   ];
 
+  // Update state when artworkInfo changes (useEffect for initial data)
   useEffect(() => {
     if (artworkInfo) {
       setArtworks(artworkInfo.map((a, index) => ({ ...a, id: index + 1 })));
@@ -140,22 +165,6 @@ export default function StapesSix({ goToPreviousStep, goToNextStep }) {
             </div>
 
             <div className="grid grid-cols-2 gap-6">
-              {/* Artwork ID */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Artwork ID
-                </label>
-                <input
-                  type="text"
-                  value={artwork.artwork_id}
-                  onChange={(e) =>
-                    updateArtwork(artwork.id, "artwork_id", e.target.value)
-                  }
-                  placeholder="e.g., front_logo"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
               {/* Artwork Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
