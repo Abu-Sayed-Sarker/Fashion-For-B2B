@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { SelectField } from "../../Libs/FromComponents";
 import { useDispatch, useSelector } from "react-redux";
 import { setMeasurementsData } from "../../Features/addFashionSlice";
+import { toast } from "react-toastify";
 
 // Main Component
 export default function StapesTow({ goToNextStep, goToPreviousStep }) {
@@ -68,11 +69,11 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
 
   const handleSubmit = () => {
     if (!baseSize || !defaultUnit) {
-      return alert("Please fill in all required fields.");
+      return toast.error("Please fill in all required fields.");
     }
 
     if (!measurements.every((m) => m.pom && m.measurement_value && m.unit)) {
-      return alert("Please fill in all required fields.");
+      return toast.error("Please fill in all required fields.");
     }
 
     const formattedData = measurements.map(({ id, ...rest }) => rest);

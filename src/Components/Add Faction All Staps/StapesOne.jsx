@@ -7,6 +7,7 @@ import {
 } from "../../Libs/FromComponents.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import { setGarmentSetup } from "../../Features/addFashionSlice.js";
+import { toast } from "react-toastify";
 
 export default function StapesOne({ goToNextStep }) {
   const garmentInfo = useSelector((state) => state.addFashion.garment_setup);
@@ -91,7 +92,7 @@ export default function StapesOne({ goToNextStep }) {
       !formData.base_size ||
       !formData.measurement_unit
     ) {
-      return alert("Please fill in all required fields.");
+      return toast.error("Please fill in all required fields.");
     }
 
     console.log("Garment Setup Data:", formData);

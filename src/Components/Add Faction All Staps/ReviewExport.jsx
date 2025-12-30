@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "react-toastify/unstyled";
 
 export default function ReviewExport() {
   const [confirmed, setConfirmed] = useState(false);
@@ -37,8 +38,9 @@ export default function ReviewExport() {
 
   const handleExportPDF = () => {
     if (!confirmed) {
-      alert("Please confirm that all information is accurate before exporting");
-      return;
+      return toast.error(
+        "Please confirm that all information is accurate before exporting"
+      );
     }
     console.log("Exporting Tech Pack PDF...");
     console.log("Complete Garment Data:", {
@@ -54,7 +56,9 @@ export default function ReviewExport() {
 
   const handleExportBOM = () => {
     if (!confirmed) {
-      alert("Please confirm that all information is accurate before exporting");
+      toast.error(
+        "Please confirm that all information is accurate before exporting"
+      );
       return;
     }
     console.log("Exporting BOM XLSX...");

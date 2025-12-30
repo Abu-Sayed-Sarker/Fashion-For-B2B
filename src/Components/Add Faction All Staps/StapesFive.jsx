@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setConstruction } from "../../Features/addFashionSlice";
+import { toast } from "react-toastify";
 
 export default function StapesFive({ goToPreviousStep, goToNextStep }) {
   const constructionInfo = useSelector(
@@ -41,13 +42,14 @@ export default function StapesFive({ goToPreviousStep, goToNextStep }) {
       !formData.pocket_construction ||
       !formData.wash_treatment
     )
-      return alert("Please fill in all required fields.");
+      return toast.error("Please fill in all required fields.");
     dispatch(setConstruction(formData));
     goToNextStep();
   };
 
   const handleBack = () => {
-    goToPreviousStep();};
+    goToPreviousStep();
+  };
 
   useEffect(() => {}, [formData]);
 
