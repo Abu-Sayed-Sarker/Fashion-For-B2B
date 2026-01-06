@@ -72,7 +72,11 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
       return toast.error("Please fill in all required fields.");
     }
 
-    if (!measurements.every((m) => m.pom && m.measurement_value && m.unit)) {
+    if (
+      !measurements.every(
+        (m) => m.pom && m.measurement_value && m.unit && m.tolerance
+      )
+    ) {
       return toast.error("Please fill in all required fields.");
     }
 
@@ -102,7 +106,7 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
 
   return (
     <div className="bg-gray-50">
-      <div className="max-w-6xl mx-auto">
+      <div className="container mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-semibold text-gray-900 mb-2">
             Measurement Specification
@@ -117,6 +121,7 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
           <div className="grid grid-cols-2 gap-8">
             <SelectField
               label="Base Size (Reference Size)"
+              required
               value={baseSize}
               onChange={setBaseSize}
               options={sizes}
@@ -126,6 +131,7 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
 
             <SelectField
               label="Default Measurement Unit"
+              required
               value={defaultUnit}
               onChange={setDefaultUnit}
               options={units}
@@ -164,6 +170,7 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
                   Point of Measure (POM)
                 </label>
                 <input
+                  required
                   type="text"
                   value={measurement.pom}
                   onChange={(e) =>
@@ -178,6 +185,7 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
                   Measurement Value
                 </label>
                 <input
+                  required
                   type="text"
                   value={measurement.measurement_value}
                   onChange={(e) =>
@@ -200,6 +208,7 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
                     ±
                   </span>
                   <input
+                    required
                     type="text"
                     value={measurement.tolerance.replace("±", "")}
                     onChange={(e) =>

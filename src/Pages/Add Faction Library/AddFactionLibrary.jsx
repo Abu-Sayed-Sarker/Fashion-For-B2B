@@ -1,9 +1,4 @@
-import { useState } from "react";
-import {
-  ProgressStepper,
-  StepContent,
-  StepNavigation,
-} from "../../Libs/Progressbar";
+import { ProgressStepper, StepContent } from "../../Libs/Progressbar";
 import StapesOne from "../../Components/Add Faction All Staps/StapesOne";
 import useStepNavigation from "../../Libs/progressHooks";
 import StapesTow from "../../Components/Add Faction All Staps/StapesTow";
@@ -13,6 +8,7 @@ import StapesFive from "../../Components/Add Faction All Staps/StapesFive";
 import StapesSix from "../../Components/Add Faction All Staps/StapesSix";
 import StapesSeven from "../../Components/Add Faction All Staps/StapesSeven";
 import ReviewExport from "../../Components/Add Faction All Staps/ReviewExport";
+import { useState } from "react";
 
 const AddFactionLibrary = () => {
   const steps = [
@@ -66,6 +62,20 @@ const AddFactionLibrary = () => {
     },
   ];
 
+  const [artworks, setArtworks] = useState([
+    {
+      id: 1,
+      artwork_name: "",
+      artwork_size: "",
+      artwork_type: "",
+      color_count: "",
+      placement_location: "",
+      application_method: "",
+      coordinates: "",
+      front_logo: null,
+    },
+  ]);
+
   const { currentStep, goToStep, fadeIn, goToNextStep, goToPreviousStep } =
     useStepNavigation(steps.length);
 
@@ -108,6 +118,8 @@ const AddFactionLibrary = () => {
       case 6:
         return (
           <StapesSix
+            artworks={artworks}
+            setArtworks={setArtworks}
             goToPreviousStep={goToPreviousStep}
             goToNextStep={goToNextStep}
           />
@@ -115,12 +127,13 @@ const AddFactionLibrary = () => {
       case 7:
         return (
           <StapesSeven
+            artworks={artworks}
             goToPreviousStep={goToPreviousStep}
             goToNextStep={goToNextStep}
           />
         );
       case 8:
-        return <ReviewExport />;
+        return <ReviewExport goToPreviousStep={goToPreviousStep} />;
       default:
         return (
           <>
@@ -151,7 +164,7 @@ const AddFactionLibrary = () => {
         onStepClick={goToStep}
       />
 
-      <div className="max-w-5xl mx-auto px-8 py-12">
+      <div className="container mx-auto px-8 py-12">
         <StepContent fadeIn={fadeIn}>
           {renderStepContent()}
 

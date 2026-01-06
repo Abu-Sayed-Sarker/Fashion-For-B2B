@@ -29,4 +29,4 @@ const allApi = api.injectEndpoints({
   }),
 });
 
-export const { useGetAllFashionQuery } = allApi;
+export const { useGetAllFashionQuery, useCreateFashionMutation } = allApi;

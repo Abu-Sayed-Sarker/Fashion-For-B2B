@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify/unstyled";
 
-export default function ReviewExport() {
+export default function ReviewExport({ goToPreviousStep }) {
   const [confirmed, setConfirmed] = useState(false);
 
   const garmentData = {
@@ -66,7 +66,7 @@ export default function ReviewExport() {
   };
 
   const handleBackToEdit = () => {
-    console.log("Going back to edit");
+    goToPreviousStep();
   };
 
   const handleReturnToLibrary = () => {
@@ -75,7 +75,7 @@ export default function ReviewExport() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="">
         <div className="mb-6">
           <h1 className="text-3xl font-semibold text-gray-900 mb-2">
             Review & Export

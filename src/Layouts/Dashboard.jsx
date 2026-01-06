@@ -1,3 +1,4 @@
+import { Scissors } from "lucide-react";
 import { Link, Outlet } from "react-router-dom";
 
 export default function Dashboard() {
@@ -9,7 +10,7 @@ export default function Dashboard() {
             to="/"
             className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-white font-semibold"
           >
-            8K
+            <Scissors />
           </Link>
           <div>
             <h1 className="text-xl font-semibold text-gray-900">

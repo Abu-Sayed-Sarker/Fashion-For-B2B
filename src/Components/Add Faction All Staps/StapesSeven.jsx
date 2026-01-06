@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setBom } from "../../Features/addFashionSlice";
+import { useCreateFashionMutation } from "../../Api/allApi";
 
-export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
+export default function StapesSeven({
+  goToPreviousStep,
+  goToNextStep,
+  artworks,
+}) {
   const bomInfo = useSelector((state) => state.addFashion.bom);
+  const allFactionInfo = useSelector((state) => state.addFashion);
+  console.log(allFactionInfo);
+  const [createFashion] = useCreateFashionMutation();
   const dispatch = useDispatch();
   const [bomItems, setBomItems] = useState([
     {
@@ -52,10 +60,36 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const formattedData = bomItems.map(({ id, ...rest }) => rest);
     dispatch(setBom(formattedData));
-    // goToNextStep();
+
+    try {
+      const formData = new FormData();
+
+      formData.append("garment_setup", allFactionInfo.garment_setup); // Append garment setup data
+      formData.append("measurements", allFactionInfo.measurements); // Append measurements data
+      formData.append("bom", allFactionInfo.bom); // Append BOM data
+      formData.append("artworks", allFactionInfo.artworks); // Append artworks data
+      formData.append("fabrics", allFactionInfo.fabrics); // Append fabric setup data
+      formData.append("trims", allFactionInfo.trims); // Append trims data
+      formData.append("construction", allFactionInfo.construction); // Append construction data
+      if (artworks) {
+        artworks.forEach(({ artwork_name, front_logo }) => {
+          if (artwork_name && front_logo) {
+            const id = artwork_name.split(" ").join("_");
+            formData.append("artwork_id", id);
+            formData.append(id, front_logo);
+          }
+        });
+      }
+      const response = await createFashion(formData);
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+
+    goToNextStep();
   };
 
   const handleBack = () => {
@@ -70,7 +104,7 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="container mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-semibold text-gray-900 mb-2">
             Bill of Materials (BOM)

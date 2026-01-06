@@ -2,22 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setArtworksData } from "../../Features/addFashionSlice";
 
-export default function StapesSix({ goToPreviousStep, goToNextStep }) {
+export default function StapesSix({
+  goToPreviousStep,
+  goToNextStep,
+  artworks,
+  setArtworks,
+}) {
   const artworkInfo = useSelector((state) => state.addFashion.artworks);
   const dispatch = useDispatch();
-  const [artworks, setArtworks] = useState([
-    {
-      id: 1,
-      artwork_name: "",
-      artwork_size: "",
-      artwork_type: "",
-      color_count: "",
-      placement_location: "",
-      application_method: "",
-      coordinates: "",
-      front_logo: null,
-    },
-  ]);
 
   // Update artwork in the state
   const updateArtwork = (id, field, value) => {
@@ -57,8 +49,7 @@ export default function StapesSix({ goToPreviousStep, goToNextStep }) {
   };
 
   // Handle form submission
-  const handleSubmit = () => {
-    console.log("Artworks Data:", artworks);
+  const handleSubmit = async () => {
     const formattedData = artworks.map(({ id, ...rest }) => ({
       artwork_id: rest.artwork_name.split(" ").join("_"),
       artwork_name: rest.artwork_name,
@@ -70,20 +61,22 @@ export default function StapesSix({ goToPreviousStep, goToNextStep }) {
       coordinates: rest.coordinates,
       artwork_file_key: rest.artwork_name.split(" ").join("_"),
     }));
-    const artworkIDAndFile = artworks.map((a) => ({
-      objectOne: {
-        name: a.artwork_name.split(" ").join("_"),
-        value: a.front_logo,
-      },
-      objectTwo: {
-        name: "artwork_id",
-        value: a.artwork_name.split(" ").join("_"),
-      },
-    }));
 
-    // dispatch(setArtworksData(formattedData)); // Uncomment to dispatch to redux
-    // goToNextStep(); // Uncomment to go to the next step
+    dispatch(setArtworksData(formattedData)); // Uncomment to dispatch to redux
+    goToNextStep(); // Uncomment to go to the next step
   };
+
+  // Log state updates for debugging
+  // useEffect(() => {
+  //   if (artworksIDAndFile instanceof FormData) {
+  //     console.log("Updated artworksIDAndFile (FormData):");
+  //     for (let [key, value] of artworksIDAndFile.entries()) {
+  //       console.log(`${key}:`, value);
+  //     }
+  //   } else {
+  //     console.log("Updated artworksIDAndFile:", artworksIDAndFile);
+  //   }
+  // }, [artworksIDAndFile]);
 
   // Handle "back" button
   const handleBack = () => {
@@ -107,7 +100,7 @@ export default function StapesSix({ goToPreviousStep, goToNextStep }) {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="container mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-semibold text-gray-900 mb-2">
             Artwork & Placement

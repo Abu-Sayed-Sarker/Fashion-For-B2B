@@ -122,7 +122,7 @@ export default function StapesOne({ goToNextStep }) {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <form onSubmit={handleSubmit}>
-        <div className="max-w-6xl mx-auto">
+        <div className="container mx-auto">
           <div className="mb-6">
             <h1 className="text-3xl font-semibold text-gray-900 mb-2">
               Garment Setup

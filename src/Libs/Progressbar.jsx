@@ -3,7 +3,7 @@ import React from "react";
 const ProgressStepper = ({ steps, currentStep, onStepClick }) => {
   return (
     <div className="bg-white border-b border-gray-200 py-6">
-      <div className="max-w-7xl mx-auto px-8">
+      <div className="container mx-auto px-8">
         <div className="flex items-center justify-between">
           {steps.map((step, index) => (
             <React.Fragment key={step.number}>
