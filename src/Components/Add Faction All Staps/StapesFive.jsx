@@ -11,7 +11,7 @@ export default function StapesFive({ goToPreviousStep, goToNextStep }) {
   const [openSections, setOpenSections] = useState({
     stitching: true,
     topstitching: true,
-    pocket: false,
+    pocket: true,
     wash: true,
   });
 
@@ -51,7 +51,19 @@ export default function StapesFive({ goToPreviousStep, goToNextStep }) {
     goToPreviousStep();
   };
 
-  useEffect(() => {}, [formData]);
+  useEffect(() => {
+    if (constructionInfo) {
+      setFormData({
+        stitch_type: constructionInfo.stitch_type,
+        seam_allowance: constructionInfo.seam_allowance,
+        topstitch_spec: constructionInfo.topstitch_spec,
+        paneling: constructionInfo.paneling,
+        pocket_construction: constructionInfo.pocket_construction,
+        wash_treatment: constructionInfo.wash_treatment,
+        special_instructions: constructionInfo.special_instructions,
+      });
+    }
+  }, [constructionInfo]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -197,7 +209,7 @@ export default function StapesFive({ goToPreviousStep, goToNextStep }) {
               </h2>
               <svg
                 className={`w-5 h-5 text-gray-500 transition-transform ${
-                  openSections.pocket ? "" : "-rotate-90"
+                  openSections.pocket ? "rotate-180" : ""
                 }`}
                 fill="none"
                 stroke="currentColor"
@@ -207,7 +219,7 @@ export default function StapesFive({ goToPreviousStep, goToNextStep }) {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9 5l7 7-7 7"
+                  d="M19 9l-7 7-7-7"
                 />
               </svg>
             </button>

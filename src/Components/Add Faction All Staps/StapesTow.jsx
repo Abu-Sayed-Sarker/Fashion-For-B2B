@@ -137,14 +137,6 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
 
         {/* Measurement Rows */}
         <div className="bg-white rounded-lg border border-gray-200 p-8 mb-6">
-          <div className="grid gap-4 mb-4 text-sm font-medium text-gray-700 uppercase tracking-wide">
-            <div>Point of Measure (POM)</div>
-            <div>Measurement Value</div>
-            <div>Tolerance</div>
-            <div>Unit</div>
-            <div></div>
-          </div>
-
           {measurements.map((measurement) => (
             <div key={measurement.id} className="grid gap-4 mb-4">
               <div className="flex justify-end">
@@ -167,59 +159,79 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
                   </svg>
                 </button>
               </div>
-              <input
-                type="text"
-                value={measurement.pom}
-                onChange={(e) =>
-                  updateMeasurement(measurement.id, "pom", e.target.value)
-                }
-                placeholder="e.g., Chest Width"
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <input
-                type="text"
-                value={measurement.measurement_value}
-                onChange={(e) =>
-                  updateMeasurement(
-                    measurement.id,
-                    "measurement_value",
-                    e.target.value
-                  )
-                }
-                placeholder="0.0"
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
-                  ±
-                </span>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Point of Measure (POM)
+                </label>
                 <input
                   type="text"
-                  value={measurement.tolerance.replace("±", "")}
+                  value={measurement.pom}
+                  onChange={(e) =>
+                    updateMeasurement(measurement.id, "pom", e.target.value)
+                  }
+                  placeholder="e.g., Chest Width"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Measurement Value
+                </label>
+                <input
+                  type="text"
+                  value={measurement.measurement_value}
                   onChange={(e) =>
                     updateMeasurement(
                       measurement.id,
-                      "tolerance",
-                      `±${e.target.value}`
+                      "measurement_value",
+                      e.target.value
                     )
                   }
-                  placeholder="0.5"
-                  className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0.0"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              <select
-                value={measurement.unit}
-                onChange={(e) =>
-                  updateMeasurement(measurement.id, "unit", e.target.value)
-                }
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {measurementUnits.map((unit) => (
-                  <option key={unit.value} value={unit.value}>
-                    {unit.label}
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tolerance
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                    ±
+                  </span>
+                  <input
+                    type="text"
+                    value={measurement.tolerance.replace("±", "")}
+                    onChange={(e) =>
+                      updateMeasurement(
+                        measurement.id,
+                        "tolerance",
+                        `±${e.target.value}`
+                      )
+                    }
+                    placeholder="0.5"
+                    className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Unit
+                </label>
+                <select
+                  value={measurement.unit}
+                  onChange={(e) =>
+                    updateMeasurement(measurement.id, "unit", e.target.value)
+                  }
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {measurementUnits.map((unit) => (
+                    <option key={unit.value} value={unit.value}>
+                      {unit.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           ))}
 

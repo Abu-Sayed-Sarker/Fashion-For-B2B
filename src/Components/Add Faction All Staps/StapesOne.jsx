@@ -69,7 +69,6 @@ export default function StapesOne({ goToNextStep }) {
 
   const genders = [
     { value: "Male", label: "Male" },
-    { value: "Male", label: "Male" },
     { value: "Female", label: "Female" },
   ];
 
@@ -99,6 +98,20 @@ export default function StapesOne({ goToNextStep }) {
     dispatch(setGarmentSetup(formData));
     goToNextStep();
   };
+
+  useEffect(() => {
+    const garmentTypeToCategory = {
+      "Dabid Woven Shirt": "Top",
+      "T-Shirt": "Tops",
+      Hoodie: "Outerwear",
+      Jeans: "Bottoms",
+    };
+
+    const category = garmentTypeToCategory[formData.garment_type];
+    if (category) {
+      updateField("garment_category", category);
+    }
+  }, [formData.garment_type]);
 
   useEffect(() => {
     if (garmentInfo) {
@@ -151,7 +164,6 @@ export default function StapesOne({ goToNextStep }) {
               onChange={(value) => updateField("size", value)}
               options={sizes}
               placeholder="Select size"
-              helperText="Base size for measurement reference"
             />
 
             <SelectField
@@ -191,6 +203,7 @@ export default function StapesOne({ goToNextStep }) {
               onChange={(value) => updateField("base_size", value)}
               options={sizes}
               placeholder="Select base size"
+              helperText="Base size for measurement reference"
             />
 
             <SelectField

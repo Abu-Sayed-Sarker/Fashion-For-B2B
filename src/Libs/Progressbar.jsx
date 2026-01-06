@@ -8,8 +8,8 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }) => {
           {steps.map((step, index) => (
             <React.Fragment key={step.number}>
               <div className="flex flex-col items-center">
-                <button
-                  onClick={() => onStepClick(step.number)}
+                <div
+                  // onClick={() => onStepClick(step.number)}
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-500 transform ${
                     step.number === currentStep
                       ? "bg-gray-900 text-white scale-110 shadow-lg"
@@ -33,7 +33,7 @@ const ProgressStepper = ({ steps, currentStep, onStepClick }) => {
                   ) : (
                     step.number
                   )}
-                </button>
+                </div>
                 <span
                   className={`mt-2 text-sm font-medium transition-all duration-300 ${
                     step.number === currentStep
