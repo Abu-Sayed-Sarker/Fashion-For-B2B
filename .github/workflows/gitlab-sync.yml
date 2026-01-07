@@ -1,0 +1,77 @@
+# ///////////////push in the main branch in gilab (it's not working)
+
+# name: Sync to GitLab
+
+# on:
+#     push:
+#         branches:
+#             - main # Trigger the workflow on push to the main branch of GitHub
+
+# jobs:
+#     sync:
+#         runs-on: ubuntu-latest # Run the job on the latest Ubuntu runner
+
+#         steps:
+#             - name: Checkout code from GitHub
+#               uses: actions/checkout@v2
+#               with:
+#                   fetch-depth: 0 # Fetch all history to avoid shallow clone
+
+#             - name: Set up Git
+#               run: |
+#                   git config user.name "Abu_Sayed"  # Replace with your GitHub username
+#                   git config user.email "abusarker@joinventureai.com"  # Replace with your GitHub email
+
+#             - name: Add GitLab remote
+#               run: |
+#                   # Add GitLab repository as a remote with a unique name to avoid conflict with GitHub's origin
+#                   git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.betopialimited.com/Abu_Sayed/ivr-jvai-website.git
+
+#                   # Fetch all branches from GitLab (to ensure we're up to date with remote)
+#                   git fetch --all
+
+#                   # Pull the latest changes from GitLab 'main' branch with rebase to handle divergent histories
+#                   git pull --rebase gitlab main
+
+#                   # Push the 'main' branch to GitLab, forcing the push
+#                   git push -uf gitlab main  # Pushing 'main' branch to GitLab
+
+
+
+
+name: Sync to GitLab
+
+on:
+    push:
+        branches:
+            - main # Trigger the workflow on push to the main branch of GitHub
+
+jobs:
+    sync:
+        runs-on: ubuntu-latest # Run the job on the latest Ubuntu runner
+
+        steps:
+            - name: Checkout code from GitHub
+              uses: actions/checkout@v2
+              with:
+                  fetch-depth: 0 # Fetch all history to avoid shallow clone
+
+            - name: Set up Git
+              run: |
+                  git config user.name "Abu_Sayed"  # Replace with your GitHub username
+                  git config user.email "abusarker@joinventureai.com"  # Replace with your GitHub email
+
+            - name: Add GitLab remote
+              run: |
+                  # Add GitLab repository as a remote with a unique name to avoid conflict with GitHub's origin
+                  git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.betopialimited.com/Abu_Sayed/tri2.git
+
+                  # Fetch all branches from GitLab (to ensure we're up to date with remote)
+                  git fetch --all
+
+                  # Create and checkout the 'sayed' branch locally
+                  git checkout -b sayed
+
+                  # Push the 'sayed' branch to GitLab, forcing the push
+                  git push -uf gitlab sayed  # Pushing 'sayed' branch to GitLab
+
