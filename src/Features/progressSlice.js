@@ -11,8 +11,9 @@ const progressSlice = createSlice({
     setCurrentStep: (state, action) => {
       state.currentStep = action.payload;
     },
+    resetProgress: () => initialState,
   },
 });
 
-export const { setCurrentStep } = progressSlice.actions;
+export const { setCurrentStep, resetProgress } = progressSlice.actions;
 export default progressSlice.reducer;

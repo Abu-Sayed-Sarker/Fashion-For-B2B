@@ -29,6 +29,7 @@ export const store = configureStore({
           "register",
           "rehydrate",
           "meta.baseQueryMeta.request",
+          "meta.baseQueryMeta.response",
         ],
       },
     }).concat(api.middleware),

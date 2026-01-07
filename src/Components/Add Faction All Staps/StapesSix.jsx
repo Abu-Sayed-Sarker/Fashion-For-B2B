@@ -1,7 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import {
+  useCreateFashionByIdAndStepMutation,
+  useGetFashionByIdQuery,
+} from "../../Api/allApi";
+import { useSelector } from "react-redux";
 
 export default function StapesSix({ goToPreviousStep, goToNextStep }) {
+  const parentId = useSelector((state) => state.addFashion.id);
+
+  const [createFashionByIdAndStep] = useCreateFashionByIdAndStepMutation();
+  const { data: fashionInfo } = useGetFashionByIdQuery(parentId, {
+    skip: !parentId,
+  });
 
   const [artworks, setArtworks] = useState([
     {
@@ -67,45 +78,50 @@ export default function StapesSix({ goToPreviousStep, goToNextStep }) {
 
   const handleSubmit = async () => {
     // Validate required fields
-    const hasEmptyRequired = artworks.some(
-      (artwork) => !artwork.artwork_name || !artwork.artwork_type || !artwork.placement_location
-    );
+    // const hasEmptyRequired = artworks.some(
+    //   (artwork) => !artwork.artwork_name || !artwork.artwork_type || !artwork.placement_location
+    // );
 
-    if (hasEmptyRequired) {
-      return toast.error("Please fill in all required fields for each artwork.");
-    }
+    // if (hasEmptyRequired) {
+    //   return toast.error("Please fill in all required fields for each artwork.");
+    // }
 
     const formattedData = artworks.map(({ id, front_logo, ...rest }) => ({
       ...rest,
-      artwork_id: rest.artwork_name.split(" ").join("_"),
-      artwork_file_key: rest.artwork_name.split(" ").join("_"),
     }));
 
-    console.log("=== FORM SUBMITTED ===");
-    console.log("All Artworks Array:", artworks);
-    console.log("Formatted Data:", formattedData);
-    console.log("Total Artworks:", artworks.length);
-
-    goToNextStep();
+    const data = {
+      data: formattedData,
+      is_complete: true,
+    };
+    try {
+      await createFashionByIdAndStep({
+        id: parentId,
+        step: 6,
+        data: data,
+      });
+      toast.success("Trims data saved successfully!");
+      goToNextStep();
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to save trims data.");
+    }
   };
 
   const handleBack = () => {
     goToPreviousStep();
   };
 
-  // useEffect(() => {
-  //   if (artworkInfo && artworkInfo.length > 0) {
-  //     const loadedArtworks = artworkInfo.map((a, index) => ({
-  //       ...a,
-  //       id: index + 1,
-  //       front_logo: null,
-  //     }));
-  //     setArtworks(loadedArtworks);
-
-  //     console.log("=== Artworks Loaded from Redux ===");
-  //     console.log("Loaded Artworks:", loadedArtworks);
-  //   }
-  // }, [artworkInfo]);
+  useEffect(() => {
+    if (fashionInfo && fashionInfo?.steps?.artwork?.length > 0) {
+      const loadedArtworks = fashionInfo.steps.artwork.map((a, index) => ({
+        ...a,
+        id: index + 1,
+        front_logo: null,
+      }));
+      setArtworks(loadedArtworks);
+    }
+  }, [fashionInfo]);
 
   return (
     <div className="bg-gray-50 min-h-screen py-8">

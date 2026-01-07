@@ -1,8 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import {
+  useCreateFashionByIdAndStepMutation,
+  useGetFashionByIdQuery,
+} from "../../Api/allApi";
 
 export default function StapesFour({ goToPreviousStep, goToNextStep }) {
-  
+  const parentId = useSelector((state) => state.addFashion.id);
+
+  const [createFashionByIdAndStep] = useCreateFashionByIdAndStepMutation();
+  const { data: fashionInfo } = useGetFashionByIdQuery(parentId, {
+    skip: !parentId,
+  });
+
   const [trims, setTrims] = useState([
     {
       id: 1,
@@ -32,7 +43,9 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
   ];
 
   const updateTrim = (id, field, value) => {
-    const updatedTrims = trims.map((t) => (t.id === id ? { ...t, [field]: value } : t));
+    const updatedTrims = trims.map((t) =>
+      t.id === id ? { ...t, [field]: value } : t
+    );
     setTrims(updatedTrims);
   };
 
@@ -58,10 +71,14 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Validate required fields
     const hasEmptyRequired = trims.some(
-      (trim) => !trim.trim_type || !trim.material || !trim.placement || !trim.consumption
+      (trim) =>
+        !trim.trim_type ||
+        !trim.material ||
+        !trim.placement ||
+        !trim.consumption
     );
 
     if (hasEmptyRequired) {
@@ -69,17 +86,39 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
     }
 
     const formattedData = trims.map(({ id, ...rest }) => rest);
-    
-    console.log("=== FORM SUBMITTED ===");
-    console.log("All Trims Array:", trims);
-    console.log("Formatted Data (without id):", formattedData);
-    console.log("Total Trims:", trims.length);
-    goToNextStep();
+
+    const data = {
+      data: formattedData,
+      is_complete: true,
+    };
+    try {
+      await createFashionByIdAndStep({
+        id: parentId,
+        step: 4,
+        data: data,
+      });
+      toast.success("Trims data saved successfully!");
+      goToNextStep();
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to save trims data.");
+    }
   };
 
   const handleBack = () => {
     goToPreviousStep();
   };
+
+  useEffect(() => {
+    if (fashionInfo?.steps?.trims) {
+      setTrims(
+        fashionInfo?.steps?.trims.map((trim, index) => ({
+          ...trim,
+          id: index + 1,
+        }))
+      );
+    }
+  }, [fashionInfo]);
 
   return (
     <div className="bg-gray-50 min-h-screen py-8">
@@ -148,7 +187,9 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-gray-500 mt-1">Type of trim or accessory</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Type of trim or accessory
+                  </p>
                 </div>
 
                 <div>
@@ -164,7 +205,9 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
                     placeholder="e.g., Metal, Plastic, Polyester"
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Material composition</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Material composition
+                  </p>
                 </div>
 
                 <div>
@@ -174,11 +217,15 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
                   <input
                     type="text"
                     value={trim.size}
-                    onChange={(e) => updateTrim(trim.id, "size", e.target.value)}
+                    onChange={(e) =>
+                      updateTrim(trim.id, "size", e.target.value)
+                    }
                     placeholder="e.g., 15mm, 5 inches"
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Dimensions or size specification</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Dimensions or size specification
+                  </p>
                 </div>
 
                 {/* Row 2 */}
@@ -190,19 +237,27 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
                     <input
                       type="text"
                       value={trim.color}
-                      onChange={(e) => updateTrim(trim.id, "color", e.target.value)}
+                      onChange={(e) =>
+                        updateTrim(trim.id, "color", e.target.value)
+                      }
                       placeholder="e.g., Black, Silver, #33445F"
                       className="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <input
                       type="color"
-                      value={trim.color.startsWith("#") ? trim.color : "#000000"}
-                      onChange={(e) => updateTrim(trim.id, "color", e.target.value)}
+                      value={
+                        trim.color.startsWith("#") ? trim.color : "#000000"
+                      }
+                      onChange={(e) =>
+                        updateTrim(trim.id, "color", e.target.value)
+                      }
                       className="w-12 h-[38px] rounded-lg border border-gray-300 cursor-pointer"
                       title="Pick a color"
                     />
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Color name or code</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Color name or code
+                  </p>
                 </div>
 
                 <div>
@@ -218,7 +273,9 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
                     placeholder="e.g., Matt, Glossy, Brushed"
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Surface finish or treatment</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Surface finish or treatment
+                  </p>
                 </div>
 
                 <div>
@@ -234,7 +291,9 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
                     placeholder="e.g., Center Front, Pocket, Waistband"
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Location on garment</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Location on garment
+                  </p>
                 </div>
 
                 {/* Row 3 - Full Width */}
@@ -251,7 +310,9 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
                     placeholder="e.g., 6 pcs, 1.5 meters"
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Quantity required per garment</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Quantity required per garment
+                  </p>
                 </div>
               </div>
             </div>

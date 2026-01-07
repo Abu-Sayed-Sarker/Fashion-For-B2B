@@ -1,7 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import {
+  useCreateFashionByIdAndStepMutation,
+  useGetFashionByIdQuery,
+} from "../../Api/allApi";
+import { useSelector } from "react-redux";
 
 export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
+  const parentId = useSelector((state) => state.addFashion.id);
+
+  const [createFashionByIdAndStep] = useCreateFashionByIdAndStepMutation();
+  const { data: fashionInfo } = useGetFashionByIdQuery(parentId, {
+    skip: !parentId,
+  });
+
   const [bomItems, setBomItems] = useState([
     {
       id: 1,
@@ -77,23 +89,41 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
     );
 
     if (hasEmptyRequired) {
-      return toast.error("Please fill in all required fields for each BOM item.");
+      return toast.error(
+        "Please fill in all required fields for each BOM item."
+      );
     }
 
     const formattedData = bomItems.map(({ id, ...rest }) => rest);
-
-    console.log("=== FORM SUBMITTED ===");
-    console.log("All BOM Items Array:", bomItems);
-    console.log("Formatted Data:", formattedData);
-    console.log("Total BOM Items:", bomItems.length);
-
-    toast.success("BOM data saved successfully!");
-    goToNextStep();
+    const data = {
+      data: formattedData,
+      is_complete: true,
+    };
+    try {
+      await createFashionByIdAndStep({
+        id: parentId,
+        step: 7,
+        data: data,
+      });
+      toast.success("BOM data saved successfully!");
+      goToNextStep();
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to save BOM data.");
+    }
   };
 
   const handleBack = () => {
     goToPreviousStep();
   };
+
+  useEffect(() => {
+    if (fashionInfo?.steps?.bom) {
+      setBomItems(
+        fashionInfo.steps.bom.map((item, index) => ({ ...item, id: index + 1 }))
+      );
+    }
+  }, [fashionInfo]);
 
   return (
     <div className="bg-gray-50 min-h-screen py-8">
@@ -103,7 +133,8 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
             Bill of Materials (BOM)
           </h1>
           <p className="text-gray-600">
-            Comprehensive material breakdown with supplier and costing information
+            Comprehensive material breakdown with supplier and costing
+            information
           </p>
         </div>
 
@@ -184,7 +215,9 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
                         </option>
                       ))}
                     </select>
-                    <p className="text-xs text-gray-500 mt-1">Item classification</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Item classification
+                    </p>
                   </div>
 
                   <div>
@@ -200,23 +233,32 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
                       placeholder="e.g., Main Body Fabric, Care Label"
                       className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Specific component identifier</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Specific component identifier
+                    </p>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Material / Composition <span className="text-red-500">*</span>
+                      Material / Composition{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       value={item.material_composition}
                       onChange={(e) =>
-                        updateBomItem(item.id, "material_composition", e.target.value)
+                        updateBomItem(
+                          item.id,
+                          "material_composition",
+                          e.target.value
+                        )
                       }
                       placeholder="e.g., 100% Cotton, Metal Button"
                       className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Material description</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Material description
+                    </p>
                   </div>
                 </div>
               </div>
@@ -244,7 +286,9 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
                         </option>
                       ))}
                     </select>
-                    <p className="text-xs text-gray-500 mt-1">Unit of measurement</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Unit of measurement
+                    </p>
                   </div>
 
                   <div>
@@ -260,7 +304,9 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
                       placeholder="e.g., 1.5, 6"
                       className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Required quantity per garment</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Required quantity per garment
+                    </p>
                   </div>
 
                   <div>
@@ -271,12 +317,18 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
                       type="text"
                       value={item.wastage_percent}
                       onChange={(e) =>
-                        updateBomItem(item.id, "wastage_percent", e.target.value)
+                        updateBomItem(
+                          item.id,
+                          "wastage_percent",
+                          e.target.value
+                        )
                       }
                       placeholder="e.g., 5, 10"
                       className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Expected wastage percentage</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Expected wastage percentage
+                    </p>
                   </div>
                 </div>
               </div>
@@ -300,7 +352,9 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
                       placeholder="e.g., ABC Textiles Ltd."
                       className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Supplier name or code</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Supplier name or code
+                    </p>
                   </div>
 
                   <div>
@@ -316,7 +370,9 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
                       placeholder="e.g., 500 meters, 100 pieces"
                       className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Supplier minimum order</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Supplier minimum order
+                    </p>
                   </div>
 
                   <div>
@@ -332,14 +388,18 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
                       placeholder="e.g., 30 days, 2 weeks"
                       className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Production/delivery time</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Production/delivery time
+                    </p>
                   </div>
                 </div>
               </div>
 
               {/* Notes */}
               <div>
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">Notes</h4>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                  Notes
+                </h4>
                 <textarea
                   value={item.notes}
                   onChange={(e) =>
@@ -349,7 +409,9 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
                   rows={2}
                   className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 />
-                <p className="text-xs text-gray-500 mt-1">Additional specifications or requirements</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Additional specifications or requirements
+                </p>
               </div>
             </div>
           </div>

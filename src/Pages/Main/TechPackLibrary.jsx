@@ -1,14 +1,38 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Search, Plus, MoreVertical, FileText, Tag } from "lucide-react";
 import { techPacks } from "../../../Data/staticData";
-import { useGetAllFashionQuery } from "../../Api/allApi";
-import { Link } from "react-router-dom";
+import {
+  useCreateFashionIdMutation,
+  useGetAllFashionQuery,
+} from "../../Api/allApi";
+import { useNavigate } from "react-router-dom";
+import { setFashionId } from "../../Features/addFashionSlice";
+import { useDispatch } from "react-redux";
+import { resetProgress } from "../../Features/progressSlice";
 
 const TechPackLibrary = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   //// api call here
 
   const { data } = useGetAllFashionQuery();
   console.log("API Data:", data);
+
+  const [createFashionId, { isLoading }] = useCreateFashionIdMutation();
+  ////////////////////////
+
+  const handleCreatePack = async () => {
+    try {
+      const res = await createFashionId();
+      dispatch(setFashionId(res?.data?.id));
+      if (res.data) {
+        navigate("/add-faction-library");
+      }
+    } catch (error) {
+      console.error("Error creating Fashion ID:", error);
+    }
+  };
 
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -42,6 +66,13 @@ const TechPackLibrary = () => {
     // Add your action handlers here
   };
 
+  ///////////// clear local storage
+
+  useEffect(() => {
+    dispatch(setFashionId(null));
+    dispatch(resetProgress());
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
@@ -68,13 +99,13 @@ const TechPackLibrary = () => {
               className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          <Link
-            to="/add-faction-library"
+          <button
+            onClick={handleCreatePack}
             className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 font-medium transition-colors"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className={`w-5 h-5 ${isLoading ? "animate-spin" : ""}`} />
             Create New Tech Pack
-          </Link>
+          </button>
         </div>
 
         {/* Table */}

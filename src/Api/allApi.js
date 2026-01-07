@@ -4,29 +4,32 @@ const allApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getAllFashion: builder.query({
       query: () => "fashion/techpacks/table/",
-      providesTags: ["fashion"],
+      //   providesTags: ["fashion"],
     }),
-    createFashion: builder.mutation({
-      query: (body) => ({
-        url: "fashion/techpack/",
+    createFashionId: builder.mutation({
+      query: () => ({
+        url: "fashion/techpacks/",
         method: "POST",
-        body,
       }),
-      invalidatesTags: ["fashion"],
+      //   invalidatesTags: ["fashion"],
     }),
-    getSingleFashion: builder.query({
-      query: (id) => `fashion/techpack/?id=${id}`,
-      providesTags: ["fashion"],
-    }),
-    updateFashion: builder.mutation({
-      query: (body) => ({
-        url: `fashion/techpack/`,
-        method: "PATCH",
-        body,
+    createFashionByIdAndStep: builder.mutation({
+      query: (data) => ({
+        url: `fashion/techpacks/${data.id}/steps/${data.step}/`,
+        method: "POST",
+        body: data.data,
       }),
-      invalidatesTags: ["fashion"],
+      //   invalidatesTags: ["fashion"],
+    }),
+    getFashionById: builder.query({
+      query: (id) => `fashion/techpacks/${id}/export/`,
     }),
   }),
 });
 
-export const { useGetAllFashionQuery, useCreateFashionMutation } = allApi;
+export const {
+  useGetAllFashionQuery,
+  useCreateFashionIdMutation,
+  useCreateFashionByIdAndStepMutation,
+  useGetFashionByIdQuery,
+} = allApi;

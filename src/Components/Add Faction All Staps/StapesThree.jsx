@@ -1,8 +1,20 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import {
+  useCreateFashionByIdAndStepMutation,
+  useGetFashionByIdQuery,
+} from "../../Api/allApi";
 
 export default function StapesThree({ goToPreviousStep, goToNextStep }) {
-  
+  const parentId = useSelector((state) => state.addFashion.id);
+
+  const [createFashionByIdAndStep] = useCreateFashionByIdAndStepMutation();
+
+  const { data: fashionInfo } = useGetFashionByIdQuery(parentId, {
+    skip: !parentId,
+  });
+
   const [fabrics, setFabrics] = useState([
     {
       id: 1,
@@ -60,7 +72,9 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
   ];
 
   const updateFabric = (id, field, value) => {
-    const updatedFabrics = fabrics.map((f) => (f.id === id ? { ...f, [field]: value } : f));
+    const updatedFabrics = fabrics.map((f) =>
+      f.id === id ? { ...f, [field]: value } : f
+    );
     setFabrics(updatedFabrics);
   };
 
@@ -91,40 +105,53 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Validate required fields for primary fabric
     const primaryFabric = fabrics[0];
-    if (!primaryFabric.composition || !primaryFabric.gsm || !primaryFabric.color) {
-      return toast.error("Please fill in all required fields for the primary fabric.");
+    if (
+      !primaryFabric.composition ||
+      !primaryFabric.gsm ||
+      !primaryFabric.color
+    ) {
+      return toast.error(
+        "Please fill in all required fields for the primary fabric."
+      );
     }
 
     const formattedData = fabrics.map(({ id, type, ...rest }) => rest);
-    
-    console.log("=== FORM SUBMITTED ===");
-    console.log("All Fabrics Array:", fabrics);
-    console.log("Formatted Data (without id and type):", formattedData);
-    console.log("Total Fabrics:", fabrics.length);
-  
-    goToNextStep();
+
+    const data = {
+      data: formattedData,
+      is_complete: true,
+    };
+    try {
+      await createFashionByIdAndStep({
+        id: parentId,
+        step: 3,
+        data: data,
+      });
+      toast.success("Fabrics data saved successfully!");
+      goToNextStep();
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to save fabrics data.");
+    }
   };
 
   const handleBack = () => {
     goToPreviousStep();
   };
 
-  // useEffect(() => {
-  //   if (fabricsInfo && fabricsInfo.length > 0) {
-  //     const loadedFabrics = fabricsInfo.map((fabric, index) => ({
-  //       ...fabric,
-  //       id: index + 1,
-  //       type: index === 0 ? "Primary" : "Secondary",
-  //     }));
-  //     setFabrics(loadedFabrics);
-      
-  //     console.log("=== Fabrics Loaded from Redux ===");
-  //     console.log("Loaded Fabrics:", loadedFabrics);
-  //   }
-  // }, [fabricsInfo]);
+  useEffect(() => {
+    if (fashionInfo?.steps?.fabrics && fashionInfo?.steps?.fabrics.length > 0) {
+      const loadedFabrics = fashionInfo.steps.fabrics.map((fabric, index) => ({
+        ...fabric,
+        id: index + 1,
+        type: index === 0 ? "Primary" : "Secondary",
+      }));
+      setFabrics(loadedFabrics);
+    }
+  }, [fashionInfo]);
 
   return (
     <div className="bg-gray-50 min-h-screen py-8">
@@ -201,7 +228,9 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
                     placeholder="e.g., 100% Cotton, 65% Poly 35% Cotton"
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Fiber content breakdown</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Fiber content breakdown
+                  </p>
                 </div>
 
                 <div>
@@ -217,7 +246,9 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
                     placeholder="e.g., 180, 220"
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Grams per square meter</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Grams per square meter
+                  </p>
                 </div>
 
                 <div>
@@ -237,7 +268,9 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-gray-500 mt-1">Weave or knit type</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Weave or knit type
+                  </p>
                 </div>
 
                 {/* Row 2 */}
@@ -254,7 +287,9 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
                     placeholder="e.g., Navy Blue, White, Black"
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Color name or code</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Color name or code
+                  </p>
                 </div>
 
                 <div>
@@ -274,7 +309,9 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-gray-500 mt-1">Finishing treatment</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Finishing treatment
+                  </p>
                 </div>
 
                 <div>
@@ -290,7 +327,9 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
                     placeholder="e.g., 3-5%, <2%"
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Expected shrinkage after wash</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Expected shrinkage after wash
+                  </p>
                 </div>
 
                 {/* Row 3 */}
@@ -311,7 +350,9 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-gray-500 mt-1">Fabric stretch properties</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Fabric stretch properties
+                  </p>
                 </div>
 
                 <div>
@@ -327,7 +368,9 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
                     placeholder="e.g., Same both sides, Brushed inside"
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Face and back characteristics</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Face and back characteristics
+                  </p>
                 </div>
 
                 <div>
@@ -347,7 +390,9 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-gray-500 mt-1">Cutting direction requirement</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Cutting direction requirement
+                  </p>
                 </div>
 
                 {/* Row 4 - Full Width Fields */}
@@ -364,7 +409,9 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
                     placeholder="e.g., 500 yards, 100 meters"
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Supplier minimum order</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Supplier minimum order
+                  </p>
                 </div>
 
                 <div className="col-span-2">
@@ -375,12 +422,18 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
                     type="text"
                     value={fabric.testingRequirements}
                     onChange={(e) =>
-                      updateFabric(fabric.id, "testingRequirements", e.target.value)
+                      updateFabric(
+                        fabric.id,
+                        "testingRequirements",
+                        e.target.value
+                      )
                     }
                     placeholder="e.g., AATCC 61 (Colorfastness), ASTM D3776 (Weight), Pilling Grade 4"
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Required lab tests and standards</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Required lab tests and standards
+                  </p>
                 </div>
               </div>
             </div>
