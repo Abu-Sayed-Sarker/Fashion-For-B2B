@@ -1,49 +1,85 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setConstruction } from "../../Features/addFashionSlice";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 export default function StapesFive({ goToPreviousStep, goToNextStep }) {
-  const constructionInfo = useSelector(
-    (state) => state.addFashion.construction
-  );
-  const dispatch = useDispatch();
-  const [openSections, setOpenSections] = useState({
-    stitching: true,
-    topstitching: true,
-    pocket: true,
-    wash: true,
-  });
 
-  const [formData, setFormData] = useState({
-    stitch_type: "",
-    seam_allowance: "",
-    topstitch_spec: "",
-    paneling: "",
-    pocket_construction: "",
-    wash_treatment: "",
-    special_instructions: "",
-  });
 
-  const toggleSection = (section) => {
-    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
+  const [constructions, setConstructions] = useState([
+    {
+      id: 1,
+      section_name: "Neck Construction",
+      icon: "📘",
+      description: "Collar, neckline, and neck binding specifications",
+      stitch_type: "",
+      spi: "",
+      seam_allowance: "",
+      reinforcement_points: "",
+      topstitch_logic: "",
+    },
+    {
+      id: 2,
+      section_name: "Sleeve Construction",
+      icon: "🟢",
+      description: "Sleeve attachment, armhole, and sleeve hem details",
+      stitch_type: "",
+      spi: "",
+      seam_allowance: "",
+      reinforcement_points: "",
+      topstitch_logic: "",
+    },
+    {
+      id: 3,
+      section_name: "Hem Construction",
+      icon: "🔧",
+      description: "Bottom hem, side slits, and hemline finishing",
+      stitch_type: "",
+      spi: "",
+      seam_allowance: "",
+      reinforcement_points: "",
+      topstitch_logic: "",
+    },
+    {
+      id: 4,
+      section_name: "Hood / Cuff Construction",
+      icon: "🧢",
+      description: "Hood, cuff, waistband, and rib construction",
+      stitch_type: "",
+      spi: "",
+      seam_allowance: "",
+      reinforcement_points: "",
+      topstitch_logic: "",
+    },
+  ]);
 
-  const updateField = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const [specialInstructions, setSpecialInstructions] = useState("");
+
+  const updateConstruction = (id, field, value) => {
+    const updatedConstructions = constructions.map((c) =>
+      c.id === id ? { ...c, [field]: value } : c
+    );
+    setConstructions(updatedConstructions);
+
   };
 
   const handleSubmit = () => {
-    if (
-      !formData.stitch_type ||
-      !formData.seam_allowance ||
-      !formData.topstitch_spec ||
-      !formData.paneling ||
-      !formData.pocket_construction ||
-      !formData.wash_treatment
-    )
-      return toast.error("Please fill in all required fields.");
-    dispatch(setConstruction(formData));
+    // Validate that at least some fields are filled
+    const hasData = constructions.some(
+      (c) => c.stitch_type || c.spi || c.seam_allowance || c.reinforcement_points || c.topstitch_logic
+    );
+
+    if (!hasData) {
+      return toast.error("Please fill in construction details for at least one section.");
+    }
+
+    const formattedData = {
+      constructions: constructions.map(({ id, icon, ...rest }) => rest),
+      special_instructions: specialInstructions,
+    };
+
+    console.log("=== FORM SUBMITTED ===");
+    console.log("All Constructions:", constructions);
+    console.log("Special Instructions:", specialInstructions);
+    console.log("Formatted Data:", formattedData);
     goToNextStep();
   };
 
@@ -51,259 +87,239 @@ export default function StapesFive({ goToPreviousStep, goToNextStep }) {
     goToPreviousStep();
   };
 
-  useEffect(() => {
-    if (constructionInfo) {
-      setFormData({
-        stitch_type: constructionInfo.stitch_type,
-        seam_allowance: constructionInfo.seam_allowance,
-        topstitch_spec: constructionInfo.topstitch_spec,
-        paneling: constructionInfo.paneling,
-        pocket_construction: constructionInfo.pocket_construction,
-        wash_treatment: constructionInfo.wash_treatment,
-        special_instructions: constructionInfo.special_instructions,
-      });
-    }
-  }, [constructionInfo]);
+  // useEffect(() => {
+  //   if (constructionInfo) {
+  //     if (constructionInfo.constructions) {
+  //       setConstructions(
+  //         constructionInfo.constructions.map((c, index) => ({
+  //           ...c,
+  //           id: index + 1,
+  //           icon: ["📘", "🟢", "🔧", "🧢"][index] || "📋",
+  //         }))
+  //       );
+  //     }
+  //     if (constructionInfo.special_instructions) {
+  //       setSpecialInstructions(constructionInfo.special_instructions);
+  //     }
+      
+  //     console.log("=== Construction Data Loaded from Redux ===");
+  //     console.log("Loaded Data:", constructionInfo);
+  //   }
+  // }, [constructionInfo]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="container mx-auto">
+    <div className="bg-gray-50 min-h-screen py-8">
+      <div className="container mx-auto px-4 max-w-6xl">
         <div className="mb-6">
           <h1 className="text-3xl font-semibold text-gray-900 mb-2">
             Construction Details
           </h1>
           <p className="text-gray-600">
-            Define construction methods and assembly specifications
+            Define area-specific construction specifications for precise manufacturing
           </p>
         </div>
 
-        <div className="space-y-4 mb-6">
-          {/* Stitching & Seams Section */}
-          <div className="bg-white rounded-lg border border-gray-200">
-            <button
-              onClick={() => toggleSection("stitching")}
-              className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+        {/* Construction Sections */}
+        <div className="space-y-6 mb-6">
+          {constructions.map((construction) => (
+            <div
+              key={construction.id}
+              className="bg-white rounded-lg border border-gray-300 overflow-hidden"
             >
-              <h2 className="text-lg font-semibold text-gray-900">
-                Stitching & Seams
-              </h2>
-              <svg
-                className={`w-5 h-5 text-gray-500 transition-transform ${
-                  openSections.stitching ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-            {openSections.stitching && (
-              <div className="px-6 pb-6">
-                <div className="grid grid-cols-2 gap-6">
+              {/* Header */}
+              <div className="bg-blue-50 border-b border-blue-200 px-6 py-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">{construction.icon}</span>
                   <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <h3 className="text-base font-semibold text-gray-900">
+                      {construction.section_name}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-0.5">
+                      {construction.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Form Fields */}
+              <div className="p-6">
+                <div className="grid grid-cols-2 gap-6">
+                  {/* Row 1 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Stitch Type
                     </label>
                     <input
                       type="text"
-                      value={formData.stitch_type}
+                      value={construction.stitch_type}
                       onChange={(e) =>
-                        updateField("stitch_type", e.target.value)
+                        updateConstruction(construction.id, "stitch_type", e.target.value)
                       }
-                      placeholder="e.g., Lock stitch 301, Chain stitch 401"
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="e.g., Lockstitch 301, Overlock 504s"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      SPI (Stitches Per Inch)
+                    </label>
+                    <input
+                      type="text"
+                      value={construction.spi}
+                      onChange={(e) =>
+                        updateConstruction(construction.id, "spi", e.target.value)
+                      }
+                      placeholder="e.g., 12, 14, 16"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Row 2 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Seam Allowance
                     </label>
                     <input
                       type="text"
-                      value={formData.seam_allowance}
+                      value={construction.seam_allowance}
                       onChange={(e) =>
-                        updateField("seam_allowance", e.target.value)
+                        updateConstruction(construction.id, "seam_allowance", e.target.value)
                       }
-                      placeholder="e.g., 1cm, 3/8 inch"
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="e.g., 1cm, 3/8, 0.5cm"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
-                </div>
-              </div>
-            )}
-          </div>
 
-          {/* Topstitching & Details Section */}
-          <div className="bg-white rounded-lg border border-gray-200">
-            <button
-              onClick={() => toggleSection("topstitching")}
-              className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
-            >
-              <h2 className="text-lg font-semibold text-gray-900">
-                Topstitching & Details
-              </h2>
-              <svg
-                className={`w-5 h-5 text-gray-500 transition-transform ${
-                  openSections.topstitching ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-            {openSections.topstitching && (
-              <div className="px-6 pb-6">
-                <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Topstitch Specification
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Reinforcement Points
                     </label>
                     <input
                       type="text"
-                      value={formData.topstitch_spec}
+                      value={construction.reinforcement_points}
                       onChange={(e) =>
-                        updateField("topstitch_spec", e.target.value)
+                        updateConstruction(construction.id, "reinforcement_points", e.target.value)
                       }
-                      placeholder="e.g., 0.5cm from edge, double needle"
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="e.g., Bartack, Double stitch"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Paneling / Piecing
+
+                  {/* Row 3 - Full Width */}
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Topstitch / Coverstitch Logic
                     </label>
                     <input
                       type="text"
-                      value={formData.paneling}
-                      onChange={(e) => updateField("paneling", e.target.value)}
-                      placeholder="e.g., Side panels, Raglan sleeves"
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={construction.topstitch_logic}
+                      onChange={(e) =>
+                        updateConstruction(construction.id, "topstitch_logic", e.target.value)
+                      }
+                      placeholder="e.g., Single needle 0.5cm from edge, Double needle 0.6cm spacing, Coverstitch 406"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          ))}
+        </div>
+
+        {/* Special Instructions & Notes */}
+        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg overflow-hidden mb-6">
+          <div className="bg-yellow-100 border-b border-yellow-400 px-6 py-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">📋</span>
+              <div>
+                <h3 className="text-base font-semibold text-gray-900">
+                  Special Instructions & Notes
+                </h3>
+                <p className="text-sm text-red-600 mt-0.5">
+                  Additional construction notes, critical points, or special requirements
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* Pocket Construction Section */}
-          <div className="bg-white rounded-lg border border-gray-200">
-            <button
-              onClick={() => toggleSection("pocket")}
-              className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
-            >
-              <h2 className="text-lg font-semibold text-gray-900">
-                Pocket Construction
-              </h2>
-              <svg
-                className={`w-5 h-5 text-gray-500 transition-transform ${
-                  openSections.pocket ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-            {openSections.pocket && (
-              <div className="px-6 pb-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Pocket Construction
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.pocket_construction}
-                    onChange={(e) =>
-                      updateField("pocket_construction", e.target.value)
-                    }
-                    placeholder="e.g., Patch pocket, Welt pocket"
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-            )}
+          <div className="p-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
+                Special Construction Instructions
+              </label>
+              <textarea
+                value={specialInstructions}
+                onChange={(e) => {
+                  setSpecialInstructions(e.target.value);
+                  console.log("Special Instructions Updated:", e.target.value);
+                }}
+                placeholder="e.g., Use matching thread for all seams, Reinforce all stress points with bartack, Apply fusible interfacing to collar..."
+                rows={5}
+                className="w-full px-4 py-3 bg-white border border-yellow-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
+              />
+              <p className="text-xs text-gray-600 mt-2">
+                Include any critical construction notes, quality requirements, or special techniques
+              </p>
+            </div>
           </div>
+        </div>
 
-          {/* Wash & Finishing Section */}
-          <div className="bg-white rounded-lg border border-gray-200">
-            <button
-              onClick={() => toggleSection("wash")}
-              className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
-            >
-              <h2 className="text-lg font-semibold text-gray-900">
-                Wash & Finishing
-              </h2>
-              <svg
-                className={`w-5 h-5 text-gray-500 transition-transform ${
-                  openSections.wash ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-            {openSections.wash && (
-              <div className="px-6 pb-6 space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Wash Treatment
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.wash_treatment}
-                    onChange={(e) =>
-                      updateField("wash_treatment", e.target.value)
-                    }
-                    placeholder="e.g., Stone wash, Enzyme wash, Garment dye"
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Special Instructions
-                  </label>
-                  <textarea
-                    value={formData.special_instructions}
-                    onChange={(e) =>
-                      updateField("special_instructions", e.target.value)
-                    }
-                    placeholder="Any additional construction notes, special techniques, or quality requirements"
-                    rows={4}
-                    className="w-full px-4 py-2.5 bg-yellow-50 border border-yellow-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
-                  />
-                  <p className="mt-2 text-sm text-yellow-700">
-                    Highlighted for emphasis - use for critical construction
-                    notes
-                  </p>
-                </div>
-              </div>
-            )}
+        {/* Quick Reference Guide */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+          <h3 className="text-base font-semibold text-blue-900 mb-4">
+            Quick Reference Guide
+          </h3>
+
+          <div className="grid grid-cols-2 gap-8">
+            <div>
+              <h4 className="text-sm font-semibold text-blue-900 mb-2">
+                Common Stitch Types:
+              </h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Lockstitch 301 - General seaming</li>
+                <li>• Overlock 504 - Edge finishing, shoulders</li>
+                <li>• Coverstitch 406 - Hemming, neckline</li>
+                <li>• Chainstitch 401 - Side seams</li>
+                <li>• Chain Stitch 401 - Decorative, temporary</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold text-blue-900 mb-2">
+                Typical SPI Values:
+              </h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Light fabrics: 14-16 SPI</li>
+                <li>• Medium fabrics: 10-12 SPI</li>
+                <li>• Heavy fabrics: 8-10 SPI</li>
+                <li>• Stretch fabrics: 10-14 SPI (with stretch stitch)</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold text-blue-900 mb-2">
+                Standard Seam Allowances:
+              </h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• General seams: 1cm (3/8")</li>
+                <li>• Neckline/armhole: 0.6cm (1/4")</li>
+                <li>• French seams: 0.6cm + 1cm (two step)</li>
+                <li>• Flat-felled: 1.5cm total</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold text-blue-900 mb-2">
+                Common Reinforcements:
+              </h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Bartack - Stress points (pockets, belt loops)</li>
+                <li>• Double stitch - Extra strength seams</li>
+                <li>• Backstitch - Start/end of seams</li>
+                <li>• Fusible tape - Seam reinforcement</li>
+              </ul>
+            </div>
           </div>
         </div>
 
@@ -326,7 +342,7 @@ export default function StapesFive({ goToPreviousStep, goToNextStep }) {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            Back
+            Back to Trims
           </button>
 
           <button

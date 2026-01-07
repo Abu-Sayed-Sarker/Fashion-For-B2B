@@ -1,40 +1,48 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setBom } from "../../Features/addFashionSlice";
-import { useCreateFashionMutation } from "../../Api/allApi";
+import React, { useState } from "react";
+import { toast } from "react-toastify";
 
-export default function StapesSeven({
-  goToPreviousStep,
-  goToNextStep,
-  artworks,
-}) {
-  const bomInfo = useSelector((state) => state.addFashion.bom);
-  const allFactionInfo = useSelector((state) => state.addFashion);
-  console.log(allFactionInfo);
-  const [createFashion] = useCreateFashionMutation();
-  const dispatch = useDispatch();
+export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
   const [bomItems, setBomItems] = useState([
     {
       id: 1,
       category: "",
       component_name: "",
       material_composition: "",
-      supplier: "",
       unit: "",
       consumption: "",
       wastage_percent: "",
+      supplier: "",
       moq: "",
-      lead_time: "Days",
+      lead_time: "",
       notes: "",
     },
   ]);
 
+  const categoryOptions = [
+    { value: "", label: "Select category" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Trim", label: "Trim" },
+    { value: "Packaging", label: "Packaging" },
+    { value: "Label", label: "Label" },
+    { value: "Thread", label: "Thread" },
+    { value: "Accessory", label: "Accessory" },
+  ];
+
+  const unitOptions = [
+    { value: "", label: "Select unit" },
+    { value: "Meter", label: "Meter" },
+    { value: "Yard", label: "Yard" },
+    { value: "Piece", label: "Piece" },
+    { value: "Kilogram", label: "Kilogram" },
+    { value: "Gram", label: "Gram" },
+    { value: "Set", label: "Set" },
+  ];
+
   const updateBomItem = (id, field, value) => {
-    setBomItems(
-      bomItems.map((item) =>
-        item.id === id ? { ...item, [field]: value } : item
-      )
+    const updatedItems = bomItems.map((item) =>
+      item.id === id ? { ...item, [field]: value } : item
     );
+    setBomItems(updatedItems);
   };
 
   const addBomRow = () => {
@@ -43,52 +51,43 @@ export default function StapesSeven({
       category: "",
       component_name: "",
       material_composition: "",
-      supplier: "",
       unit: "",
       consumption: "",
       wastage_percent: "",
+      supplier: "",
       moq: "",
       lead_time: "",
       notes: "",
     };
-    setBomItems([...bomItems, newItem]);
+    const updatedItems = [...bomItems, newItem];
+    setBomItems(updatedItems);
   };
 
   const removeBomItem = (id) => {
     if (bomItems.length > 1) {
-      setBomItems(bomItems.filter((item) => item.id !== id));
+      const updatedItems = bomItems.filter((item) => item.id !== id);
+      setBomItems(updatedItems);
     }
   };
 
   const handleSubmit = async () => {
-    const formattedData = bomItems.map(({ id, ...rest }) => rest);
-    dispatch(setBom(formattedData));
+    // Validate required fields
+    const hasEmptyRequired = bomItems.some(
+      (item) => !item.category || !item.component_name || !item.consumption
+    );
 
-    try {
-      const formData = new FormData();
-
-      formData.append("garment_setup", allFactionInfo.garment_setup); // Append garment setup data
-      formData.append("measurements", allFactionInfo.measurements); // Append measurements data
-      formData.append("bom", allFactionInfo.bom); // Append BOM data
-      formData.append("artworks", allFactionInfo.artworks); // Append artworks data
-      formData.append("fabrics", allFactionInfo.fabrics); // Append fabric setup data
-      formData.append("trims", allFactionInfo.trims); // Append trims data
-      formData.append("construction", allFactionInfo.construction); // Append construction data
-      if (artworks) {
-        artworks.forEach(({ artwork_name, front_logo }) => {
-          if (artwork_name && front_logo) {
-            const id = artwork_name.split(" ").join("_");
-            formData.append("artwork_id", id);
-            formData.append(id, front_logo);
-          }
-        });
-      }
-      const response = await createFashion(formData);
-      console.log(response);
-    } catch (error) {
-      console.log(error);
+    if (hasEmptyRequired) {
+      return toast.error("Please fill in all required fields for each BOM item.");
     }
 
+    const formattedData = bomItems.map(({ id, ...rest }) => rest);
+
+    console.log("=== FORM SUBMITTED ===");
+    console.log("All BOM Items Array:", bomItems);
+    console.log("Formatted Data:", formattedData);
+    console.log("Total BOM Items:", bomItems.length);
+
+    toast.success("BOM data saved successfully!");
     goToNextStep();
   };
 
@@ -96,22 +95,15 @@ export default function StapesSeven({
     goToPreviousStep();
   };
 
-  useEffect(() => {
-    if (bomInfo) {
-      setBomItems(bomInfo.map((item, index) => ({ ...item, id: index + 1 })));
-    }
-  }, [bomInfo]);
-
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="container mx-auto">
+    <div className="bg-gray-50 min-h-screen py-8">
+      <div className="container mx-auto px-4 max-w-7xl">
         <div className="mb-6">
           <h1 className="text-3xl font-semibold text-gray-900 mb-2">
             Bill of Materials (BOM)
           </h1>
           <p className="text-gray-600">
-            Comprehensive material breakdown with supplier and costing
-            information
+            Comprehensive material breakdown with supplier and costing information
           </p>
         </div>
 
@@ -119,18 +111,13 @@ export default function StapesSeven({
         {bomItems.map((item, index) => (
           <div
             key={item.id}
-            className="bg-white rounded-lg border border-gray-200 p-8 mb-6"
+            className="bg-white rounded-lg border border-gray-300 overflow-hidden mb-6"
           >
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">
-                BOM Item {index + 1}
-              </h3>
-              <button
-                onClick={() => removeBomItem(item.id)}
-                className="text-gray-400 hover:text-red-500 transition-colors"
-              >
+            {/* Header */}
+            <div className="bg-gray-50 border-b border-gray-300 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
                 <svg
-                  className="w-5 h-5"
+                  className="w-5 h-5 text-gray-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -139,174 +126,239 @@ export default function StapesSeven({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-              </button>
+                <h3 className="text-base font-semibold text-gray-900">
+                  BOM Item {index + 1}{" "}
+                  <span className="text-sm font-normal text-gray-500">
+                    ({item.category || "Uncategorized"})
+                  </span>
+                </h3>
+              </div>
+              {bomItems.length > 1 && (
+                <button
+                  onClick={() => removeBomItem(item.id)}
+                  className="text-red-500 hover:text-red-700 transition-colors"
+                  title="Remove BOM item"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Category
-                </label>
-                <input
-                  type="text"
-                  value={item.category}
-                  onChange={(e) =>
-                    updateBomItem(item.id, "category", e.target.value)
-                  }
-                  placeholder="Fabric"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+            {/* Form Content */}
+            <div className="p-6">
+              {/* Basic Information */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                  Basic Information
+                </h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Category <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={item.category}
+                      onChange={(e) =>
+                        updateBomItem(item.id, "category", e.target.value)
+                      }
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      {categoryOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">Item classification</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Component Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={item.component_name}
+                      onChange={(e) =>
+                        updateBomItem(item.id, "component_name", e.target.value)
+                      }
+                      placeholder="e.g., Main Body Fabric, Care Label"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Specific component identifier</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Material / Composition <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={item.material_composition}
+                      onChange={(e) =>
+                        updateBomItem(item.id, "material_composition", e.target.value)
+                      }
+                      placeholder="e.g., 100% Cotton, Metal Button"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Material description</p>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Component Name
-                </label>
-                <input
-                  type="text"
-                  value={item.component_name}
-                  onChange={(e) =>
-                    updateBomItem(item.id, "component_name", e.target.value)
-                  }
-                  placeholder="Main Body Fabric"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+              {/* Quantities & Consumption */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                  Quantities & Consumption
+                </h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Unit <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={item.unit}
+                      onChange={(e) =>
+                        updateBomItem(item.id, "unit", e.target.value)
+                      }
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      {unitOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">Unit of measurement</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Consumption <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={item.consumption}
+                      onChange={(e) =>
+                        updateBomItem(item.id, "consumption", e.target.value)
+                      }
+                      placeholder="e.g., 1.5, 6"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Required quantity per garment</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Wastage %
+                    </label>
+                    <input
+                      type="text"
+                      value={item.wastage_percent}
+                      onChange={(e) =>
+                        updateBomItem(item.id, "wastage_percent", e.target.value)
+                      }
+                      placeholder="e.g., 5, 10"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Expected wastage percentage</p>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Material / Composition
-                </label>
-                <input
-                  type="text"
-                  value={item.material_composition}
-                  onChange={(e) =>
-                    updateBomItem(
-                      item.id,
-                      "material_composition",
-                      e.target.value
-                    )
-                  }
-                  placeholder="Material"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+              {/* Supplier Information */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                  Supplier Information
+                </h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Supplier
+                    </label>
+                    <input
+                      type="text"
+                      value={item.supplier}
+                      onChange={(e) =>
+                        updateBomItem(item.id, "supplier", e.target.value)
+                      }
+                      placeholder="e.g., ABC Textiles Ltd."
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Supplier name or code</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      MOQ (Minimum Order Quantity)
+                    </label>
+                    <input
+                      type="text"
+                      value={item.moq}
+                      onChange={(e) =>
+                        updateBomItem(item.id, "moq", e.target.value)
+                      }
+                      placeholder="e.g., 500 meters, 100 pieces"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Supplier minimum order</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Lead Time
+                    </label>
+                    <input
+                      type="text"
+                      value={item.lead_time}
+                      onChange={(e) =>
+                        updateBomItem(item.id, "lead_time", e.target.value)
+                      }
+                      placeholder="e.g., 30 days, 2 weeks"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Production/delivery time</p>
+                  </div>
+                </div>
               </div>
 
+              {/* Notes */}
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Supplier
-                </label>
-                <input
-                  type="text"
-                  value={item.supplier}
-                  onChange={(e) =>
-                    updateBomItem(item.id, "supplier", e.target.value)
-                  }
-                  placeholder="Supplier"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Unit
-                </label>
-                <input
-                  type="text"
-                  value={item.unit}
-                  onChange={(e) =>
-                    updateBomItem(item.id, "unit", e.target.value)
-                  }
-                  placeholder="meter"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Consumption
-                </label>
-                <input
-                  type="text"
-                  value={item.consumption}
-                  onChange={(e) =>
-                    updateBomItem(item.id, "consumption", e.target.value)
-                  }
-                  placeholder="0.0"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Wastage %
-                </label>
-                <input
-                  type="text"
-                  value={item.wastage_percent}
-                  onChange={(e) =>
-                    updateBomItem(item.id, "wastage_percent", e.target.value)
-                  }
-                  placeholder="5"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  MOQ
-                </label>
-                <input
-                  type="text"
-                  value={item.moq}
-                  onChange={(e) =>
-                    updateBomItem(item.id, "moq", e.target.value)
-                  }
-                  placeholder="MOQ"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Lead Time
-                </label>
-                <input
-                  type="text"
-                  value={item.lead_time}
-                  onChange={(e) =>
-                    updateBomItem(item.id, "lead_time", e.target.value)
-                  }
-                  placeholder="Days"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Notes
-                </label>
-                <input
-                  type="text"
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Notes</h4>
+                <textarea
                   value={item.notes}
                   onChange={(e) =>
                     updateBomItem(item.id, "notes", e.target.value)
                   }
-                  placeholder="Notes"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., Must pass AATCC test, Special color matching required"
+                  rows={2}
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 />
+                <p className="text-xs text-gray-500 mt-1">Additional specifications or requirements</p>
               </div>
             </div>
           </div>
         ))}
 
-        {/* Add BOM Row Button */}
+        {/* Add BOM Item Button */}
         <button
           onClick={addBomRow}
-          className="w-full py-4 mb-6 bg-white border-2 border-dashed border-gray-300 rounded-lg text-gray-600 font-medium hover:border-gray-400 hover:text-gray-700 transition-colors flex items-center justify-center gap-2"
+          className="w-full py-4 mb-6 bg-white border-2 border-dashed border-gray-300 rounded-lg text-gray-600 font-medium hover:border-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors flex items-center justify-center gap-2"
         >
           <svg
             className="w-5 h-5"

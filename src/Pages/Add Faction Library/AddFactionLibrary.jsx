@@ -8,8 +8,6 @@ import StapesFive from "../../Components/Add Faction All Staps/StapesFive";
 import StapesSix from "../../Components/Add Faction All Staps/StapesSix";
 import StapesSeven from "../../Components/Add Faction All Staps/StapesSeven";
 import ReviewExport from "../../Components/Add Faction All Staps/ReviewExport";
-import { useState } from "react";
-
 const AddFactionLibrary = () => {
   const steps = [
     {
@@ -62,19 +60,6 @@ const AddFactionLibrary = () => {
     },
   ];
 
-  const [artworks, setArtworks] = useState([
-    {
-      id: 1,
-      artwork_name: "",
-      artwork_size: "",
-      artwork_type: "",
-      color_count: "",
-      placement_location: "",
-      application_method: "",
-      coordinates: "",
-      front_logo: null,
-    },
-  ]);
 
   const { currentStep, goToStep, fadeIn, goToNextStep, goToPreviousStep } =
     useStepNavigation(steps.length);
@@ -118,8 +103,6 @@ const AddFactionLibrary = () => {
       case 6:
         return (
           <StapesSix
-            artworks={artworks}
-            setArtworks={setArtworks}
             goToPreviousStep={goToPreviousStep}
             goToNextStep={goToNextStep}
           />
@@ -127,7 +110,6 @@ const AddFactionLibrary = () => {
       case 7:
         return (
           <StapesSeven
-            artworks={artworks}
             goToPreviousStep={goToPreviousStep}
             goToNextStep={goToNextStep}
           />

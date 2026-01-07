@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setTrimsData } from "../../Features/addFashionSlice";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 export default function StapesFour({ goToPreviousStep, goToNextStep }) {
-  const trimsInfo = useSelector((state) => state.addFashion.trims);
-  const dispatch = useDispatch();
+  
   const [trims, setTrims] = useState([
     {
       id: 1,
@@ -14,11 +12,28 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
       color: "",
       finish: "",
       placement: "",
+      consumption: "",
     },
   ]);
 
+  const trimTypes = [
+    { value: "", label: "Select type" },
+    { value: "Button", label: "Button" },
+    { value: "Zipper", label: "Zipper" },
+    { value: "Label", label: "Label" },
+    { value: "Thread", label: "Thread" },
+    { value: "Elastic", label: "Elastic" },
+    { value: "Ribbon", label: "Ribbon" },
+    { value: "Snap", label: "Snap" },
+    { value: "Hook & Eye", label: "Hook & Eye" },
+    { value: "Drawstring", label: "Drawstring" },
+    { value: "Patch", label: "Patch" },
+    { value: "Applique", label: "Applique" },
+  ];
+
   const updateTrim = (id, field, value) => {
-    setTrims(trims.map((t) => (t.id === id ? { ...t, [field]: value } : t)));
+    const updatedTrims = trims.map((t) => (t.id === id ? { ...t, [field]: value } : t));
+    setTrims(updatedTrims);
   };
 
   const addTrim = () => {
@@ -30,19 +45,35 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
       color: "",
       finish: "",
       placement: "",
+      consumption: "",
     };
-    setTrims([...trims, newTrim]);
+    const updatedTrims = [...trims, newTrim];
+    setTrims(updatedTrims);
   };
 
   const removeTrim = (id) => {
     if (trims.length > 1) {
-      setTrims(trims.filter((t) => t.id !== id));
+      const updatedTrims = trims.filter((t) => t.id !== id);
+      setTrims(updatedTrims);
     }
   };
 
   const handleSubmit = () => {
+    // Validate required fields
+    const hasEmptyRequired = trims.some(
+      (trim) => !trim.trim_type || !trim.material || !trim.placement || !trim.consumption
+    );
+
+    if (hasEmptyRequired) {
+      return toast.error("Please fill in all required fields for each trim.");
+    }
+
     const formattedData = trims.map(({ id, ...rest }) => rest);
-    dispatch(setTrimsData(formattedData));
+    
+    console.log("=== FORM SUBMITTED ===");
+    console.log("All Trims Array:", trims);
+    console.log("Formatted Data (without id):", formattedData);
+    console.log("Total Trims:", trims.length);
     goToNextStep();
   };
 
@@ -50,144 +81,178 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
     goToPreviousStep();
   };
 
-  const trimTypes = [
-    { value: "Button", label: "Button" },
-    { value: "Zipper", label: "Zipper" },
-    { value: "Label", label: "Label" },
-    { value: "Thread", label: "Thread" },
-    { value: "Elastic", label: "Elastic" },
-    { value: "Ribbon", label: "Ribbon" },
-  ];
-
-  useEffect(() => {
-    if (trimsInfo) {
-      setTrims(trimsInfo.map((trim, index) => ({ ...trim, id: index + 1 })));
-    }
-  }, [trimsInfo]);
-
   return (
-    <div className=" bg-gray-50 p-8">
-      <div className="container mx-auto">
+    <div className="bg-gray-50 min-h-screen py-8">
+      <div className="container mx-auto px-4 max-w-7xl">
+        <div className="mb-6">
+          <h1 className="text-3xl font-semibold text-gray-900 mb-2">
+            Trims & Accessories
+          </h1>
+          <p className="text-gray-600">
+            Define all trims, closures, and accessories for your garment
+          </p>
+        </div>
+
         {/* Trim Cards */}
         {trims.map((trim, index) => (
           <div
             key={trim.id}
-            className="bg-white rounded-lg border border-gray-200 p-8 mb-6"
+            className="bg-white rounded-lg border border-gray-300 overflow-hidden mb-6"
           >
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">
+            {/* Header */}
+            <div className="bg-gray-50 border-b border-gray-300 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-base font-semibold text-gray-900">
                 Trim {index + 1}
               </h3>
-              <button
-                onClick={() => removeTrim(trim.id)}
-                className="text-gray-400 hover:text-red-500 transition-colors"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              {trims.length > 1 && (
+                <button
+                  onClick={() => removeTrim(trim.id)}
+                  className="text-red-500 hover:text-red-700 transition-colors"
+                  title="Remove trim"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 uppercase tracking-wide mb-2">
-                  TRIM TYPE
-                </label>
-                <select
-                  value={trim.trim_type}
-                  onChange={(e) =>
-                    updateTrim(trim.id, "trim_type", e.target.value)
-                  }
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Select type</option>
-                  {trimTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            {/* Form Fields */}
+            <div className="p-6">
+              <div className="grid grid-cols-3 gap-6">
+                {/* Row 1 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Trim Type <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={trim.trim_type}
+                    onChange={(e) =>
+                      updateTrim(trim.id, "trim_type", e.target.value)
+                    }
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {trimTypes.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">Type of trim or accessory</p>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 uppercase tracking-wide mb-2">
-                  MATERIAL
-                </label>
-                <input
-                  type="text"
-                  value={trim.material}
-                  onChange={(e) =>
-                    updateTrim(trim.id, "material", e.target.value)
-                  }
-                  placeholder="Material"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Material <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={trim.material}
+                    onChange={(e) =>
+                      updateTrim(trim.id, "material", e.target.value)
+                    }
+                    placeholder="e.g., Metal, Plastic, Polyester"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Material composition</p>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 uppercase tracking-wide mb-2">
-                  SIZE
-                </label>
-                <input
-                  type="text"
-                  value={trim.size}
-                  onChange={(e) => updateTrim(trim.id, "size", e.target.value)}
-                  placeholder="Size"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Size
+                  </label>
+                  <input
+                    type="text"
+                    value={trim.size}
+                    onChange={(e) => updateTrim(trim.id, "size", e.target.value)}
+                    placeholder="e.g., 15mm, 5 inches"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Dimensions or size specification</p>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 uppercase tracking-wide mb-2">
-                  COLOR
-                </label>
-                <input
-                  type="text"
-                  value={trim.color}
-                  onChange={(e) => updateTrim(trim.id, "color", e.target.value)}
-                  placeholder="Color"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+                {/* Row 2 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Color
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={trim.color}
+                      onChange={(e) => updateTrim(trim.id, "color", e.target.value)}
+                      placeholder="e.g., Black, Silver, #33445F"
+                      className="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <input
+                      type="color"
+                      value={trim.color.startsWith("#") ? trim.color : "#000000"}
+                      onChange={(e) => updateTrim(trim.id, "color", e.target.value)}
+                      className="w-12 h-[38px] rounded-lg border border-gray-300 cursor-pointer"
+                      title="Pick a color"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Color name or code</p>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 uppercase tracking-wide mb-2">
-                  FINISH
-                </label>
-                <input
-                  type="text"
-                  value={trim.finish}
-                  onChange={(e) =>
-                    updateTrim(trim.id, "finish", e.target.value)
-                  }
-                  placeholder="Finish"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Finish
+                  </label>
+                  <input
+                    type="text"
+                    value={trim.finish}
+                    onChange={(e) =>
+                      updateTrim(trim.id, "finish", e.target.value)
+                    }
+                    placeholder="e.g., Matt, Glossy, Brushed"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Surface finish or treatment</p>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 uppercase tracking-wide mb-2">
-                  PLACEMENT
-                </label>
-                <input
-                  type="text"
-                  value={trim.placement}
-                  onChange={(e) =>
-                    updateTrim(trim.id, "placement", e.target.value)
-                  }
-                  placeholder="Placement"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Placement <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={trim.placement}
+                    onChange={(e) =>
+                      updateTrim(trim.id, "placement", e.target.value)
+                    }
+                    placeholder="e.g., Center Front, Pocket, Waistband"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Location on garment</p>
+                </div>
+
+                {/* Row 3 - Full Width */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Consumption <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={trim.consumption}
+                    onChange={(e) =>
+                      updateTrim(trim.id, "consumption", e.target.value)
+                    }
+                    placeholder="e.g., 6 pcs, 1.5 meters"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Quantity required per garment</p>
+                </div>
               </div>
             </div>
           </div>
@@ -196,7 +261,7 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
         {/* Add Trim Button */}
         <button
           onClick={addTrim}
-          className="w-full py-4 mb-6 bg-white border-2 border-dashed border-gray-300 rounded-lg text-gray-600 font-medium hover:border-gray-400 hover:text-gray-700 transition-colors flex items-center justify-center gap-2"
+          className="w-full py-4 mb-6 bg-white border-2 border-dashed border-gray-300 rounded-lg text-gray-600 font-medium hover:border-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors flex items-center justify-center gap-2"
         >
           <svg
             className="w-5 h-5"
