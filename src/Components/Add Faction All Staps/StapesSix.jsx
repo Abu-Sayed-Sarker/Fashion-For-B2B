@@ -3,11 +3,15 @@ import { toast } from "react-toastify";
 import {
   useCreateFashionByIdAndStepMutation,
   useGetFashionByIdQuery,
+  useUpdateFashionByIdMutation,
 } from "../../Api/allApi";
 import { useSelector } from "react-redux";
 
 export default function StapesSix({ goToPreviousStep, goToNextStep }) {
   const parentId = useSelector((state) => state.addFashion.id);
+
+  const [currentStepId, setCurrentStepId] = useState(null);
+  const [updateFashionById] = useUpdateFashionByIdMutation();
 
   const [createFashionByIdAndStep] = useCreateFashionByIdAndStepMutation();
   const { data: fashionInfo } = useGetFashionByIdQuery(parentId, {
@@ -90,21 +94,38 @@ export default function StapesSix({ goToPreviousStep, goToNextStep }) {
       ...rest,
     }));
 
-    const data = {
-      data: formattedData,
-      is_complete: true,
-    };
-    try {
-      await createFashionByIdAndStep({
-        id: parentId,
-        step: 6,
-        data: data,
-      });
-      toast.success("Trims data saved successfully!");
-      goToNextStep();
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Failed to save trims data.");
+    if (currentStepId) {
+      const data = {
+        data: { data: formattedData },
+        is_completed: true,
+        stepsId: currentStepId,
+        parentId: parentId,
+      };
+      try {
+        await updateFashionById(data);
+        toast.success("Trims data updated successfully!");
+        goToNextStep();
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Failed to update trims data.");
+      }
+    } else {
+      const data = {
+        data: formattedData,
+        is_complete: true,
+      };
+      try {
+        await createFashionByIdAndStep({
+          id: parentId,
+          step: 6,
+          data: data,
+        });
+        toast.success("Trims data saved successfully!");
+        goToNextStep();
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Failed to save trims data.");
+      }
     }
   };
 
@@ -120,6 +141,7 @@ export default function StapesSix({ goToPreviousStep, goToNextStep }) {
         front_logo: null,
       }));
       setArtworks(loadedArtworks);
+      setCurrentStepId(fashionInfo.steps[5]?.step_id);
     }
   }, [fashionInfo]);
 

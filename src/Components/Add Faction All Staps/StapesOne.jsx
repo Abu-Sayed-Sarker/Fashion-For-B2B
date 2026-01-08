@@ -30,7 +30,7 @@ export default function StapesOne({ goToNextStep }) {
     season: "",
     style_code: "",
     date: new Date().toISOString().split("T")[0],
-    version: "1.0",
+    version: 1.0,
     base_size: "M",
     measurement_unit: "",
   });
@@ -130,12 +130,17 @@ export default function StapesOne({ goToNextStep }) {
     }
 
     if (currentStepId) {
+      const currentVersion = parseFloat(formData.version) || 1.0;
+      // Precision issue handling: (1.0 + 0.1) might be 1.1000000001, so toFixed(1) is important
+      const newVersion = (currentVersion + 0.1).toFixed(1);
+      const updatedFormData = { ...formData, version: newVersion };
+
       const data = {
-        data: [formData],
+        data: { data: [updatedFormData] },
         is_completed: true,
         stepsId: currentStepId,
         parentId: parentId,
-      }
+      };
 
       try {
         await updateFashionById(data);
@@ -145,8 +150,6 @@ export default function StapesOne({ goToNextStep }) {
         console.error("Error:", error);
         toast.error("Failed to update garment data.");
       }
-
-
     } else {
       const data = {
         data: [formData],
@@ -169,43 +172,41 @@ export default function StapesOne({ goToNextStep }) {
   };
 
   useEffect(() => {
-    if (formData?.garment_type) {
-      const garmentTypeToCategory = {
-        Shirt: "Tops",
-        "T-Shirt": "Tops",
-        "Polo Shirt": "Tops",
-        Blouse: "Tops",
-        "Tank Top": "Tops",
-        Jacket: "Outerwear",
-        Coat: "Outerwear",
-        Blazer: "Outerwear",
-        Vest: "Outerwear",
-        Parka: "Outerwear",
-        Pants: "Bottoms",
-        Jeans: "Bottoms",
-        Shorts: "Bottoms",
-        Skirt: "Bottoms",
-        Dress: "Dresses",
-        Jumpsuit: "Dresses",
-        Sweater: "Knitwear",
-        Cardigan: "Knitwear",
-        Hoodie: "Activewear",
-        Sweatshirt: "Activewear",
-        Joggers: "Activewear",
-        Leggings: "Activewear",
-      };
+    const garmentTypeToCategory = {
+      Shirt: "Tops",
+      "T-Shirt": "Tops",
+      "Polo Shirt": "Tops",
+      Blouse: "Tops",
+      "Tank Top": "Tops",
+      Jacket: "Outerwear",
+      Coat: "Outerwear",
+      Blazer: "Outerwear",
+      Vest: "Outerwear",
+      Parka: "Outerwear",
+      Pants: "Bottoms",
+      Jeans: "Bottoms",
+      Shorts: "Bottoms",
+      Skirt: "Bottoms",
+      Dress: "Dresses",
+      Jumpsuit: "Dresses",
+      Sweater: "Knitwear",
+      Cardigan: "Knitwear",
+      Hoodie: "Activewear",
+      Sweatshirt: "Activewear",
+      Joggers: "Activewear",
+      Leggings: "Activewear",
+    };
 
-      const category = garmentTypeToCategory[formData?.garment_type];
-      if (category) {
-        updateField("garment_category", category);
-      }
+    const category = garmentTypeToCategory[formData?.garment_type];
+    if (category) {
+      updateField("garment_category", category);
     }
   }, [formData?.garment_type]);
 
   useEffect(() => {
     if (fashionInfo?.steps[0]) {
       setFormData(fashionInfo.steps[0]?.data[0]);
-      setCurrentStepId(fashionInfo.steps[0]?.step_uuid);
+      setCurrentStepId(fashionInfo.steps[0]?.step_id);
     }
   }, [fashionInfo?.steps]);
 
@@ -324,7 +325,7 @@ export default function StapesOne({ goToNextStep }) {
               Version
             </label>
             <input
-              type="text"
+              type="number"
               value={formData?.version}
               readOnly
               className="w-full px-4 py-2.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 cursor-not-allowed"

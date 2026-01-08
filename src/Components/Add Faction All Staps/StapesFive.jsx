@@ -3,11 +3,15 @@ import { toast } from "react-toastify";
 import {
   useCreateFashionByIdAndStepMutation,
   useGetFashionByIdQuery,
+  useUpdateFashionByIdMutation,
 } from "../../Api/allApi";
 import { useSelector } from "react-redux";
 
 export default function StapesFive({ goToPreviousStep, goToNextStep }) {
   const parentId = useSelector((state) => state.addFashion.id);
+
+  const [currentStepId, setCurrentStepId] = useState(null);
+  const [updateFashionById] = useUpdateFashionByIdMutation();
 
   const [createFashionByIdAndStep] = useCreateFashionByIdAndStepMutation();
   const { data: fashionInfo } = useGetFashionByIdQuery(parentId, {
@@ -84,21 +88,38 @@ export default function StapesFive({ goToPreviousStep, goToNextStep }) {
       constructions: constructions.map(({ id, icon, ...rest }) => rest),
       special_instructions: specialInstructions,
     };
-    const data = {
-      data: [formattedData],
-      is_complete: true,
-    };
-    try {
-      await createFashionByIdAndStep({
-        id: parentId,
-        step: 5,
-        data: data,
-      });
-      toast.success("Construction data saved successfully!");
-      goToNextStep();
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Failed to save construction data.");
+    if (currentStepId) {
+      const data = {
+        data: { data: [formattedData] },
+        is_completed: true,
+        stepsId: currentStepId,
+        parentId: parentId,
+      };
+      try {
+        await updateFashionById(data);
+        toast.success("Construction data updated successfully!");
+        goToNextStep();
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Failed to update construction data.");
+      }
+    } else {
+      const data = {
+        data: [formattedData],
+        is_complete: true,
+      };
+      try {
+        await createFashionByIdAndStep({
+          id: parentId,
+          step: 5,
+          data: data,
+        });
+        toast.success("Construction data saved successfully!");
+        goToNextStep();
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Failed to save construction data.");
+      }
     }
   };
 
@@ -122,6 +143,8 @@ export default function StapesFive({ goToPreviousStep, goToNextStep }) {
           fashionInfo.steps[4]?.data[0]?.special_instructions
         );
       }
+
+      setCurrentStepId(fashionInfo.steps[4]?.step_id);
     }
   }, [fashionInfo]);
 

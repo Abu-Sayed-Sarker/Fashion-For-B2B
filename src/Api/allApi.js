@@ -3,7 +3,7 @@ import { api } from "./api";
 const allApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getAllFashion: builder.query({
-      query: () => "fashion/techpacks/table/",
+      query: () => "fashion/techpackslist/",
       providesTags: ["fashion"],
     }),
     createFashionId: builder.mutation({
@@ -23,6 +23,7 @@ const allApi = api.injectEndpoints({
     }),
     getFashionById: builder.query({
       query: (id) => `fashion/techpacks/${id}/export/`,
+      providesTags: ["fashion"],
     }),
     updateFashionById: builder.mutation({
       query: (data) => ({

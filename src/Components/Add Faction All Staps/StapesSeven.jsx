@@ -3,11 +3,15 @@ import { toast } from "react-toastify";
 import {
   useCreateFashionByIdAndStepMutation,
   useGetFashionByIdQuery,
+  useUpdateFashionByIdMutation,
 } from "../../Api/allApi";
 import { useSelector } from "react-redux";
 
 export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
   const parentId = useSelector((state) => state.addFashion.id);
+
+  const [currentStepId, setCurrentStepId] = useState(null);
+  const [updateFashionById] = useUpdateFashionByIdMutation();
 
   const [createFashionByIdAndStep] = useCreateFashionByIdAndStepMutation();
   const { data: fashionInfo } = useGetFashionByIdQuery(parentId, {
@@ -95,21 +99,38 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
     }
 
     const formattedData = bomItems.map(({ id, ...rest }) => rest);
-    const data = {
-      data: formattedData,
-      is_complete: true,
-    };
-    try {
-      await createFashionByIdAndStep({
-        id: parentId,
-        step: 7,
-        data: data,
-      });
-      toast.success("BOM data saved successfully!");
-      goToNextStep();
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Failed to save BOM data.");
+    if (currentStepId) {
+      const data = {
+        data: { data: formattedData },
+        is_completed: true,
+        stepsId: currentStepId,
+        parentId: parentId,
+      };
+      try {
+        await updateFashionById(data);
+        toast.success("BOM data saved successfully!");
+        goToNextStep();
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Failed to save BOM data.");
+      }
+    } else {
+      const data = {
+        data: formattedData,
+        is_complete: true,
+      };
+      try {
+        await createFashionByIdAndStep({
+          id: parentId,
+          step: 7,
+          data: data,
+        });
+        toast.success("BOM data saved successfully!");
+        goToNextStep();
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Failed to save BOM data.");
+      }
     }
   };
 
@@ -125,6 +146,7 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
           id: index + 1,
         }))
       );
+      setCurrentStepId(fashionInfo.steps[6]?.step_id);
     }
   }, [fashionInfo]);
 

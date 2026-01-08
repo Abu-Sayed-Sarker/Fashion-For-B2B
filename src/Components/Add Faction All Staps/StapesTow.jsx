@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import {
   useCreateFashionByIdAndStepMutation,
   useGetFashionByIdQuery,
+  useUpdateFashionByIdMutation,
 } from "../../Api/allApi";
 
 // Mock SelectField component for demonstration
@@ -38,6 +39,9 @@ const SelectField = ({
 
 export default function StapesTow({ goToNextStep, goToPreviousStep }) {
   const parentId = useSelector((state) => state.addFashion.id);
+
+  const [currentStepId, setCurrentStepId] = useState(null);
+  const [updateFashionById] = useUpdateFashionByIdMutation();
 
   const [createFashionByIdAndStep] = useCreateFashionByIdAndStepMutation();
   const { data: fashionInfo } = useGetFashionByIdQuery(parentId, {
@@ -165,21 +169,38 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
     const formattedData = measurements
       .filter((m) => m.pom.trim() !== "")
       .map(({ locked, ...rest }) => rest);
-    const data = {
-      data: formattedData,
-      is_complete: true,
-    };
-    try {
-      await createFashionByIdAndStep({
-        id: parentId,
-        step: 2,
-        data: data,
-      });
-      toast.success("Measurement data saved successfully!");
-      goToNextStep();
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Failed to save measurement data.");
+    if (currentStepId) {
+      const data = {
+        data: { data: formattedData },
+        is_completed: true,
+        stepsId: currentStepId,
+        parentId: parentId,
+      };
+      try {
+        await updateFashionById(data);
+        toast.success("Measurement data updated successfully!");
+        goToNextStep();
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Failed to save measurement data.");
+      }
+    } else {
+      const data = {
+        data: formattedData,
+        is_complete: true,
+      };
+      try {
+        await createFashionByIdAndStep({
+          id: parentId,
+          step: 2,
+          data: data,
+        });
+        toast.success("Measurement data saved successfully!");
+        goToNextStep();
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Failed to save measurement data.");
+      }
     }
   };
 
@@ -202,7 +223,7 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
 
       const customMeasurements =
         fashionInfo?.steps[1]?.data
-          ?.slice(8, fashionInfo.steps[1].data.length)
+          ?.slice(8, fashionInfo.steps[1].data.length + 1)
           .map((m) => ({
             ...m,
             locked: false,
@@ -210,6 +231,7 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
 
       setMeasurements([...requiredMeasurements, ...customMeasurements]);
       setBaseSize(fashionInfo.steps[0]?.data[0]?.base_size);
+      setCurrentStepId(fashionInfo.steps[1]?.step_id);
     }
   }, [fashionInfo]);
 

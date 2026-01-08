@@ -27,24 +27,25 @@ export default function ReviewExport({ goToPreviousStep }) {
   } = useMemo(() => {
     const getStepData = (stepName) => {
       return (
-        fashionInfo?.steps?.find((step) => step.step_name === stepName)?.data ||
-        []
+        fashionInfo?.steps?.find(
+          (step) => step.step_name.toLowerCase() === stepName.toLowerCase()
+        )?.data || []
       );
     };
 
-    const setup = getStepData("setup")[0] || {};
-    const constructionsData = getStepData("construction")[0] || {};
-    const measurementsData = getStepData("measurements");
-    const fabricsData = getStepData("fabrics");
-    const trimsData = getStepData("trims");
-    const artworkData = getStepData("artwork");
-    const bomData = getStepData("bom");
+    const setup = getStepData("Setup")[0] || {};
+    const constructionsData = getStepData("Construction")[0] || {};
+    const measurementsData = getStepData("Measurements");
+    const fabricsData = getStepData("Fabrics");
+    const trimsData = getStepData("Trims");
+    const artworkData = getStepData("Artwork");
+    const bomData = getStepData("BOM");
 
     const getIconForSection = (name) => {
       const lower = name.toLowerCase();
-      if (lower.includes("neck")) return "📘";
-      if (lower.includes("sleeve")) return "🟢";
-      if (lower.includes("hem")) return "🔧";
+      if (lower.includes("neck")) return "👔";
+      if (lower.includes("sleeve")) return "👕";
+      if (lower.includes("hem")) return "📏";
       if (lower.includes("hood")) return "🧢";
       return "📋";
     };
@@ -65,9 +66,8 @@ export default function ReviewExport({ goToPreviousStep }) {
       measurements: measurementsData.map((m) => ({
         name: m.pom,
         value: `${m.measurement_value} ${m.unit}`,
-        tolerance: `(${m.tolerance})${
-          m.instruction ? ` (${m.instruction})` : ""
-        }`,
+        tolerance: `(${m.tolerance})${m.instruction ? ` (${m.instruction})` : ""
+          }`,
       })),
       fabrics: fabricsData.map((f, i) => ({
         name: f.construction || `Fabric ${i + 1}`,
@@ -76,7 +76,8 @@ export default function ReviewExport({ goToPreviousStep }) {
       })),
       trims: trimsData.map((t) => ({
         name: t.trim_type,
-        description: [t.material, t.size, t.color, t.placement]
+        color: t.color,
+        description: [t.material, t.size, t.placement]
           .filter(Boolean)
           .join(", "),
       })),
@@ -247,9 +248,17 @@ export default function ReviewExport({ goToPreviousStep }) {
                     <span className="text-gray-500">Composition:</span>
                     <span className="text-gray-900">{fabric.composition}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-sm items-center">
                     <span className="text-gray-500">Color:</span>
-                    <span className="text-gray-900">{fabric.color}</span>
+                    <div className="flex items-center gap-2">
+                      {fabric.color && (
+                        <div
+                          className="w-4 h-4 rounded border border-gray-200 shadow-sm"
+                          style={{ backgroundColor: fabric.color }}
+                        />
+                      )}
+                      <span className="text-gray-900">{fabric.color}</span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -274,6 +283,18 @@ export default function ReviewExport({ goToPreviousStep }) {
                   <div className="text-sm text-gray-600">
                     {trim.description}
                   </div>
+                  {trim.color && (
+                    <div className="flex justify-between text-sm items-center mt-1">
+                      <span className="text-gray-500">Color:</span>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-4 h-4 rounded border border-gray-200 shadow-sm"
+                          style={{ backgroundColor: trim.color }}
+                        />
+                        <span className="text-gray-900">{trim.color}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -422,11 +443,10 @@ export default function ReviewExport({ goToPreviousStep }) {
           <a
             href={BASE_URL + fashionInfo?.files?.pdf}
             disabled={!confirmed}
-            className={`px-6 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${
-              confirmed
-                ? "bg-gray-900 text-white hover:bg-gray-800"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
+            className={`px-6 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${confirmed
+              ? "bg-gray-900 text-white hover:bg-gray-800"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
           >
             <svg
               className="w-5 h-5"
@@ -446,11 +466,10 @@ export default function ReviewExport({ goToPreviousStep }) {
           <a
             href={BASE_URL + fashionInfo?.files?.xlsx}
             disabled={!confirmed}
-            className={`px-6 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${
-              confirmed
-                ? "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                : "bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed"
-            }`}
+            className={`px-6 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${confirmed
+              ? "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+              : "bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed"
+              }`}
           >
             <svg
               className="w-5 h-5"

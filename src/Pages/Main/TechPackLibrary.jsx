@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Search, Plus, MoreVertical, FileText, Tag } from "lucide-react";
-import { techPacks } from "../../../Data/staticData";
 import {
   useCreateFashionIdMutation,
   useGetAllFashionQuery,
@@ -8,7 +7,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { setFashionId } from "../../Features/addFashionSlice";
 import { useDispatch } from "react-redux";
-import { resetProgress } from "../../Features/progressSlice";
+import { resetProgress, setCurrentStep } from "../../Features/progressSlice";
 
 const TechPackLibrary = () => {
   const navigate = useNavigate();
@@ -16,8 +15,8 @@ const TechPackLibrary = () => {
 
   //// api call here
 
-  const { data } = useGetAllFashionQuery();
-  console.log("API Data:", data);
+  const { data: techPacks = [] } = useGetAllFashionQuery();
+  console.log("API Data:", techPacks);
 
   const [createFashionId, { isLoading }] = useCreateFashionIdMutation();
   ////////////////////////
@@ -38,11 +37,12 @@ const TechPackLibrary = () => {
   const [openMenuId, setOpenMenuId] = useState(null);
   const menuRef = useRef(null);
 
-  const filteredPacks = techPacks.filter(
-    (pack) =>
-      pack.styleCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pack.garmentType.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // const filteredPacks = techPacks.filter(
+  //   (pack) =>
+  //     pack.styleCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     pack.garmentType.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
+  const filteredPacks = techPacks;
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -60,9 +60,17 @@ const TechPackLibrary = () => {
     setOpenMenuId(openMenuId === id ? null : id);
   };
 
-  const handleAction = (action, pack) => {
-    console.log(`${action} action for ${pack.styleCode}`);
+  const handleAction = (action, id) => {
+    console.log(`${action} action for ${id}`);
     setOpenMenuId(null);
+
+    if (action === "Open") {
+      navigate("/add-faction-library");
+      dispatch(setCurrentStep(8))
+      dispatch(setFashionId(id));
+    }
+
+
     // Add your action handlers here
   };
 
@@ -142,23 +150,23 @@ const TechPackLibrary = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 text-gray-700 font-medium">
                       <FileText className="w-4 h-4 text-gray-400" />
-                      {pack.styleCode}
+                      Code
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-700">
-                    {pack.garmentType}
+                    Garment Type
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1.5 text-gray-600">
                       <Tag className="w-4 h-4 text-gray-400" />
-                      {pack.version}
+                      Version
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${pack.statusColor}`}
+                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium`}
                     >
-                      {pack.status}
+                      Status
                     </span>
                   </td>
                   <td className="px-6 py-4 text-gray-600">
@@ -195,7 +203,7 @@ const TechPackLibrary = () => {
                       {openMenuId === pack.id && (
                         <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
                           <button
-                            onClick={() => handleAction("Open", pack)}
+                            onClick={() => handleAction("Open", pack.id)}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                           >
                             Open

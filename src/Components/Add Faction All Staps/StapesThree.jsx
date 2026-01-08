@@ -4,11 +4,14 @@ import { toast } from "react-toastify";
 import {
   useCreateFashionByIdAndStepMutation,
   useGetFashionByIdQuery,
+  useUpdateFashionByIdMutation,
 } from "../../Api/allApi";
 
 export default function StapesThree({ goToPreviousStep, goToNextStep }) {
   const parentId = useSelector((state) => state.addFashion.id);
 
+  const [currentStepId, setCurrentStepId] = useState(null);
+  const [updateFashionById] = useUpdateFashionByIdMutation();
   const [createFashionByIdAndStep] = useCreateFashionByIdAndStepMutation();
 
   const { data: fashionInfo } = useGetFashionByIdQuery(parentId, {
@@ -120,21 +123,38 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
 
     const formattedData = fabrics.map(({ id, type, ...rest }) => rest);
 
-    const data = {
-      data: formattedData,
-      is_complete: true,
-    };
-    try {
-      await createFashionByIdAndStep({
-        id: parentId,
-        step: 3,
-        data: data,
-      });
-      toast.success("Fabrics data saved successfully!");
-      goToNextStep();
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Failed to save fabrics data.");
+    if (currentStepId) {
+      const data = {
+        data: { data: formattedData },
+        is_completed: true,
+        stepsId: currentStepId,
+        parentId: parentId,
+      };
+      try {
+        await updateFashionById(data);
+        toast.success("Fabrics data updated successfully!");
+        goToNextStep();
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Failed to update fabrics data.");
+      }
+    } else {
+      const data = {
+        data: formattedData,
+        is_complete: true,
+      };
+      try {
+        await createFashionByIdAndStep({
+          id: parentId,
+          step: 3,
+          data: data,
+        });
+        toast.success("Fabrics data saved successfully!");
+        goToNextStep();
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Failed to save fabrics data.");
+      }
     }
   };
 
@@ -153,6 +173,7 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
         type: index === 0 ? "Primary" : "Secondary",
       }));
       setFabrics(loadedFabrics);
+      setCurrentStepId(fashionInfo.steps[2]?.step_id);
     }
   }, [fashionInfo]);
 
