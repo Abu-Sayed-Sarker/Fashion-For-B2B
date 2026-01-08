@@ -143,8 +143,11 @@ export default function StapesThree({ goToPreviousStep, goToNextStep }) {
   };
 
   useEffect(() => {
-    if (fashionInfo?.steps?.fabrics && fashionInfo?.steps?.fabrics.length > 0) {
-      const loadedFabrics = fashionInfo.steps.fabrics.map((fabric, index) => ({
+    if (
+      fashionInfo?.steps[2]?.data &&
+      fashionInfo?.steps[2]?.data?.length > 0
+    ) {
+      const loadedFabrics = fashionInfo.steps[2].data.map((fabric, index) => ({
         ...fabric,
         id: index + 1,
         type: index === 0 ? "Primary" : "Secondary",

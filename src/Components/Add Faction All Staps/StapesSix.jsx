@@ -113,8 +113,8 @@ export default function StapesSix({ goToPreviousStep, goToNextStep }) {
   };
 
   useEffect(() => {
-    if (fashionInfo && fashionInfo?.steps?.artwork?.length > 0) {
-      const loadedArtworks = fashionInfo.steps.artwork.map((a, index) => ({
+    if (fashionInfo && fashionInfo?.steps[5]?.data?.length > 0) {
+      const loadedArtworks = fashionInfo.steps[5]?.data.map((a, index) => ({
         ...a,
         id: index + 1,
         front_logo: null,

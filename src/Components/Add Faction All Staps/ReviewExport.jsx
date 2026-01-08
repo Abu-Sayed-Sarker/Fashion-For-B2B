@@ -25,21 +25,20 @@ export default function ReviewExport({ goToPreviousStep }) {
     artworks,
     bomItems,
   } = useMemo(() => {
-    if (!fashionInfo?.steps) {
-      return {
-        garmentData: {},
-        measurements: [],
-        fabrics: [],
-        trims: [],
-        constructionSections: [],
-        specialInstructions: "",
-        artworks: [],
-        bomItems: [],
-      };
-    }
+    const getStepData = (stepName) => {
+      return (
+        fashionInfo?.steps?.find((step) => step.step_name === stepName)?.data ||
+        []
+      );
+    };
 
-    const setup = fashionInfo.steps.setup?.[0] || {};
-    const constructionRoot = fashionInfo.steps.construction?.[0] || {};
+    const setup = getStepData("setup")[0] || {};
+    const constructionsData = getStepData("construction")[0] || {};
+    const measurementsData = getStepData("measurements");
+    const fabricsData = getStepData("fabrics");
+    const trimsData = getStepData("trims");
+    const artworkData = getStepData("artwork");
+    const bomData = getStepData("bom");
 
     const getIconForSection = (name) => {
       const lower = name.toLowerCase();
@@ -63,45 +62,47 @@ export default function ReviewExport({ goToPreviousStep }) {
         version: setup.version || "1.0",
         date: setup.date || "-",
       },
-      measurements: (fashionInfo.steps.measurements || []).map((m) => ({
+      measurements: measurementsData.map((m) => ({
         name: m.pom,
         value: `${m.measurement_value} ${m.unit}`,
         tolerance: `(${m.tolerance})${
           m.instruction ? ` (${m.instruction})` : ""
         }`,
       })),
-      fabrics: (fashionInfo.steps.fabrics || []).map((f, i) => ({
+      fabrics: fabricsData.map((f, i) => ({
         name: f.construction || `Fabric ${i + 1}`,
         composition: f.composition,
         color: f.color,
       })),
-      trims: (fashionInfo.steps.trims || []).map((t) => ({
+      trims: trimsData.map((t) => ({
         name: t.trim_type,
         description: [t.material, t.size, t.color, t.placement]
           .filter(Boolean)
           .join(", "),
       })),
-      constructionSections: (constructionRoot.constructions || []).map((c) => ({
-        title: c.section_name,
-        icon: getIconForSection(c.section_name),
-        fields: [
-          { label: "Stitch Type", value: c.stitch_type },
-          { label: "SPI", value: c.spi },
-          { label: "Seam Allowance", value: c.seam_allowance },
-          { label: "Reinforcement", value: c.reinforcement_points },
-          { label: "Topstitch / Coverstitch", value: c.topstitch_logic },
-        ],
-      })),
+      constructionSections: (constructionsData.constructions || []).map(
+        (c) => ({
+          title: c.section_name,
+          icon: getIconForSection(c.section_name),
+          fields: [
+            { label: "Stitch Type", value: c.stitch_type },
+            { label: "SPI", value: c.spi },
+            { label: "Seam Allowance", value: c.seam_allowance },
+            { label: "Reinforcement", value: c.reinforcement_points },
+            { label: "Topstitch / Coverstitch", value: c.topstitch_logic },
+          ],
+        })
+      ),
       specialInstructions:
-        constructionRoot.special_instructions ||
+        constructionsData.special_instructions ||
         "No special instructions provided.",
-      artworks: (fashionInfo.steps.artwork || []).map((a) => ({
+      artworks: artworkData.map((a) => ({
         name: a.artwork_name,
         placement: a.placement_location,
         method: a.artwork_type,
         size: a.artwork_size,
       })),
-      bomItems: (fashionInfo.steps.bom || []).map((b) => ({
+      bomItems: bomData.map((b) => ({
         name: b.component_name,
         category: b.category,
         consumption: `${b.consumption} ${b.unit}`,

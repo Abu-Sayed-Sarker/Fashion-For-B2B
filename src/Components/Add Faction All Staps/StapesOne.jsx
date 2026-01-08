@@ -44,44 +44,72 @@ export default function StapesOne({ goToNextStep }) {
   };
 
   const garmentTypes = [
-    { value: "Dabid Woven Shirt", label: "Dabid Woven Shirt" },
+    { value: "Shirt", label: "Shirt" },
     { value: "T-Shirt", label: "T-Shirt" },
-    { value: "Hoodie", label: "Hoodie" },
+    { value: "Polo Shirt", label: "Polo Shirt" },
+    { value: "Blouse", label: "Blouse" },
+    { value: "Tank Top", label: "Tank Top" },
+    { value: "Jacket", label: "Jacket" },
+    { value: "Coat", label: "Coat" },
+    { value: "Blazer", label: "Blazer" },
+    { value: "Vest", label: "Vest" },
+    { value: "Parka", label: "Parka" },
+    { value: "Pants", label: "Pants" },
     { value: "Jeans", label: "Jeans" },
+    { value: "Shorts", label: "Shorts" },
+    { value: "Skirt", label: "Skirt" },
+    { value: "Dress", label: "Dress" },
+    { value: "Jumpsuit", label: "Jumpsuit" },
+    { value: "Sweater", label: "Sweater" },
+    { value: "Cardigan", label: "Cardigan" },
+    { value: "Hoodie", label: "Hoodie" },
+    { value: "Sweatshirt", label: "Sweatshirt" },
+    { value: "Joggers", label: "Joggers" },
+    { value: "Leggings", label: "Leggings" },
   ];
 
   const seasons = [
-    { value: "Summer", label: "Summer" },
-    { value: "Fall", label: "Fall" },
-    { value: "Winter", label: "Winter" },
-    { value: "Spring", label: "Spring" },
+    { value: "Spring", label: "Spring (SS)" },
+    { value: "Summer", label: "Summer (SU)" },
+    { value: "Fall", label: "Fall (FA)" },
+    { value: "Winter", label: "Winter (WI)" },
+    { value: "All Seasons", label: "All Seasons" },
   ];
 
   const categories = [
-    { value: "Top", label: "Top" },
     { value: "Tops", label: "Tops" },
     { value: "Bottoms", label: "Bottoms" },
     { value: "Outerwear", label: "Outerwear" },
+    { value: "Dresses", label: "Dresses" },
+    { value: "Activewear", label: "Activewear" },
+    { value: "Knitwear", label: "Knitwear" },
   ];
 
   const sizes = [
+    { value: "XXS", label: "XXS" },
     { value: "XS", label: "XS" },
     { value: "S", label: "S" },
     { value: "M", label: "M" },
     { value: "L", label: "L" },
     { value: "XL", label: "XL" },
+    { value: "XXL", label: "XXL" },
+    { value: "XXXL", label: "XXXL" },
   ];
 
   const fits = [
-    { value: "Regular", label: "Regular" },
-    { value: "Slim", label: "Slim" },
-    { value: "Relaxed", label: "Relaxed" },
-    { value: "Oversized", label: "Oversized" },
+    { value: "Regular", label: "Regular Fit" },
+    { value: "Slim", label: "Slim Fit" },
+    { value: "Relaxed", label: "Relaxed Fit" },
+    { value: "Oversized", label: "Oversized Fit" },
+    { value: "Tailored", label: "Tailored" },
+    { value: "Loose", label: "Loose" },
   ];
 
   const genders = [
-    { value: "Male", label: "Male" },
-    { value: "Female", label: "Female" },
+    { value: "Man", label: "Man" },
+    { value: "Woman", label: "Woman" },
+    { value: "Unisex", label: "Unisex" },
+    { value: "Child", label: "Child" },
   ];
 
   const handleSubmit = async (e) => {
@@ -120,10 +148,28 @@ export default function StapesOne({ goToNextStep }) {
 
   useEffect(() => {
     const garmentTypeToCategory = {
-      "Dabid Woven Shirt": "Top",
+      Shirt: "Tops",
       "T-Shirt": "Tops",
-      Hoodie: "Outerwear",
+      "Polo Shirt": "Tops",
+      Blouse: "Tops",
+      "Tank Top": "Tops",
+      Jacket: "Outerwear",
+      Coat: "Outerwear",
+      Blazer: "Outerwear",
+      Vest: "Outerwear",
+      Parka: "Outerwear",
+      Pants: "Bottoms",
       Jeans: "Bottoms",
+      Shorts: "Bottoms",
+      Skirt: "Bottoms",
+      Dress: "Dresses",
+      Jumpsuit: "Dresses",
+      Sweater: "Knitwear",
+      Cardigan: "Knitwear",
+      Hoodie: "Activewear",
+      Sweatshirt: "Activewear",
+      Joggers: "Activewear",
+      Leggings: "Activewear",
     };
 
     const category = garmentTypeToCategory[formData.garment_type];
@@ -133,8 +179,8 @@ export default function StapesOne({ goToNextStep }) {
   }, [formData.garment_type]);
 
   useEffect(() => {
-    if (fashionInfo?.steps?.setup) {
-      setFormData(fashionInfo.steps.setup[0]);
+    if (fashionInfo?.steps) {
+      setFormData(fashionInfo.steps[0]?.data[0]);
     }
   }, [fashionInfo]);
 

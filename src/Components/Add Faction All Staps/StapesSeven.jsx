@@ -118,9 +118,12 @@ export default function StapesSeven({ goToPreviousStep, goToNextStep }) {
   };
 
   useEffect(() => {
-    if (fashionInfo?.steps?.bom) {
+    if (fashionInfo?.steps[6]) {
       setBomItems(
-        fashionInfo.steps.bom.map((item, index) => ({ ...item, id: index + 1 }))
+        fashionInfo.steps[6]?.data.map((item, index) => ({
+          ...item,
+          id: index + 1,
+        }))
       );
     }
   }, [fashionInfo]);

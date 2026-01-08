@@ -107,19 +107,19 @@ export default function StapesFive({ goToPreviousStep, goToNextStep }) {
   };
 
   useEffect(() => {
-    if (fashionInfo?.steps?.construction) {
-      if (fashionInfo.steps.construction[0].constructions) {
+    if (fashionInfo?.steps[4]) {
+      if (fashionInfo.steps[4]?.data[0].constructions) {
         setConstructions(
-          fashionInfo.steps.construction[0].constructions.map((c, index) => ({
+          fashionInfo.steps[4]?.data[0]?.constructions.map((c, index) => ({
             ...c,
             id: index + 1,
             icon: ["📘", "🟢", "🔧", "🧢"][index] || "📋",
           }))
         );
       }
-      if (fashionInfo.steps.construction[0].special_instructions) {
+      if (fashionInfo.steps[4]?.data[0]?.special_instructions) {
         setSpecialInstructions(
-          fashionInfo.steps.construction[0].special_instructions
+          fashionInfo.steps[4]?.data[0]?.special_instructions
         );
       }
     }

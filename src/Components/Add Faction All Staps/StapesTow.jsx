@@ -53,49 +53,49 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
       id: 1,
       pom: "Chest",
       instruction: 'Measure 1" below armhole, straight across chest',
-      locked: true,
+      locked: false,
     },
     {
       id: 2,
       pom: "Body Length",
       instruction: "Measure from HPS (high point shoulder) to bottom hem",
-      locked: true,
+      locked: false,
     },
     {
       id: 3,
       pom: "Sleeve Length",
       instruction: "Measure from shoulder seam to sleeve hem",
-      locked: true,
+      locked: false,
     },
     {
       id: 4,
       pom: "Shoulder Width",
       instruction: "Measure from shoulder seam to shoulder seam across back",
-      locked: true,
+      locked: false,
     },
     {
       id: 5,
       pom: "Armhole",
       instruction: "Measure armhole circumference from shoulder seam",
-      locked: true,
+      locked: false,
     },
     {
       id: 6,
       pom: "Hem Width",
       instruction: "Measure bottom hem width edge to edge when laid flat",
-      locked: true,
+      locked: false,
     },
     {
       id: 7,
       pom: "Neck Opening",
       instruction: "Measure neckline opening circumference",
-      locked: true,
+      locked: false,
     },
     {
       id: 8,
       pom: "Waist",
       instruction: "Measure waist circumference",
-      locked: true,
+      locked: false,
     },
   ];
 
@@ -193,32 +193,23 @@ export default function StapesTow({ goToNextStep, goToPreviousStep }) {
   ///// set measurement data
 
   useEffect(() => {
-    if (fashionInfo?.steps?.measurements) {
+    if (fashionInfo?.steps[1]) {
       const requiredMeasurements =
-        fashionInfo.steps.measurements.slice(0, 8).map((m) => ({
+        fashionInfo.steps[1]?.data?.slice(0, 8).map((m) => ({
           ...m,
-          locked: true,
-          instruction: "",
+          locked: false,
         })) || [];
 
       const customMeasurements =
-        fashionInfo.steps.measurements
-          .slice(8, fashionInfo.steps.measurements.length)
+        fashionInfo?.steps[1]?.data
+          ?.slice(8, fashionInfo.steps[1].data.length)
           .map((m) => ({
             ...m,
             locked: false,
-            instruction: "",
           })) || [];
 
       setMeasurements([...requiredMeasurements, ...customMeasurements]);
-
-      // setMeasurements(
-      //   fashionInfo.steps.measurements.map((m) => ({
-      //     ...m,
-      //     locked: true,
-      //     instruction: "",
-      //   }))
-      // );
+      setBaseSize(fashionInfo.steps[0]?.data[0]?.base_size);
     }
   }, [fashionInfo]);
 

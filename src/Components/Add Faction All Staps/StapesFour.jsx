@@ -110,9 +110,9 @@ export default function StapesFour({ goToPreviousStep, goToNextStep }) {
   };
 
   useEffect(() => {
-    if (fashionInfo?.steps?.trims) {
+    if (fashionInfo?.steps[3]?.data) {
       setTrims(
-        fashionInfo?.steps?.trims.map((trim, index) => ({
+        fashionInfo?.steps[3]?.data.map((trim, index) => ({
           ...trim,
           id: index + 1,
         }))
