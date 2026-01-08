@@ -169,34 +169,36 @@ export default function StapesOne({ goToNextStep }) {
   };
 
   useEffect(() => {
-    const garmentTypeToCategory = {
-      Shirt: "Tops",
-      "T-Shirt": "Tops",
-      "Polo Shirt": "Tops",
-      Blouse: "Tops",
-      "Tank Top": "Tops",
-      Jacket: "Outerwear",
-      Coat: "Outerwear",
-      Blazer: "Outerwear",
-      Vest: "Outerwear",
-      Parka: "Outerwear",
-      Pants: "Bottoms",
-      Jeans: "Bottoms",
-      Shorts: "Bottoms",
-      Skirt: "Bottoms",
-      Dress: "Dresses",
-      Jumpsuit: "Dresses",
-      Sweater: "Knitwear",
-      Cardigan: "Knitwear",
-      Hoodie: "Activewear",
-      Sweatshirt: "Activewear",
-      Joggers: "Activewear",
-      Leggings: "Activewear",
-    };
+    if (formData?.garment_type) {
+      const garmentTypeToCategory = {
+        Shirt: "Tops",
+        "T-Shirt": "Tops",
+        "Polo Shirt": "Tops",
+        Blouse: "Tops",
+        "Tank Top": "Tops",
+        Jacket: "Outerwear",
+        Coat: "Outerwear",
+        Blazer: "Outerwear",
+        Vest: "Outerwear",
+        Parka: "Outerwear",
+        Pants: "Bottoms",
+        Jeans: "Bottoms",
+        Shorts: "Bottoms",
+        Skirt: "Bottoms",
+        Dress: "Dresses",
+        Jumpsuit: "Dresses",
+        Sweater: "Knitwear",
+        Cardigan: "Knitwear",
+        Hoodie: "Activewear",
+        Sweatshirt: "Activewear",
+        Joggers: "Activewear",
+        Leggings: "Activewear",
+      };
 
-    const category = garmentTypeToCategory[formData?.garment_type];
-    if (category) {
-      updateField("garment_category", category);
+      const category = garmentTypeToCategory[formData?.garment_type];
+      if (category) {
+        updateField("garment_category", category);
+      }
     }
   }, [formData?.garment_type]);
 
