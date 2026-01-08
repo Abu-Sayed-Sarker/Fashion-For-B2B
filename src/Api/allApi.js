@@ -4,14 +4,14 @@ const allApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getAllFashion: builder.query({
       query: () => "fashion/techpacks/table/",
-      //   providesTags: ["fashion"],
+      providesTags: ["fashion"],
     }),
     createFashionId: builder.mutation({
       query: () => ({
         url: "fashion/techpacks/",
         method: "POST",
       }),
-      //   invalidatesTags: ["fashion"],
+      invalidatesTags: ["fashion"],
     }),
     createFashionByIdAndStep: builder.mutation({
       query: (data) => ({
@@ -19,10 +19,18 @@ const allApi = api.injectEndpoints({
         method: "POST",
         body: data.data,
       }),
-      //   invalidatesTags: ["fashion"],
+      invalidatesTags: ["fashion"],
     }),
     getFashionById: builder.query({
       query: (id) => `fashion/techpacks/${id}/export/`,
+    }),
+    updateFashionById: builder.mutation({
+      query: (data) => ({
+        url: `fashion/techpacks/${data.parentId}/steps/update/${data.stepsId}/`,
+        method: "PATCH",
+        body: data.data,
+      }),
+      invalidatesTags: ["fashion"],
     }),
   }),
 });
@@ -32,4 +40,5 @@ export const {
   useCreateFashionIdMutation,
   useCreateFashionByIdAndStepMutation,
   useGetFashionByIdQuery,
+  useUpdateFashionByIdMutation,
 } = allApi;

@@ -18,7 +18,7 @@ export default function StapesFive({ goToPreviousStep, goToNextStep }) {
     {
       id: 1,
       section_name: "Neck Construction",
-      icon: "📘",
+      icon: "👔",
       description: "Collar, neckline, and neck binding specifications",
       stitch_type: "",
       spi: "",
@@ -29,7 +29,7 @@ export default function StapesFive({ goToPreviousStep, goToNextStep }) {
     {
       id: 2,
       section_name: "Sleeve Construction",
-      icon: "🟢",
+      icon: "👕",
       description: "Sleeve attachment, armhole, and sleeve hem details",
       stitch_type: "",
       spi: "",
@@ -40,7 +40,7 @@ export default function StapesFive({ goToPreviousStep, goToNextStep }) {
     {
       id: 3,
       section_name: "Hem Construction",
-      icon: "🔧",
+      icon: "📏",
       description: "Bottom hem, side slits, and hemline finishing",
       stitch_type: "",
       spi: "",

@@ -9,12 +9,14 @@ import { toast } from "react-toastify";
 import {
   useCreateFashionByIdAndStepMutation,
   useGetFashionByIdQuery,
+  useUpdateFashionByIdMutation,
 } from "../../Api/allApi.js";
 import { useSelector } from "react-redux";
 
 export default function StapesOne({ goToNextStep }) {
   const parentId = useSelector((state) => state.addFashion.id);
-
+  const [currentStepId, setCurrentStepId] = useState(null);
+  const [updateFashionById] = useUpdateFashionByIdMutation();
   const [createFashionByIdAndStep] = useCreateFashionByIdAndStepMutation();
   const { data: fashionInfo } = useGetFashionByIdQuery(parentId, {
     skip: !parentId,
@@ -127,22 +129,42 @@ export default function StapesOne({ goToNextStep }) {
       return toast.error("Please fill in all required fields.");
     }
 
-    const data = {
-      data: [formData],
-      is_completed: true,
-    };
+    if (currentStepId) {
+      const data = {
+        data: [formData],
+        is_completed: true,
+        stepsId: currentStepId,
+        parentId: parentId,
+      }
 
-    try {
-      await createFashionByIdAndStep({
-        id: parentId,
-        step: 1,
-        data: data,
-      });
-      toast.success("Garment data saved successfully!");
-      goToNextStep();
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Failed to save garment data.");
+      try {
+        await updateFashionById(data);
+        toast.success("Garment data updated successfully!");
+        goToNextStep();
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Failed to update garment data.");
+      }
+
+
+    } else {
+      const data = {
+        data: [formData],
+        is_completed: true,
+      };
+
+      try {
+        await createFashionByIdAndStep({
+          id: parentId,
+          step: 1,
+          data: data,
+        });
+        toast.success("Garment data saved successfully!");
+        goToNextStep();
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Failed to save garment data.");
+      }
     }
   };
 
@@ -172,17 +194,18 @@ export default function StapesOne({ goToNextStep }) {
       Leggings: "Activewear",
     };
 
-    const category = garmentTypeToCategory[formData.garment_type];
+    const category = garmentTypeToCategory[formData?.garment_type];
     if (category) {
       updateField("garment_category", category);
     }
-  }, [formData.garment_type]);
+  }, [formData?.garment_type]);
 
   useEffect(() => {
-    if (fashionInfo?.steps) {
+    if (fashionInfo?.steps[0]) {
       setFormData(fashionInfo.steps[0]?.data[0]);
+      setCurrentStepId(fashionInfo.steps[0]?.step_uuid);
     }
-  }, [fashionInfo]);
+  }, [fashionInfo?.steps]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -200,7 +223,7 @@ export default function StapesOne({ goToNextStep }) {
           <SelectField
             label="Garment Type"
             required
-            value={formData.garment_type}
+            value={formData?.garment_type}
             onChange={(value) => updateField("garment_type", value)}
             options={garmentTypes}
             placeholder="Select garment type"
@@ -210,7 +233,7 @@ export default function StapesOne({ goToNextStep }) {
 
           <SelectField
             label="Season"
-            value={formData.season}
+            value={formData?.season}
             onChange={(value) => updateField("season", value)}
             options={seasons}
             placeholder="Select season"
@@ -220,7 +243,7 @@ export default function StapesOne({ goToNextStep }) {
             <SelectField
               label="Garment Category"
               required
-              value={formData.garment_category}
+              value={formData?.garment_category}
               onChange={(value) => updateField("garment_category", value)}
               options={categories}
               placeholder="Select category"
@@ -244,7 +267,7 @@ export default function StapesOne({ goToNextStep }) {
               </div>
             </div>
             <SelectField
-              value={formData.base_size}
+              value={formData?.base_size}
               onChange={(value) => updateField("base_size", value)}
               options={sizes}
               placeholder="Select base size"
@@ -254,7 +277,7 @@ export default function StapesOne({ goToNextStep }) {
 
           <SelectField
             label="Fit / Silhouette"
-            value={formData.fit}
+            value={formData?.fit}
             onChange={(value) => updateField("fit", value)}
             options={fits}
             placeholder="Select fit"
@@ -263,7 +286,7 @@ export default function StapesOne({ goToNextStep }) {
           <InputField
             label="Style Code"
             required
-            value={formData.style_code}
+            value={formData?.style_code}
             onChange={(value) => updateField("style_code", value)}
             placeholder="e.g., TP-2026-001"
             error={errors.style_code}
@@ -272,7 +295,7 @@ export default function StapesOne({ goToNextStep }) {
 
           <SelectField
             label="Target Gender"
-            value={formData.target_gender}
+            value={formData?.target_gender}
             onChange={(value) => updateField("target_gender", value)}
             options={genders}
             placeholder="Select gender"
@@ -285,7 +308,7 @@ export default function StapesOne({ goToNextStep }) {
             </label>
             <input
               type="text"
-              value={formData.date}
+              value={formData?.date}
               readOnly
               className="w-full px-4 py-2.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 cursor-not-allowed"
             />
@@ -300,7 +323,7 @@ export default function StapesOne({ goToNextStep }) {
             </label>
             <input
               type="text"
-              value={formData.version}
+              value={formData?.version}
               readOnly
               className="w-full px-4 py-2.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 cursor-not-allowed"
             />
