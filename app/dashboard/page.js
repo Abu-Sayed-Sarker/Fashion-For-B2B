@@ -1,3 +1,7 @@
+import GarmentSetup from "@/Components/Dashboard/Setup/GarmentSetup";
+
 export default function page() {
-  return <div className="">Main Dashboard Page</div>;
+  return <div className="">
+    <GarmentSetup />
+  </div>;
 }

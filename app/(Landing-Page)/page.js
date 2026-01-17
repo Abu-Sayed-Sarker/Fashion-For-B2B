@@ -1,4 +1,4 @@
-import Main from "@/Components/Landing/Main/Main";
+import Main from "@/Components/Landing/Main/TechPackLibrary";
 
 export default function Home() {
   return (
