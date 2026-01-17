@@ -3,9 +3,11 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { AlertCircle, Info, ArrowRight } from "lucide-react";
 import { Input, Select } from "@/Libs/Form-components/FormComponent";
+import { useRouter } from "next/navigation";
 
 // Main Component
 const GarmentSetup = () => {
+  const route = useRouter();
   const {
     register,
     control,
@@ -59,8 +61,8 @@ const GarmentSetup = () => {
   };
 
   const onSubmit = (data) => {
+    route.push('dashboard/measurements');
     console.log("Form Data:", data);
-    // Handle form submission
   };
 
   const garmentTypeOptions = [
