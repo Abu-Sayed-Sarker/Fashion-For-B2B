@@ -1,3 +1,4 @@
+
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientProvider from "@/Providers/ReduxProvider";
@@ -23,7 +24,37 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClientProvider>{children}</ClientProvider>
+        <ClientProvider>
+          {/* Header */}
+          <header className="bg-white border-b border-gray-200 px-8 py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">
+                  Fashion Collection Studio
+                </h1>
+                <p className="text-sm text-gray-500">
+                  Tech Pack & BOM Generator
+                </p>
+              </div>
+            </div>
+          </header>
+          {children}
+        </ClientProvider>
       </body>
     </html>
   );
