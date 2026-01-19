@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { AlertCircle, Info, ArrowRight } from "lucide-react";
 import { Input, Select } from "@/Libs/Form-components/FormComponent";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 // Main Component
 const GarmentSetup = () => {
@@ -294,12 +295,13 @@ const GarmentSetup = () => {
 
         {/* Navigation */}
         <div className="flex justify-between items-center my-6">
-          <button
+          <Link
+            href="/"
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Back to Library
-          </button>
+          </Link>
           <div className="flex flex-col items-end gap-2">
             <button
               type="submit"
