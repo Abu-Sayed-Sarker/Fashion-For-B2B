@@ -106,9 +106,10 @@ export default function MeasurementSpecification() {
     control,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isValid },
     handleSubmit,
   } = useForm({
+    mode: "onChange",
     defaultValues: {
       baseSize: "M",
       measurementUnit: "cm",
@@ -196,22 +197,6 @@ export default function MeasurementSpecification() {
     // console.log('Required Measurements:', data.measurements.filter(m => m.required).length);
   };
 
-  let hasError = false;
-  useEffect(() => {
-    const subscription = watch((value) => {
-      hasError = false;
-      Object.keys(value).forEach((key) => {
-        const errors = value[key];
-        if (errors) {
-          hasError = true;
-        }
-      });
-      setError(hasError);
-    });
-    return () => subscription.unsubscribe();
-  }, [watch]);
-
-  console.log("hasError:", hasError);
 
   return (
     <>
@@ -290,8 +275,7 @@ export default function MeasurementSpecification() {
                   POM Name <span className="text-red-500">*</span>
                 </label>
                 <input
-                  {...register(`measurements.${index}.pom`)}
-                  onChange={(e) => handlePomChange(e, index)}
+                  {...register(`measurements.${index}.pom`, { required: true, onChange: (e) => handlePomChange(e, index) })}
                   placeholder="e.g., Waist Width"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -304,7 +288,7 @@ export default function MeasurementSpecification() {
                     Value <span className="text-red-500">*</span>
                   </label>
                   <input
-                    {...register(`measurements.${index}.value`)}
+                    {...register(`measurements.${index}.value`, { required: true })}
                     type="number"
                     step="0.1"
                     placeholder="0.2"
@@ -318,7 +302,7 @@ export default function MeasurementSpecification() {
                     Tolerance <span className="text-red-500">*</span>
                   </label>
                   <input
-                    {...register(`measurements.${index}.tolerance`)}
+                    {...register(`measurements.${index}.tolerance`, { required: true })}
                     placeholder="±0.5"
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -411,8 +395,7 @@ export default function MeasurementSpecification() {
                       {/* POM Name */}
                       <td className="px-4 py-3">
                         <input
-                          {...register(`measurements.${index}.pom`)}
-                          onChange={(e) => handlePomChange(e, index)}
+                          {...register(`measurements.${index}.pom`, { required: true, onChange: (e) => handlePomChange(e, index) })}
                           placeholder="e.g., Waist Width"
                           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -421,7 +404,7 @@ export default function MeasurementSpecification() {
                       {/* Value */}
                       <td className="px-4 py-3">
                         <input
-                          {...register(`measurements.${index}.value`)}
+                          {...register(`measurements.${index}.value`, { required: true })}
                           type="number"
                           step="0.1"
                           placeholder="0.2"
@@ -432,7 +415,7 @@ export default function MeasurementSpecification() {
                       {/* Tolerance */}
                       <td className="px-4 py-3">
                         <input
-                          {...register(`measurements.${index}.tolerance`)}
+                          {...register(`measurements.${index}.tolerance`, { required: true })}
                           placeholder="±0.5"
                           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -519,14 +502,17 @@ export default function MeasurementSpecification() {
           <div className="flex flex-col items-end gap-2">
             <button
               type="submit"
-              disabled={hasError}
-              className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors bg-gray-900 text-white hover:bg-gray-800`}
+              disabled={!isValid}
+              className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
+                !isValid
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-gray-900 text-white hover:bg-gray-800"
+              }`}
             >
               Next: Measurements
               <ArrowRight className="w-4 h-4" />
             </button>
-
-            {hasError && (
+            {!isValid && (
               <p className="text-sm text-red-600">
                 Please fill all required fields (*) to continue
               </p>
