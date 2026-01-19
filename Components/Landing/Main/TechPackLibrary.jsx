@@ -58,7 +58,7 @@ const TechPackLibrary = () => {
         </div>
 
         {/* Desktop Table View */}
-        <div className="hidden lg:block bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="hidden lg:block bg-white rounded-lg border border-gray-200">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
