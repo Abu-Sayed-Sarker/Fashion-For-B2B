@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { Plus, X, Info, ArrowRight } from "lucide-react";
 import { Select } from "@/Libs/Form-components/FormComponent";
+import { useRouter } from "next/navigation";
 
 // Garment-type-specific mandatory measurements
 const GARMENT_MEASUREMENTS = {
@@ -97,9 +98,9 @@ const getMeasurementsForGarmentType = (garmentType) => {
 };
 
 export default function MeasurementSpecification() {
+const route = useRouter();
   const [garmentType] = useState("shirt");
   const mandatoryMeasurements = getMeasurementsForGarmentType(garmentType);
-  const [error, setError] = useState("");
 
   const {
     register,
@@ -195,6 +196,8 @@ export default function MeasurementSpecification() {
     // console.log('Measurements:', data.measurements);
     // console.log('Total Measurements:', data.measurements.length);
     // console.log('Required Measurements:', data.measurements.filter(m => m.required).length);
+
+    route.push('/dashboard/fabrics');
   };
 
 
@@ -509,7 +512,7 @@ export default function MeasurementSpecification() {
                   : "bg-gray-900 text-white hover:bg-gray-800"
               }`}
             >
-              Next: Measurements
+              Next: Fabrics
               <ArrowRight className="w-4 h-4" />
             </button>
             {!isValid && (
