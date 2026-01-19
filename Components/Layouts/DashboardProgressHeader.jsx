@@ -59,9 +59,9 @@ const DashboardProgressHeader = () => {
 
   return (
     <>
-      <div className="w-full container mx-auto">
+      <div className="w-full container mx-auto mb-6">
         {/* Progress Stepper */}
-        <div className="rounded-lg shadow-sm p-8 sm:p-12">
+        <div className="rounded-lg shadow-sm p-6">
           <div className="relative">
             {/* Progress Line Background */}
             <div
@@ -87,7 +87,7 @@ const DashboardProgressHeader = () => {
                   <div
                     key={step.id}
                     className="flex flex-col items-center cursor-pointer group"
-                    onClick={() => handleStepClick(step.id)}
+                    // onClick={() => handleStepClick(step.id)}
                   >
                     {/* Circle */}
                     <div

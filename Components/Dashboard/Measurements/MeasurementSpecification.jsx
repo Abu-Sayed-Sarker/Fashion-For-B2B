@@ -4,6 +4,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { Plus, X, Info, ArrowRight } from "lucide-react";
 import { Select } from "@/Libs/Form-components/FormComponent";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 // Garment-type-specific mandatory measurements
 const GARMENT_MEASUREMENTS = {
@@ -495,13 +496,14 @@ const route = useRouter();
 
         {/* Submit Button */}
         {/* Navigation */}
-        <div className="flex justify-between items-center">
-          <button
+        <div className="flex justify-between items-center my-6">
+          <Link
+            href="/dashboard"
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Back to Library
-          </button>
+          </Link>
           <div className="flex flex-col items-end gap-2">
             <button
               type="submit"

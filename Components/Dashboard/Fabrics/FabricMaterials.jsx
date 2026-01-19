@@ -2,8 +2,11 @@
 import { useForm, useFieldArray } from 'react-hook-form';
 import { Plus, X, Star, ArrowRight } from 'lucide-react';
 import { Input, Select } from '@/Libs/Form-components/FormComponent';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function FabricMaterials() {
+  const route = useRouter();
   const { register, control, handleSubmit, formState: { errors, isValid } } = useForm({
     defaultValues: {
       fabrics: [
@@ -59,6 +62,7 @@ export default function FabricMaterials() {
     console.log('Fabric Data:', data);
     console.log('Total Fabrics:', data.fabrics.length);
     console.log('Primary Fabric:', data.fabrics.find(f => f.isPrimary));
+    route.push('/dashboard/trims');
   };
 
   const constructionOptions = [
@@ -331,13 +335,14 @@ export default function FabricMaterials() {
         </button>
 
         {/* Navigation Buttons */}
-       <div className="flex justify-between items-center">
-          <button
+       <div className="flex justify-between items-center my-6">
+          <Link
+            href="/dashboard/measurements"
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Back to Measurements
-          </button>
+          </Link>
           <div className="flex flex-col items-end gap-2">
             <button
               type="submit"

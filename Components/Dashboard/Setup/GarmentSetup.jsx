@@ -137,7 +137,7 @@ const GarmentSetup = () => {
   const hasErrors = Object.keys(errors).length > 0;
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto">
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-gray-900 mb-1">
@@ -293,7 +293,7 @@ const GarmentSetup = () => {
         </div>
 
         {/* Navigation */}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center my-6">
           <button
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"

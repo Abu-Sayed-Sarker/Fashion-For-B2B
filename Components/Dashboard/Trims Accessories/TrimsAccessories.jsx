@@ -1,7 +1,9 @@
 "use client";
 import { useForm, useFieldArray } from 'react-hook-form';
-import { Plus, X, Tag, Zap, Scissors, Package } from 'lucide-react';
+import { Plus, X, Tag, Zap, Scissors, Package, ArrowRight } from 'lucide-react';
 import { Input, Select } from '@/Libs/Form-components/FormComponent';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const trimIcons = {
   button: Tag,
@@ -17,7 +19,8 @@ const trimIcons = {
 };
 
 export default function TrimsAccessories() {
-  const { register, control, handleSubmit, watch, formState: { errors } } = useForm({
+const router = useRouter();
+  const { register, control, handleSubmit, watch, formState: { errors, isValid } } = useForm({
     defaultValues: {
       trims: []
     }
@@ -46,6 +49,7 @@ export default function TrimsAccessories() {
   const onSubmit = (data) => {
     console.log('Trims Data:', data);
     console.log('Total Trims:', data.trims.length);
+    router.push('/dashboard/construction');
   };
 
   const trimTypeOptions = [
@@ -74,8 +78,8 @@ export default function TrimsAccessories() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <form onSubmit={handleSubmit(onSubmit)} className="max-w-7xl mx-auto">
+    <>
+      <form onSubmit={handleSubmit(onSubmit)} className="container mx-auto">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-xl md:text-2xl font-semibold text-gray-900 mb-1">
@@ -238,29 +242,36 @@ export default function TrimsAccessories() {
           Add Trim / Accessory
         </button>
 
-        {/* Navigation Buttons */}
-        <div className="flex flex-col md:flex-row justify-between gap-4 mt-8">
-          <button
+          {/* Navigation */}
+        <div className="flex justify-between items-center my-6">
+          <Link
+            href="/dashboard/fabrics"
             type="button"
-            className="flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
             Back to Fabrics
-          </button>
-
-          <button
-            type="submit"
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-          >
-            Next: Construction Details
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+          </Link>
+          <div className="flex flex-col items-end gap-2">
+            <button
+              type="submit"
+              disabled={!isValid}
+              className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
+                !isValid
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-gray-900 text-white hover:bg-gray-800"
+              }`}
+            >
+              Next: Construction Details
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            {!isValid && (
+              <p className="text-sm text-red-600">
+                Please fill all required fields (*) to continue
+              </p>
+            )}
+          </div>
         </div>
       </form>
-    </div>
+    </>
   );
 }

@@ -1,59 +1,69 @@
 "use client";
-import { useForm } from 'react-hook-form';
-import { AlertCircle, Book } from 'lucide-react';
-import { Input, Select } from '@/Libs/Form-components/FormComponent';
+import { useForm } from "react-hook-form";
+import { AlertCircle, ArrowRight, Book } from "lucide-react";
+import { Input, Select } from "@/Libs/Form-components/FormComponent";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 export default function ConstructionDetails() {
-  const { register, control, handleSubmit, watch, formState: { errors } } = useForm({
+const router = useRouter();
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
-      garmentType: 'polo',
+      garmentType: "polo",
       neckCollar: {
-        stitchType: '',
-        spi: '',
-        seamAllowance: '',
-        reinforcement: '',
-        topstitch: ''
+        stitchType: "",
+        spi: "",
+        seamAllowance: "",
+        reinforcement: "",
+        topstitch: "",
       },
       sleeve: {
-        stitchType: '',
-        spi: '',
-        seamAllowance: '',
-        reinforcement: '',
-        topstitch: ''
+        stitchType: "",
+        spi: "",
+        seamAllowance: "",
+        reinforcement: "",
+        topstitch: "",
       },
       hem: {
-        stitchType: '',
-        spi: '',
-        seamAllowance: '',
-        reinforcement: '',
-        topstitch: ''
+        stitchType: "",
+        spi: "",
+        seamAllowance: "",
+        reinforcement: "",
+        topstitch: "",
       },
       sideSeam: {
-        stitchType: '',
-        spi: '',
-        seamAllowance: '',
-        reinforcement: '',
-        topstitch: ''
+        stitchType: "",
+        spi: "",
+        seamAllowance: "",
+        reinforcement: "",
+        topstitch: "",
       },
-      specialInstructions: ''
-    }
+      specialInstructions: "",
+    },
   });
 
   // Watch all required fields
-  const neckStitchType = watch('neckCollar.stitchType');
-  const neckSpi = watch('neckCollar.spi');
-  const sleeveStitchType = watch('sleeve.stitchType');
-  const sleeveSpi = watch('sleeve.spi');
-  const hemStitchType = watch('hem.stitchType');
-  const hemSpi = watch('hem.spi');
+  const neckStitchType = watch("neckCollar.stitchType");
+  const neckSpi = watch("neckCollar.spi");
+  const sleeveStitchType = watch("sleeve.stitchType");
+  const sleeveSpi = watch("sleeve.spi");
+  const hemStitchType = watch("hem.stitchType");
+  const hemSpi = watch("hem.spi");
 
   // Calculate missing fields dynamically
   const missingFields = [];
-  if (!neckStitchType) missingFields.push('Neck/Collar Stitch Type is required');
-  if (!neckSpi) missingFields.push('Neck/Collar SPI is required');
-  if (!sleeveStitchType) missingFields.push('Sleeve Stitch Type is required');
-  if (!sleeveSpi) missingFields.push('Sleeve SPI is required');
-  if (!hemStitchType) missingFields.push('Hem Stitch Type is required');
-  if (!hemSpi) missingFields.push('Hem SPI is required');
+  if (!neckStitchType)
+    missingFields.push("Neck/Collar Stitch Type is required");
+  if (!neckSpi) missingFields.push("Neck/Collar SPI is required");
+  if (!sleeveStitchType) missingFields.push("Sleeve Stitch Type is required");
+  if (!sleeveSpi) missingFields.push("Sleeve SPI is required");
+  if (!hemStitchType) missingFields.push("Hem Stitch Type is required");
+  if (!hemSpi) missingFields.push("Hem SPI is required");
 
   const hasErrors = missingFields.length > 0;
 
@@ -61,50 +71,52 @@ export default function ConstructionDetails() {
     if (hasErrors) {
       return;
     }
-    console.log('Construction Details:', data);
+    console.log("Construction Details:", data);
+    router.push("/dashboard/artwork");
   };
 
   const stitchTypeOptions = [
-    { value: '301', label: '301 - Lockstitch' },
-    { value: '401', label: '401 - Chain Stitch' },
-    { value: '504', label: '504 - Overlock (3-thread)' },
-    { value: '514', label: '514 - Overlock (4-thread)' },
-    { value: '516', label: '516 - Safety Stitch' },
-    { value: '602', label: '602 - Coverstitch' },
-    { value: '406', label: '406 - Flatlock' }
+    { value: "301", label: "301 - Lockstitch" },
+    { value: "401", label: "401 - Chain Stitch" },
+    { value: "504", label: "504 - Overlock (3-thread)" },
+    { value: "514", label: "514 - Overlock (4-thread)" },
+    { value: "516", label: "516 - Safety Stitch" },
+    { value: "602", label: "602 - Coverstitch" },
+    { value: "406", label: "406 - Flatlock" },
   ];
 
   const spiOptions = [
-    { value: '10-12', label: '10-12 SPI' },
-    { value: '12-14', label: '12-14 SPI' },
-    { value: '14-16', label: '14-16 SPI' },
-    { value: '8-10', label: '8-10 SPI' }
+    { value: "10-12", label: "10-12 SPI" },
+    { value: "12-14", label: "12-14 SPI" },
+    { value: "14-16", label: "14-16 SPI" },
+    { value: "8-10", label: "8-10 SPI" },
   ];
 
   const seamAllowanceOptions = [
-    { value: '1cm', label: '1cm (3/8")' },
-    { value: '1.5cm', label: '1.5cm (5/8")' },
-    { value: '0.6cm', label: '0.6cm (1/4")' },
-    { value: '0.3cm', label: '0.3cm (1/8")' }
+    { value: "1cm", label: '1cm (3/8")' },
+    { value: "1.5cm", label: '1.5cm (5/8")' },
+    { value: "0.6cm", label: '0.6cm (1/4")' },
+    { value: "0.3cm", label: '0.3cm (1/8")' },
   ];
 
   const reinforcementOptions = [
-    { value: 'bartack', label: 'Bartack' },
-    { value: 'double-stitch', label: 'Double Stitch' },
-    { value: 'tape', label: 'Reinforcement Tape' },
-    { value: 'none', label: 'None' }
+    { value: "bartack", label: "Bartack" },
+    { value: "double-stitch", label: "Double Stitch" },
+    { value: "tape", label: "Reinforcement Tape" },
+    { value: "none", label: "None" },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <>
+      <div className="container mx-auto">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-xl md:text-2xl font-semibold text-gray-900 mb-1">
             Construction Details
           </h1>
           <p className="text-gray-600 text-xs md:text-sm">
-            Define stitch-specific construction specifications for precise manufacturing
+            Define stitch-specific construction specifications for precise
+            manufacturing
           </p>
         </div>
 
@@ -135,8 +147,13 @@ export default function ConstructionDetails() {
                 <span className="text-blue-600 text-lg">👔</span>
               </div>
               <div>
-                <h3 className="text-base font-semibold text-gray-900">Neck/Collar Construction <span className="text-red-500">*</span></h3>
-                <p className="text-xs text-gray-600">Collar attachment and placket specifications</p>
+                <h3 className="text-base font-semibold text-gray-900">
+                  Neck/Collar Construction{" "}
+                  <span className="text-red-500">*</span>
+                </h3>
+                <p className="text-xs text-gray-600">
+                  Collar attachment and placket specifications
+                </p>
               </div>
             </div>
 
@@ -202,8 +219,12 @@ export default function ConstructionDetails() {
                 <span className="text-green-600 text-lg">👕</span>
               </div>
               <div>
-                <h3 className="text-base font-semibold text-gray-900">Sleeve Construction <span className="text-red-500">*</span></h3>
-                <p className="text-xs text-gray-600">Sleeve attachment and cuff details</p>
+                <h3 className="text-base font-semibold text-gray-900">
+                  Sleeve Construction <span className="text-red-500">*</span>
+                </h3>
+                <p className="text-xs text-gray-600">
+                  Sleeve attachment and cuff details
+                </p>
               </div>
             </div>
 
@@ -269,8 +290,12 @@ export default function ConstructionDetails() {
                 <span className="text-purple-600 text-lg">✂️</span>
               </div>
               <div>
-                <h3 className="text-base font-semibold text-gray-900">Hem Construction <span className="text-red-500">*</span></h3>
-                <p className="text-xs text-gray-600">Bottom hem and side vents</p>
+                <h3 className="text-base font-semibold text-gray-900">
+                  Hem Construction <span className="text-red-500">*</span>
+                </h3>
+                <p className="text-xs text-gray-600">
+                  Bottom hem and side vents
+                </p>
               </div>
             </div>
 
@@ -333,7 +358,9 @@ export default function ConstructionDetails() {
                 <span className="text-gray-600 text-lg">📐</span>
               </div>
               <div>
-                <h3 className="text-base font-semibold text-gray-900">Side Seam Construction</h3>
+                <h3 className="text-base font-semibold text-gray-900">
+                  Side Seam Construction
+                </h3>
                 <p className="text-xs text-gray-600">Side seam assembly</p>
               </div>
             </div>
@@ -395,8 +422,13 @@ export default function ConstructionDetails() {
                 <span className="text-yellow-600 text-lg">📝</span>
               </div>
               <div>
-                <h3 className="text-base font-semibold text-gray-900">Special Instructions & Notes</h3>
-                <p className="text-xs text-yellow-700">Additional construction notes, critical points, or special requirements</p>
+                <h3 className="text-base font-semibold text-gray-900">
+                  Special Instructions & Notes
+                </h3>
+                <p className="text-xs text-yellow-700">
+                  Additional construction notes, critical points, or special
+                  requirements
+                </p>
               </div>
             </div>
 
@@ -405,12 +437,15 @@ export default function ConstructionDetails() {
                 Special Construction Instructions
               </label>
               <textarea
-                {...register('specialInstructions')}
+                {...register("specialInstructions")}
                 rows={4}
                 placeholder="e.g., Use interfacing (thread) for all seams, Reinforce all stress points with bartack, Apply fusible interlining to collar..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500 outline-none focus:ring-2 resize-none"
               />
-              <p className="text-xs text-gray-500 mt-1">Include any critical construction notes, quality requirements, or special techniques</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Include any critical construction notes, quality requirements,
+                or special techniques
+              </p>
             </div>
           </div>
 
@@ -418,12 +453,16 @@ export default function ConstructionDetails() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 md:p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <Book className="w-5 h-5 text-blue-600" />
-              <h3 className="text-base font-semibold text-blue-900">Quick Reference Guide</h3>
+              <h3 className="text-base font-semibold text-blue-900">
+                Quick Reference Guide
+              </h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2">Stitch Types</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">
+                  Stitch Types
+                </h4>
                 <ul className="space-y-1 text-gray-700">
                   <li>• Lockstitch: 301 - General sewing</li>
                   <li>• Overlock: 504 - Edge finishing</li>
@@ -433,7 +472,9 @@ export default function ConstructionDetails() {
               </div>
 
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2">SPI Guidelines</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">
+                  SPI Guidelines
+                </h4>
                 <ul className="space-y-1 text-gray-700">
                   <li>• Light: 14-16 SPI</li>
                   <li>• Medium: 12-14 SPI</li>
@@ -443,7 +484,9 @@ export default function ConstructionDetails() {
               </div>
 
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2">Seam Allowances</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">
+                  Seam Allowances
+                </h4>
                 <ul className="space-y-1 text-gray-700">
                   <li>• General: 1cm (3/8")</li>
                   <li>• Neckline: 0.6cm (1/4")</li>
@@ -455,31 +498,27 @@ export default function ConstructionDetails() {
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <button
+          {/* Navigation */}
+          <div className="flex justify-between items-center my-6">
+            <Link
+              href="/dashboard/trims"
               type="button"
-              className="flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to Trims
-            </button>
-
-            <div className="flex flex-col items-end gap-2 w-full md:w-auto">
+              Back to Trims & Accessories
+            </Link>
+            <div className="flex flex-col items-end gap-2">
               <button
                 type="submit"
                 disabled={hasErrors}
-                className={`w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
                   hasErrors
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-slate-900 hover:bg-slate-800 text-white shadow-md hover:shadow-lg'
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gray-900 text-white hover:bg-gray-800"
                 }`}
               >
-                Next: Artwork & Placement
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                Next: Artwork & Graphics
+                <ArrowRight className="w-4 h-4" />
               </button>
               {hasErrors && (
                 <p className="text-sm text-red-600">
@@ -490,6 +529,6 @@ export default function ConstructionDetails() {
           </div>
         </form>
       </div>
-    </div>
+    </>
   );
 }
