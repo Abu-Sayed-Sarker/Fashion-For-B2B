@@ -4,6 +4,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { Plus, X, Package, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Select, Input } from '@/Libs/Form-components/FormComponent';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // Textarea Component
 const Textarea = ({ label, name, register, errors, placeholder = '', helperText = '' }) => {
@@ -25,6 +26,7 @@ const Textarea = ({ label, name, register, errors, placeholder = '', helperText 
 };
 
 export default function BOMGenerator() {
+  const router = useRouter();
   const { register, control, handleSubmit, watch, formState: { errors, isValid } } = useForm({
     defaultValues: {
       bomItems: [
@@ -84,6 +86,7 @@ export default function BOMGenerator() {
 
   const onSubmit = (data) => {
     console.log('BOM Data:', data);
+    router.push('/dashboard/review');
   };
 
   const categoryOptions = [

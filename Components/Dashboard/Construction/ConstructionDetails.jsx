@@ -4,7 +4,77 @@ import { AlertCircle, ArrowRight, Book } from "lucide-react";
 import { Input, Select } from "@/Libs/Form-components/FormComponent";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+// Garment-type specific construction areas
+const GARMENT_CONSTRUCTION_AREAS = {
+  't-shirt': [
+    { area: 'neck', title: 'Neck Construction', icon: '👔', description: 'Collar, neckline, and neck binding specifications', required: true },
+    { area: 'sleeve', title: 'Sleeve Construction', icon: '👕', description: 'Sleeve attachment, armhole, and sleeve hem details', required: true },
+    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem and hemline finishing', required: true },
+    { area: 'side', title: 'Side Seam Construction', icon: '📐', description: 'Side seam assembly and finishing', required: false },
+  ],
+  'polo': [
+    { area: 'neck', title: 'Neck/Collar Construction', icon: '👔', description: 'Collar attachment and placket specifications', required: true },
+    { area: 'sleeve', title: 'Sleeve Construction', icon: '👕', description: 'Sleeve attachment and cuff details', required: true },
+    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem and side vents', required: true },
+    { area: 'side', title: 'Side Seam Construction', icon: '📐', description: 'Side seam assembly', required: false },
+  ],
+  'hoodie': [
+    { area: 'hoodCuff', title: 'Hood Construction', icon: '🧢', description: 'Hood assembly, lining, and drawstring details', required: true },
+    { area: 'sleeve', title: 'Sleeve Construction', icon: '👕', description: 'Sleeve attachment and cuff details', required: true },
+    { area: 'hem', title: 'Hem/Waistband Construction', icon: '📏', description: 'Bottom rib or hem finishing', required: true },
+    { area: 'side', title: 'Side Seam Construction', icon: '📐', description: 'Side seam assembly', required: false },
+  ],
+  'jacket': [
+    { area: 'neck', title: 'Collar/Neckline Construction', icon: '👔', description: 'Collar, lapel, and neck facing details', required: true },
+    { area: 'sleeve', title: 'Sleeve Construction', icon: '👕', description: 'Sleeve attachment and lining details', required: true },
+    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem and lining hem', required: true },
+    { area: 'side', title: 'Side Seam Construction', icon: '📐', description: 'Side seam and lining assembly', required: false },
+  ],
+  'jeans': [
+    { area: 'waistband', title: 'Waistband Construction', icon: '⚡', description: 'Waistband assembly, button, and fly specifications', required: true },
+    { area: 'inseam', title: 'Inseam Construction', icon: '📏', description: 'Inner leg seam assembly', required: true },
+    { area: 'outseam', title: 'Outseam Construction', icon: '📐', description: 'Outer leg seam assembly', required: true },
+    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem finishing', required: true },
+  ],
+  'pants': [
+    { area: 'waistband', title: 'Waistband Construction', icon: '⚡', description: 'Waistband assembly and closure', required: true },
+    { area: 'inseam', title: 'Inseam Construction', icon: '📏', description: 'Inner leg seam assembly', required: true },
+    { area: 'outseam', title: 'Outseam Construction', icon: '📐', description: 'Outer leg seam assembly', required: true },
+    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem finishing', required: true },
+  ],
+  'shorts': [
+    { area: 'waistband', title: 'Waistband Construction', icon: '⚡', description: 'Waistband assembly and closure', required: true },
+    { area: 'inseam', title: 'Inseam Construction', icon: '📏', description: 'Inner leg seam assembly', required: true },
+    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem finishing', required: true },
+  ],
+  'dress': [
+    { area: 'neck', title: 'Neckline Construction', icon: '👔', description: 'Neckline and collar specifications', required: true },
+    { area: 'sleeve', title: 'Sleeve Construction', icon: '👕', description: 'Sleeve attachment details (if applicable)', required: false },
+    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem and lining hem', required: true },
+    { area: 'side', title: 'Side Seam Construction', icon: '📐', description: 'Side seam and zipper assembly', required: false },
+  ],
+  'skirt': [
+    { area: 'waistband', title: 'Waistband Construction', icon: '⚡', description: 'Waistband assembly and closure', required: true },
+    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem finishing', required: true },
+  ],
+};
+
+
+
+
+
+
+
+
+
+
 export default function ConstructionDetails() {
+
+  const garmentType = "skirt"; // This would typically come from props or context
+  const currentAreas = GARMENT_CONSTRUCTION_AREAS[garmentType] || GARMENT_CONSTRUCTION_AREAS['t-shirt'];
+
+
 const router = useRouter();
   const {
     register,
@@ -15,55 +85,31 @@ const router = useRouter();
   } = useForm({
     defaultValues: {
       garmentType: "polo",
-      neckCollar: {
-        stitchType: "",
-        spi: "",
-        seamAllowance: "",
-        reinforcement: "",
-        topstitch: "",
-      },
-      sleeve: {
-        stitchType: "",
-        spi: "",
-        seamAllowance: "",
-        reinforcement: "",
-        topstitch: "",
-      },
-      hem: {
-        stitchType: "",
-        spi: "",
-        seamAllowance: "",
-        reinforcement: "",
-        topstitch: "",
-      },
-      sideSeam: {
-        stitchType: "",
-        spi: "",
-        seamAllowance: "",
-        reinforcement: "",
-        topstitch: "",
-      },
       specialInstructions: "",
+      ...currentAreas.reduce((acc, area) => {
+        acc[area.area] = {
+          stitchType: "",
+          spi: "",
+          seamAllowance: "",
+          reinforcement: "",
+          topstitch: "",
+        };
+        return acc;
+      }, {}),
     },
   });
 
-  // Watch all required fields
-  const neckStitchType = watch("neckCollar.stitchType");
-  const neckSpi = watch("neckCollar.spi");
-  const sleeveStitchType = watch("sleeve.stitchType");
-  const sleeveSpi = watch("sleeve.spi");
-  const hemStitchType = watch("hem.stitchType");
-  const hemSpi = watch("hem.spi");
+  const formValues = watch();
 
   // Calculate missing fields dynamically
   const missingFields = [];
-  if (!neckStitchType)
-    missingFields.push("Neck/Collar Stitch Type is required");
-  if (!neckSpi) missingFields.push("Neck/Collar SPI is required");
-  if (!sleeveStitchType) missingFields.push("Sleeve Stitch Type is required");
-  if (!sleeveSpi) missingFields.push("Sleeve SPI is required");
-  if (!hemStitchType) missingFields.push("Hem Stitch Type is required");
-  if (!hemSpi) missingFields.push("Hem SPI is required");
+  currentAreas.forEach((area) => {
+    if (area.required) {
+      const areaValues = formValues[area.area] || {};
+      if (!areaValues.stitchType) missingFields.push(`${area.title} Stitch Type is required`);
+      if (!areaValues.spi) missingFields.push(`${area.title} SPI is required`);
+    }
+  });
 
   const hasErrors = missingFields.length > 0;
 
@@ -137,283 +183,82 @@ const router = useRouter();
         )}
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          {/* Neck/Collar Construction */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6 mb-6 relative">
-            <span className="absolute -top-2 right-4 px-2 py-0.5 bg-red-500 text-white text-xs font-semibold rounded">
-              Required
-            </span>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
-                <span className="text-blue-600 text-lg">👔</span>
+          {currentAreas.map((area) => (
+            <div
+              key={area.area}
+              className="bg-white rounded-lg border border-gray-200 p-4 md:p-6 mb-6 relative"
+            >
+              {area.required && (
+                <span className="absolute -top-2 right-4 px-2 py-0.5 bg-red-500 text-white text-xs font-semibold rounded">
+                  Required
+                </span>
+              )}
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
+                  <span className="text-blue-600 text-lg">{area.icon}</span>
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900">
+                    {area.title} {area.required && <span className="text-red-500">*</span>}
+                  </h3>
+                  <p className="text-xs text-gray-600">
+                    {area.description}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-semibold text-gray-900">
-                  Neck/Collar Construction{" "}
-                  <span className="text-red-500">*</span>
-                </h3>
-                <p className="text-xs text-gray-600">
-                  Collar attachment and placket specifications
-                </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <Select
+                  label="Stitch Type"
+                  name={`${area.area}.stitchType`}
+                  control={control}
+                  errors={errors[area.area] || {}}
+                  options={stitchTypeOptions}
+                  required={area.required}
+                  placeholder="Select stitch type"
+                />
+
+                <Select
+                  label="SPI (Stitches Per Inch)"
+                  name={`${area.area}.spi`}
+                  control={control}
+                  errors={errors[area.area] || {}}
+                  options={spiOptions}
+                  required={area.required}
+                  placeholder="Select SPI"
+                />
+
+                <Select
+                  label="Seam Allowance"
+                  name={`${area.area}.seamAllowance`}
+                  control={control}
+                  errors={errors[area.area] || {}}
+                  options={seamAllowanceOptions}
+                  placeholder="Select seam allowance"
+                />
+
+                <Select
+                  label="Reinforcement Points"
+                  name={`${area.area}.reinforcement`}
+                  control={control}
+                  errors={errors[area.area] || {}}
+                  options={reinforcementOptions}
+                  placeholder="Select reinforcement"
+                />
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <Select
-                label="Stitch Type"
-                name="neckCollar.stitchType"
-                control={control}
-                errors={errors.neckCollar || {}}
-                options={stitchTypeOptions}
-                required={true}
-                placeholder="Select stitch type"
-              />
-
-              <Select
-                label="SPI (Stitches Per Inch)"
-                name="neckCollar.spi"
-                control={control}
-                errors={errors.neckCollar || {}}
-                options={spiOptions}
-                required={true}
-                placeholder="Select SPI"
-              />
-
-              <Select
-                label="Seam Allowance"
-                name="neckCollar.seamAllowance"
-                control={control}
-                errors={errors.neckCollar || {}}
-                options={seamAllowanceOptions}
-                placeholder="Select seam allowance"
-              />
-
-              <Select
-                label="Reinforcement Points"
-                name="neckCollar.reinforcement"
-                control={control}
-                errors={errors.neckCollar || {}}
-                options={reinforcementOptions}
-                placeholder="Select reinforcement"
-              />
-            </div>
-
-            <div className="mt-4">
-              <Input
-                label="Topstitch / Coverstitch Logic"
-                name="neckCollar.topstitch"
-                register={register}
-                errors={errors.neckCollar || {}}
-                placeholder="e.g., Single needle 0.5cm from edge, Double needle 0.6cm spacing"
-                helperText="e.g., Single needle 0.5cm from edge, Double needle 0.6cm spacing"
-              />
-            </div>
-          </div>
-
-          {/* Sleeve Construction */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6 mb-6 relative">
-            <span className="absolute -top-2 right-4 px-2 py-0.5 bg-red-500 text-white text-xs font-semibold rounded">
-              Required
-            </span>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
-                <span className="text-green-600 text-lg">👕</span>
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-gray-900">
-                  Sleeve Construction <span className="text-red-500">*</span>
-                </h3>
-                <p className="text-xs text-gray-600">
-                  Sleeve attachment and cuff details
-                </p>
+              <div className="mt-4">
+                <Input
+                  label="Topstitch / Coverstitch Logic"
+                  name={`${area.area}.topstitch`}
+                  register={register}
+                  errors={errors[area.area] || {}}
+                  placeholder="e.g., Single needle 0.5cm from edge, Double needle 0.6cm spacing"
+                  helperText="e.g., Single needle 0.5cm from edge, Double needle 0.6cm spacing"
+                />
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <Select
-                label="Stitch Type"
-                name="sleeve.stitchType"
-                control={control}
-                errors={errors.sleeve || {}}
-                options={stitchTypeOptions}
-                required={true}
-                placeholder="Select stitch type"
-              />
-
-              <Select
-                label="SPI (Stitches Per Inch)"
-                name="sleeve.spi"
-                control={control}
-                errors={errors.sleeve || {}}
-                options={spiOptions}
-                required={true}
-                placeholder="Select SPI"
-              />
-
-              <Select
-                label="Seam Allowance"
-                name="sleeve.seamAllowance"
-                control={control}
-                errors={errors.sleeve || {}}
-                options={seamAllowanceOptions}
-                placeholder="Select seam allowance"
-              />
-
-              <Select
-                label="Reinforcement Points"
-                name="sleeve.reinforcement"
-                control={control}
-                errors={errors.sleeve || {}}
-                options={reinforcementOptions}
-                placeholder="Select reinforcement"
-              />
-            </div>
-
-            <div className="mt-4">
-              <Input
-                label="Topstitch / Coverstitch Logic"
-                name="sleeve.topstitch"
-                register={register}
-                errors={errors.sleeve || {}}
-                placeholder="e.g., Single needle 0.5cm from edge, Double needle 0.6cm spacing"
-                helperText="e.g., Single needle 0.5cm from edge, Double needle 0.6cm spacing"
-              />
-            </div>
-          </div>
-
-          {/* Hem Construction */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6 mb-6 relative">
-            <span className="absolute -top-2 right-4 px-2 py-0.5 bg-red-500 text-white text-xs font-semibold rounded">
-              Required
-            </span>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-purple-100 rounded flex items-center justify-center">
-                <span className="text-purple-600 text-lg">✂️</span>
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-gray-900">
-                  Hem Construction <span className="text-red-500">*</span>
-                </h3>
-                <p className="text-xs text-gray-600">
-                  Bottom hem and side vents
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <Select
-                label="Stitch Type"
-                name="hem.stitchType"
-                control={control}
-                errors={errors.hem || {}}
-                options={stitchTypeOptions}
-                required={true}
-                placeholder="Select stitch type"
-              />
-
-              <Select
-                label="SPI (Stitches Per Inch)"
-                name="hem.spi"
-                control={control}
-                errors={errors.hem || {}}
-                options={spiOptions}
-                required={true}
-                placeholder="Select SPI"
-              />
-
-              <Select
-                label="Seam Allowance"
-                name="hem.seamAllowance"
-                control={control}
-                errors={errors.hem || {}}
-                options={seamAllowanceOptions}
-                placeholder="Select seam allowance"
-              />
-
-              <Select
-                label="Reinforcement Points"
-                name="hem.reinforcement"
-                control={control}
-                errors={errors.hem || {}}
-                options={reinforcementOptions}
-                placeholder="Select reinforcement"
-              />
-            </div>
-
-            <div className="mt-4">
-              <Input
-                label="Topstitch / Coverstitch Logic"
-                name="hem.topstitch"
-                register={register}
-                errors={errors.hem || {}}
-                placeholder="e.g., Single needle 0.5cm from edge, Double needle 0.6cm spacing"
-                helperText="e.g., Single needle 0.5cm from edge, Double needle 0.6cm spacing"
-              />
-            </div>
-          </div>
-
-          {/* Side Seam Construction */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6 mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                <span className="text-gray-600 text-lg">📐</span>
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-gray-900">
-                  Side Seam Construction
-                </h3>
-                <p className="text-xs text-gray-600">Side seam assembly</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <Select
-                label="Stitch Type"
-                name="sideSeam.stitchType"
-                control={control}
-                errors={errors.sideSeam || {}}
-                options={stitchTypeOptions}
-                placeholder="Select stitch type"
-              />
-
-              <Select
-                label="SPI (Stitches Per Inch)"
-                name="sideSeam.spi"
-                control={control}
-                errors={errors.sideSeam || {}}
-                options={spiOptions}
-                placeholder="Select SPI"
-              />
-
-              <Select
-                label="Seam Allowance"
-                name="sideSeam.seamAllowance"
-                control={control}
-                errors={errors.sideSeam || {}}
-                options={seamAllowanceOptions}
-                placeholder="Select seam allowance"
-              />
-
-              <Select
-                label="Reinforcement Points"
-                name="sideSeam.reinforcement"
-                control={control}
-                errors={errors.sideSeam || {}}
-                options={reinforcementOptions}
-                placeholder="Select reinforcement"
-              />
-            </div>
-
-            <div className="mt-4">
-              <Input
-                label="Topstitch / Coverstitch Logic"
-                name="sideSeam.topstitch"
-                register={register}
-                errors={errors.sideSeam || {}}
-                placeholder="e.g., Single needle 0.5cm from edge, Double needle 0.6cm spacing"
-                helperText="e.g., Single needle 0.5cm from edge, Double needle 0.6cm spacing"
-              />
-            </div>
-          </div>
+          ))}
 
           {/* Special Instructions */}
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 md:p-6 mb-6">
