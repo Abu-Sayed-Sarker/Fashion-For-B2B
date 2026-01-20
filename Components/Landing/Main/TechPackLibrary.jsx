@@ -130,9 +130,9 @@ const TechPackLibrary = () => {
                               onClick={() => setActiveMenu(null)}
                             />
                             <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
-                              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                              <Link href={`/dashboard/review`} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                 Open
-                              </button>
+                              </Link>
                               <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                 Duplicate
                               </button>
@@ -185,9 +185,9 @@ const TechPackLibrary = () => {
                           onClick={() => setActiveMenu(null)}
                         />
                         <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
-                          <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                          <Link href={`/dashboard/review`} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                             Open
-                          </button>
+                          </Link>
                           <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                             Duplicate
                           </button>

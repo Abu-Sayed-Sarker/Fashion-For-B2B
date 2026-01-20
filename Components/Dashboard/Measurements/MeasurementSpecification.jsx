@@ -8,96 +8,106 @@ import Link from "next/link";
 
 // Garment-type-specific mandatory measurements
 const GARMENT_MEASUREMENTS = {
-  shirt: [
-    {
-      pom: "Chest",
-      instruction: 'Measure 1" below armhole, straight across chest',
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Body Length",
-      instruction: "Measure from HPS to bottom hem",
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Sleeve Length",
-      instruction: "Measure from shoulder to sleeve hem",
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Shoulder Width",
-      instruction: "Measure from shoulder seam to shoulder seam",
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Armhole",
-      instruction: "Measure armhole circumference",
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Cuff Opening",
-      instruction: "Measure sleeve cuff opening",
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Hem Width",
-      instruction: "Measure bottom hem width",
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Collar Height",
-      instruction: "Measure collar height at center back",
-      defaultTolerance: "±0.3",
-    },
+  'shirt': [
+    { pom: 'Chest', instruction: 'Measure 1" below armhole, straight across chest', defaultTolerance: 0.5 },
+    { pom: 'Body Length', instruction: 'Measure from HPS (high point shoulder) to bottom hem', defaultTolerance: 0.5 },
+    { pom: 'Sleeve Length', instruction: 'Measure from shoulder seam to sleeve hem, following sleeve curve', defaultTolerance: 0.5 },
+    { pom: 'Shoulder Width', instruction: 'Measure from shoulder seam to shoulder seam across back', defaultTolerance: 0.5 },
+    { pom: 'Armhole', instruction: 'Measure armhole circumference from shoulder seam', defaultTolerance: 0.5 },
+    { pom: 'Cuff Opening', instruction: 'Measure width of sleeve cuff opening when laid flat', defaultTolerance: 0.5 },
+    { pom: 'Hem Width', instruction: 'Measure bottom hem width edge to edge when laid flat', defaultTolerance: 0.5 },
+    { pom: 'Neck Opening', instruction: 'Measure neckline opening circumference', defaultTolerance: 0.5 },
   ],
-  coat: [
-    {
-      pom: "Chest",
-      instruction: 'Measure 1" below armhole, straight across chest',
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Body Length",
-      instruction: "Measure from HPS to bottom hem",
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Sleeve Length",
-      instruction: "Measure from shoulder to sleeve hem",
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Shoulder Width",
-      instruction: "Measure from shoulder seam to shoulder seam",
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Armhole",
-      instruction: "Measure armhole circumference",
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Cuff Opening",
-      instruction: "Measure sleeve cuff opening",
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Hem Width",
-      instruction: "Measure bottom hem width",
-      defaultTolerance: "±0.5",
-    },
-    {
-      pom: "Collar Height",
-      instruction: "Measure collar height at center back",
-      defaultTolerance: "±0.3",
-    },
+  't-shirt': [
+    { pom: 'Chest', instruction: 'Measure 1" below armhole, straight across chest', defaultTolerance: 0.5 },
+    { pom: 'Body Length', instruction: 'Measure from HPS (high point shoulder) to bottom hem', defaultTolerance: 0.5 },
+    { pom: 'Sleeve Length', instruction: 'Measure from shoulder seam to sleeve hem', defaultTolerance: 0.5 },
+    { pom: 'Shoulder Width', instruction: 'Measure from shoulder seam to shoulder seam across back', defaultTolerance: 0.5 },
+    { pom: 'Armhole', instruction: 'Measure armhole circumference from shoulder seam', defaultTolerance: 0.5 },
+    { pom: 'Hem Width', instruction: 'Measure bottom hem width edge to edge when laid flat', defaultTolerance: 0.5 },
+    { pom: 'Neck Opening', instruction: 'Measure neckline opening circumference', defaultTolerance: 0.5 },
+  ],
+  'polo': [
+    { pom: 'Chest', instruction: 'Measure 1" below armhole, straight across chest', defaultTolerance: 0.5 },
+    { pom: 'Body Length', instruction: 'Measure from HPS to bottom hem', defaultTolerance: 0.5 },
+    { pom: 'Sleeve Length', instruction: 'Measure from shoulder seam to sleeve hem', defaultTolerance: 0.5 },
+    { pom: 'Shoulder Width', instruction: 'Measure from shoulder seam to shoulder seam', defaultTolerance: 0.5 },
+    { pom: 'Armhole', instruction: 'Measure armhole circumference', defaultTolerance: 0.5 },
+    { pom: 'Neck Opening', instruction: 'Measure neckline opening circumference', defaultTolerance: 0.5 },
+    { pom: 'Placket Length', instruction: 'Measure from collar to end of button placket', defaultTolerance: 0.3 },
+  ],
+  'pants': [
+    { pom: 'Waist', instruction: 'Measure waistband width edge to edge when laid flat', defaultTolerance: 0.5 },
+    { pom: 'Hip', instruction: 'Measure at fullest part of hip, straight across', defaultTolerance: 0.5 },
+    { pom: 'Inseam', instruction: 'Measure from crotch seam to bottom hem along inner leg', defaultTolerance: 0.5 },
+    { pom: 'Outseam', instruction: 'Measure from waist to bottom hem along outer leg', defaultTolerance: 0.5 },
+    { pom: 'Thigh', instruction: 'Measure across thigh at fullest point', defaultTolerance: 0.5 },
+    { pom: 'Knee', instruction: 'Measure across knee when laid flat', defaultTolerance: 0.5 },
+    { pom: 'Leg Opening', instruction: 'Measure hem opening width when laid flat', defaultTolerance: 0.3 },
+    { pom: 'Front Rise', instruction: 'Measure from crotch seam to top of waistband (front)', defaultTolerance: 0.3 },
+    { pom: 'Back Rise', instruction: 'Measure from crotch seam to top of waistband (back)', defaultTolerance: 0.3 },
+  ],
+  'jeans': [
+    { pom: 'Waist', instruction: 'Measure waistband width edge to edge when laid flat', defaultTolerance: 0.5 },
+    { pom: 'Hip', instruction: 'Measure at fullest part of hip', defaultTolerance: 0.5 },
+    { pom: 'Inseam', instruction: 'Measure from crotch seam to bottom hem', defaultTolerance: 0.5 },
+    { pom: 'Outseam', instruction: 'Measure from waist to bottom hem', defaultTolerance: 0.5 },
+    { pom: 'Thigh', instruction: 'Measure across thigh at fullest point', defaultTolerance: 0.5 },
+    { pom: 'Knee', instruction: 'Measure across knee', defaultTolerance: 0.5 },
+    { pom: 'Leg Opening', instruction: 'Measure hem opening width', defaultTolerance: 0.3 },
+    { pom: 'Front Rise', instruction: 'Measure from crotch to waistband (front)', defaultTolerance: 0.3 },
+    { pom: 'Back Rise', instruction: 'Measure from crotch to waistband (back)', defaultTolerance: 0.3 },
+  ],
+  'shorts': [
+    { pom: 'Waist', instruction: 'Measure waistband width edge to edge when laid flat', defaultTolerance: 0.5 },
+    { pom: 'Hip', instruction: 'Measure at fullest part of hip', defaultTolerance: 0.5 },
+    { pom: 'Inseam', instruction: 'Measure from crotch seam to bottom hem', defaultTolerance: 0.5 },
+    { pom: 'Outseam', instruction: 'Measure from waist to bottom hem', defaultTolerance: 0.5 },
+    { pom: 'Thigh', instruction: 'Measure across thigh at fullest point', defaultTolerance: 0.5 },
+    { pom: 'Leg Opening', instruction: 'Measure hem opening width', defaultTolerance: 0.3 },
+    { pom: 'Front Rise', instruction: 'Measure from crotch to waistband (front)', defaultTolerance: 0.3 },
+  ],
+  'dress': [
+    { pom: 'Bust', instruction: 'Measure at fullest part of bust, straight across', defaultTolerance: 0.5 },
+    { pom: 'Waist', instruction: 'Measure at natural waistline', defaultTolerance: 0.5 },
+    { pom: 'Hip', instruction: 'Measure at fullest part of hip', defaultTolerance: 0.5 },
+    { pom: 'Body Length', instruction: 'Measure from HPS to bottom hem', defaultTolerance: 0.5 },
+    { pom: 'Shoulder Width', instruction: 'Measure from shoulder seam to shoulder seam', defaultTolerance: 0.5 },
+    { pom: 'Armhole', instruction: 'Measure armhole circumference', defaultTolerance: 0.5 },
+    { pom: 'Sleeve Length', instruction: 'Measure from shoulder to sleeve hem (if applicable)', defaultTolerance: 0.5 },
+    { pom: 'Neck Opening', instruction: 'Measure neckline opening circumference', defaultTolerance: 0.5 },
+  ],
+  'jacket': [
+    { pom: 'Chest', instruction: 'Measure 1" below armhole, straight across chest', defaultTolerance: 0.5 },
+    { pom: 'Body Length', instruction: 'Measure from HPS to bottom hem', defaultTolerance: 0.5 },
+    { pom: 'Sleeve Length', instruction: 'Measure from shoulder to sleeve hem', defaultTolerance: 0.5 },
+    { pom: 'Shoulder Width', instruction: 'Measure from shoulder seam to shoulder seam', defaultTolerance: 0.5 },
+    { pom: 'Armhole', instruction: 'Measure armhole circumference', defaultTolerance: 0.5 },
+    { pom: 'Cuff Opening', instruction: 'Measure sleeve cuff opening', defaultTolerance: 0.5 },
+    { pom: 'Hem Width', instruction: 'Measure bottom hem width', defaultTolerance: 0.5 },
+    { pom: 'Collar Height', instruction: 'Measure collar height at center back', defaultTolerance: 0.3 },
+  ],
+  'hoodie': [
+    { pom: 'Chest', instruction: 'Measure 1" below armhole, straight across chest', defaultTolerance: 0.5 },
+    { pom: 'Body Length', instruction: 'Measure from HPS to bottom hem', defaultTolerance: 0.5 },
+    { pom: 'Sleeve Length', instruction: 'Measure from shoulder to sleeve hem', defaultTolerance: 0.5 },
+    { pom: 'Shoulder Width', instruction: 'Measure from shoulder seam to shoulder seam', defaultTolerance: 0.5 },
+    { pom: 'Armhole', instruction: 'Measure armhole circumference', defaultTolerance: 0.5 },
+    { pom: 'Cuff Opening', instruction: 'Measure sleeve cuff opening', defaultTolerance: 0.5 },
+    { pom: 'Hem Width', instruction: 'Measure bottom hem width', defaultTolerance: 0.5 },
+    { pom: 'Hood Height', instruction: 'Measure hood from neckline to top of hood', defaultTolerance: 0.5 },
+  ],
+  'skirt': [
+    { pom: 'Waist', instruction: 'Measure waistband width edge to edge when laid flat', defaultTolerance: 0.5 },
+    { pom: 'Hip', instruction: 'Measure at fullest part of hip', defaultTolerance: 0.5 },
+    { pom: 'Length', instruction: 'Measure from waist to bottom hem', defaultTolerance: 0.5 },
+    { pom: 'Hem Width', instruction: 'Measure bottom hem width', defaultTolerance: 0.5 },
   ],
 };
 
 const getMeasurementsForGarmentType = (garmentType) => {
   return GARMENT_MEASUREMENTS[garmentType] || GARMENT_MEASUREMENTS["shirt"];
 };
-
 export default function MeasurementSpecification() {
 const route = useRouter();
   const [garmentType] = useState("shirt");
@@ -197,7 +207,6 @@ const route = useRouter();
     // console.log('Measurements:', data.measurements);
     // console.log('Total Measurements:', data.measurements.length);
     // console.log('Required Measurements:', data.measurements.filter(m => m.required).length);
-
     route.push('/dashboard/fabrics');
   };
 
@@ -421,6 +430,8 @@ const route = useRouter();
                         <input
                           {...register(`measurements.${index}.tolerance`, { required: true })}
                           placeholder="±0.5"
+                          step="0.1"
+                          type="number"
                           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </td>
