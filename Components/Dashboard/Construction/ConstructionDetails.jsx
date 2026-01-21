@@ -71,7 +71,7 @@ const GARMENT_CONSTRUCTION_AREAS = {
 
 export default function ConstructionDetails() {
 
-  const garmentType = "skirt"; // This would typically come from props or context
+  const garmentType = "dress"; // This would typically come from props or context
   const currentAreas = GARMENT_CONSTRUCTION_AREAS[garmentType] || GARMENT_CONSTRUCTION_AREAS['t-shirt'];
 
 
