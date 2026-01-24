@@ -1,12 +1,20 @@
 "use client";
 import React, { useState } from "react";
 import { Search, Plus, MoreVertical, FileText, X, } from "lucide-react";
-import { techPacks } from "@/Data/dame";
 import Link from "next/link";
+import { useGetAllFashionTechpacksQuery } from "@/Apis/Get-Fashion/getAllFashionApi";
 
 const TechPackLibrary = () => {
   const [activeMenu, setActiveMenu] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+////////////// all api call here ///////////////
+
+const {data: techPacks =[]} = useGetAllFashionTechpacksQuery();
+
+//////////---------------------------------------------/////
+
+
 
   const toggleMenu = (id) => {
     setActiveMenu(activeMenu === id ? null : id);
@@ -15,8 +23,8 @@ const TechPackLibrary = () => {
   // Filter tech packs based on search query
   const filteredTechPacks = techPacks.filter(
     (pack) =>
-      pack.styleCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pack.garmentType.toLowerCase().includes(searchQuery.toLowerCase()),
+      pack?.style_code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      pack?.garment_type?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleClearSearch = () => {
@@ -89,21 +97,21 @@ const TechPackLibrary = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <FileText className="w-4 h-4 text-gray-400" />
-                        <span className="font-medium text-gray-900">{pack.styleCode}</span>
+                        <span className="font-medium text-gray-900">{pack.style_code || "N/A"}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-700">{pack.garmentType}</td>
+                    <td className="px-6 py-4 text-gray-700">{pack.garment_type || 'N/A'}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1 text-gray-600">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                         </svg>
-                        <span className="text-sm">{pack.version}</span>
+                        <span className="text-sm">{pack.version || 'N/A'}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${pack.statusColor}`}>
-                        {pack.status}
+                      <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium`}>
+                        {pack.status || 'N/A'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-gray-600 text-sm">
@@ -111,7 +119,7 @@ const TechPackLibrary = () => {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        {pack.lastUpdated}
+                        {pack.lastUpdated  || 'N/A'}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -168,7 +176,7 @@ const TechPackLibrary = () => {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <span className="font-medium text-gray-900">{pack.styleCode}</span>
+                    <span className="font-medium text-gray-900">{pack.style_code || "N/A"}</span>
                   </div>
                   <div className="relative">
                     <button
@@ -206,7 +214,7 @@ const TechPackLibrary = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-500">Garment Type</span>
-                    <span className="text-sm text-gray-900 font-medium">{pack.garmentType}</span>
+                    <span className="text-sm text-gray-900 font-medium">{pack.garment_type || 'N/A'}</span>
                   </div>
                   
                   <div className="flex justify-between items-center">
@@ -215,14 +223,14 @@ const TechPackLibrary = () => {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                       </svg>
-                      <span className="text-sm">{pack.version}</span>
+                      <span className="text-sm">{pack.version || 'N/A'}</span>
                     </div>
                   </div>
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-500">Status</span>
-                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${pack.statusColor}`}>
-                      {pack.status}
+                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium`}>
+                      {pack.status || 'N/A'}
                     </span>
                   </div>
                   
@@ -232,7 +240,7 @@ const TechPackLibrary = () => {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <span className="text-sm">{pack.lastUpdated}</span>
+                      <span className="text-sm">{pack.updated_at || 'N/A'}</span>
                     </div>
                   </div>
                 </div>
