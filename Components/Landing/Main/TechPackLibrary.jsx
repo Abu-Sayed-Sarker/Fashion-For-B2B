@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Search, Plus, MoreVertical, FileText, X } from "lucide-react";
 import Link from "next/link";
-import { useGetAllFashionTechpacksQuery } from "@/Apis/Get-Fashion/getAllFashionApi";
+import { useGetAllFashionTechpacksQuery } from "@/Apis/Get-Fashion/getFashionApi";
 import { useRouter } from "next/navigation";
 import { useCreateInitialFashionLibraryMutation } from "@/Apis/Poast-a-fashion/postAFashionApi";
 import { toast } from "react-toastify";

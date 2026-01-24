@@ -1,5 +1,5 @@
 import { api } from "../api";
-const getAllFashionApi = api.injectEndpoints({
+const getFashionApi = api.injectEndpoints({
   endpoints: (build) => ({
     getAllFashionTechpacks: build.query({
       query: () => "fashion/techpacks/table/",
@@ -8,4 +8,4 @@ const getAllFashionApi = api.injectEndpoints({
   }),
 });
 
-export const { useGetAllFashionTechpacksQuery } = getAllFashionApi;
+export const { useGetAllFashionTechpacksQuery } = getFashionApi;
