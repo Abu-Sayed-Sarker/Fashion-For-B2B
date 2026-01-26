@@ -1,12 +1,15 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { AlertCircle, Info, ArrowRight, Loader2 } from "lucide-react";
 import { Input, Select } from "@/Libs/Form-components/FormComponent";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
-import { usePostGarmentSetupMutation } from "@/Apis/Poast-a-fashion/postAFashionApi";
+import {
+  usePostGarmentSetupMutation,
+  useUpdateGarmentSetupMutation,
+} from "@/Apis/Poast-a-fashion/postAFashionApi";
 import { toast } from "react-toastify";
 
 // Main Component
@@ -14,16 +17,19 @@ const GarmentSetup = () => {
   const route = useRouter();
   const params = useSearchParams();
   const techpack_id = params.get("id") || "";
+  const [garmentId, setGarmentId] = React.useState(null);
 
   /////////// all api call here ///////////
 
-  const { data: techpackData, isLoading } = useGetFashionTechpackByIdQuery(
+  const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
     techpack_id,
     { skip: !techpack_id },
   );
-  console.log("Fetched Techpack Data:", techpackData);
-  const [postGarmentSetup, { isLoading: isSubmitting }] = usePostGarmentSetupMutation();
-
+  const garmentData = techpackData?.step_one || {};
+  const [postGarmentSetup, { isLoading: isSubmitting }] =
+    usePostGarmentSetupMutation();
+  const [updateGarmentSetup, { isLoading: isUpdating }] =
+    useUpdateGarmentSetupMutation();
   ////////////////////////////////////////////
 
   const {
@@ -78,13 +84,6 @@ const GarmentSetup = () => {
     setValue("garmentCategory", autoCategory);
   };
 
-  // "garment_type": "Tank Top",
-  //       "garment_category": "Summer day",
-  //       "base_size": "Mfdf",
-  //       "style_code": "fff dsd ",
-  //       "techpack": "TP-004 ed",
-  //       "fit": "hiii"
-
   const onSubmit = async (data) => {
     const payload = {
       techpack_id,
@@ -100,12 +99,24 @@ const GarmentSetup = () => {
         version: data.version,
       },
     };
-    try {
-      await postGarmentSetup(payload).unwrap();
-      toast.success("Garment setup submitted successfully!");
-      route.push(`/dashboard/measurements?id=${techpack_id}`);
-    } catch (error) {
-      console.error("Error submitting garment setup:", error);
+    if (garmentId) {
+      try {
+        await updateGarmentSetup(payload).unwrap();
+        toast.success("Garment setup updated successfully!");
+        route.push(`/dashboard/measurements?id=${techpack_id}`);
+      } catch (error) {
+        toast.error("Failed to update garment setup.");
+        console.error("Error updating garment setup:", error);
+      }
+    } else {
+      try {
+        await postGarmentSetup(payload).unwrap();
+        toast.success("Garment setup submitted successfully!");
+        route.push(`/dashboard/measurements?id=${techpack_id}`);
+      } catch (error) {
+        toast.error("Failed to submit garment setup.");
+        console.error("Error submitting garment setup:", error);
+      }
     }
   };
 
@@ -179,6 +190,22 @@ const GarmentSetup = () => {
   ];
 
   const hasErrors = Object.keys(errors).length > 0;
+
+  useEffect(() => {
+    // Pre-fill form if data exists
+    if (garmentData && !isLoading) {
+      setGarmentId(garmentData.id || null);
+      setValue("garmentType", garmentData.garment_type || "");
+      setValue("garmentCategory", garmentData.garment_category || "");
+      setValue("fitSilhouette", garmentData.fit || "");
+      setValue("targetGender", garmentData.target_gender || "");
+      setValue("season", garmentData.season || "");
+      setValue("baseSize", garmentData.base_size || "");
+      setValue("styleCode", garmentData.style_code || "");
+      setValue("dateCreated", garmentData.date_created || "");
+      setValue("version", garmentData.version || "");
+    }
+  }, [garmentData, isLoading, setValue]);
 
   return (
     <div className="container mx-auto">
@@ -355,7 +382,12 @@ const GarmentSetup = () => {
                   : "bg-gray-900 text-white hover:bg-gray-800"
               }`}
             >
-              Next: Measurements {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+              Next: Measurements{" "}
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <ArrowRight className="w-4 h-4" />
+              )}
             </button>
             {hasErrors && (
               <p className="text-sm text-red-600">
