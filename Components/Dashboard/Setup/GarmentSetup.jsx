@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { AlertCircle, Info, ArrowRight, Loader2 } from "lucide-react";
 import { Input, Select } from "@/Libs/Form-components/FormComponent";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
 import {
@@ -15,8 +15,7 @@ import { toast } from "react-toastify";
 // Main Component
 const GarmentSetup = () => {
   const route = useRouter();
-  const params = useSearchParams();
-  const techpack_id = params.get("id") || "";
+  const {techpack_id} = useParams();
   const [garmentId, setGarmentId] = React.useState(null);
 
   /////////// all api call here ///////////
@@ -103,7 +102,7 @@ const GarmentSetup = () => {
       try {
         await updateGarmentSetup(payload).unwrap();
         toast.success("Garment setup updated successfully!");
-        route.push(`/dashboard/measurements?id=${techpack_id}`);
+        route.push(`/${techpack_id}/measurements`);
       } catch (error) {
         toast.error("Failed to update garment setup.");
         console.error("Error updating garment setup:", error);

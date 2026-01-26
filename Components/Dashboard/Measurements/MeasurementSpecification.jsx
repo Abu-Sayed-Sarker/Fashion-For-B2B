@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { Plus, X, Info, ArrowRight, Loader2 } from "lucide-react";
 import { Select } from "@/Libs/Form-components/FormComponent";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
 import {
@@ -412,8 +412,8 @@ const getMeasurementsForGarmentType = (garmentType) => {
   return GARMENT_MEASUREMENTS[garmentType] || GARMENT_MEASUREMENTS["shirt"];
 };
 export default function MeasurementSpecification() {
-  const params = useSearchParams();
-  const techpack_id = params.get("id") || "";
+  
+    const {techpack_id} = useParams();
   const route = useRouter();
   const [garmentType, setGarmentType] = useState("shirt");
   const mandatoryMeasurements = getMeasurementsForGarmentType(garmentType);
@@ -449,7 +449,7 @@ export default function MeasurementSpecification() {
         id: "",
         pom: m.pom,
         value: "0.2",
-        tolerance: m.defaultTolerance,
+        tolerance: String(m.defaultTolerance),
         unit: "cm",
         instruction: m.instruction,
         required: true,
@@ -824,9 +824,7 @@ export default function MeasurementSpecification() {
                           {...register(`measurements.${index}.tolerance`, {
                             required: true,
                           })}
-                          placeholder="±0.5"
-                          step="0.1"
-                          type="number"
+                          placeholder="0.5"
                           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </td>
@@ -904,7 +902,7 @@ export default function MeasurementSpecification() {
         {/* Navigation */}
         <div className="flex justify-between items-center my-6">
           <Link
-            href="/dashboard"
+            href={`/${techpack_id}`}
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >

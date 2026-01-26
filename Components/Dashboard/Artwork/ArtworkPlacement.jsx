@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { Input, Select } from "@/Libs/Form-components/FormComponent";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import {
   useIncludedArtworkPlacementMutation,
@@ -125,8 +125,8 @@ const ImageUpload = ({ index, preview, onImageChange, onImageRemove }) => {
 };
 
 export default function ArtworkPlacement() {
-  const params = useSearchParams();
-  const techpack_id = params.get("id") || "";
+  
+  const {techpack_id} = useParams();
   const router = useRouter();
 
   ////////////////// All api call are here //////////////////

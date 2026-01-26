@@ -2,7 +2,7 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { Plus, X, Star, ArrowRight, Loader2 } from "lucide-react";
 import { Input, Select } from "@/Libs/Form-components/FormComponent";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
 import React, { useEffect } from "react";
@@ -13,8 +13,8 @@ import {
 import { toast } from "react-toastify";
 
 export default function FabricMaterials() {
-  const params = useSearchParams();
-  const techpack_id = params.get("id") || "";
+  
+  const {techpack_id} = useParams();
   const route = useRouter();
   const [fabricId, setFabricId] = React.useState(null);
 
@@ -140,7 +140,7 @@ export default function FabricMaterials() {
       try {
         await updateFabrics(updatePayload).unwrap();
         toast.success("Fabrics updated successfully");
-        route.push(`/dashboard/trims?id=${techpack_id}`);
+        route.push(`/${techpack_id}/trims`);
       } catch (error) {
         toast.error("Failed to update fabrics");
       }
@@ -148,7 +148,7 @@ export default function FabricMaterials() {
       try {
         await includedFabrics(payload).unwrap();
         toast.success("Fabrics included successfully");
-        route.push(`/dashboard/trims?id=${techpack_id}`);
+        route.push(`/${techpack_id}/trims`);
       } catch (error) {
         toast.error("Failed to include fabrics");
       }
@@ -463,7 +463,7 @@ export default function FabricMaterials() {
         {/* Navigation Buttons */}
         <div className="flex justify-between items-center my-6">
           <Link
-            href="/dashboard/measurements"
+            href={`/${techpack_id}/measurements`}
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >

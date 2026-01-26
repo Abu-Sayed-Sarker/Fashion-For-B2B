@@ -21,7 +21,7 @@ const [createInitialFashion, {isLoading}] = useCreateInitialFashionLibraryMutati
     try {
        const res = await createInitialFashion().unwrap();
       toast.success("New tech pack created successfully!");
-      route.push(`/dashboard?id=${res?.id}`);
+      route.push(`/${res?.id}`);
     } catch (error) {
       toast.error("Failed to create initial fashion.");
       console.error("Error creating initial fashion:", error);

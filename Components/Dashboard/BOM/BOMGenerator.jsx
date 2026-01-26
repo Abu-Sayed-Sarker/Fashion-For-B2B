@@ -4,7 +4,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { Plus, X, Package, ArrowRight, Loader2 } from "lucide-react";
 import { Select, Input } from "@/Libs/Form-components/FormComponent";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
 import {
   useIncludedBillOfMaterialsMutation,
@@ -41,8 +41,8 @@ const Textarea = ({
 };
 
 export default function BOMGenerator() {
-  const params = useSearchParams();
-  const techpack_id = params.get("id") || "";
+  
+  const {techpack_id} = useParams();
   const [haveId, setHaveId] = useState(null);
   const router = useRouter();
 
@@ -122,7 +122,7 @@ export default function BOMGenerator() {
           component_name: item.componentName,
           material_composition: item.material,
           unit: item.unit,
-          consumption: item.consumation,
+          consumption: item.consumption,
           wastage: item.wastage,
           supplier: item.supplier,
           moq: item.moq,
@@ -135,7 +135,7 @@ export default function BOMGenerator() {
       try {
         await updateBillOfMaterials(updatePayload).unwrap();
         toast.success("BOM data updated successfully!");
-        router.push(`/dashboard/review/?id=${techpack_id}`);
+        router.push(`/${techpack_id}/review/`);
       } catch (error) {
         toast.error("Failed to update BOM data.");
         console.error("Error updating BOM data:", error);
@@ -161,7 +161,7 @@ export default function BOMGenerator() {
       try {
         await includedMaterials(payload).unwrap();
         toast.success("BOM data submitted successfully!");
-        router.push(`/dashboard/review/?id=${techpack_id}`);
+        router.push(`/${techpack_id}/review/`);
       } catch (error) {
         toast.error("Failed to submit BOM data.");
         console.error("Error submitting BOM data:", error);
@@ -441,7 +441,7 @@ export default function BOMGenerator() {
         {/* Navigation */}
         <div className="flex justify-between items-center my-6">
           <Link
-            href="/dashboard/artwork"
+            href={`/${techpack_id}/artwork`}
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >

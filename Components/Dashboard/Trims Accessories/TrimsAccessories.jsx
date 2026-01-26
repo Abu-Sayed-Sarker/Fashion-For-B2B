@@ -2,7 +2,7 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { Plus, X, Tag, Zap, Scissors, Package, ArrowRight, Loader2 } from "lucide-react";
 import { Input, Select } from "@/Libs/Form-components/FormComponent";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
 import React from "react";
@@ -27,8 +27,8 @@ const trimIcons = {
 
 export default function TrimsAccessories() {
   const router = useRouter();
-  const params = useSearchParams();
-  const techpack_id = params.get("id") || "";
+  
+  const {techpack_id} = useParams();
   const [haveId, setHaveId] = React.useState(null);
   //////// All api call are here ////////
   const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
@@ -98,7 +98,7 @@ export default function TrimsAccessories() {
       try {
         await updateTrims(updatePayload).unwrap();
         toast.success("Trims & Accessories updated successfully!");
-        router.push(`/dashboard/construction?id=${techpack_id}`);
+        router.push(`/${techpack_id}/construction`);
       } catch (error) {
         toast.error("Failed to update Trims & Accessories.");
         console.error("Error updating Trims & Accessories:", error);
@@ -123,7 +123,7 @@ export default function TrimsAccessories() {
         console.log("payload", payload);
         await includedTrims(payload).unwrap();
         toast.success("Trims & Accessories added successfully!");
-        router.push(`/dashboard/construction?id=${techpack_id}`);
+        router.push(`/${techpack_id}/construction`);
       } catch (error) {
         toast.error("Failed to add Trims & Accessories.");
         console.error("Error adding Trims & Accessories:", error);
@@ -348,7 +348,7 @@ export default function TrimsAccessories() {
         {/* Navigation */}
         <div className="flex justify-between items-center my-6">
           <Link
-            href="/dashboard/fabrics"
+            href={`/${techpack_id}/fabrics`}
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >

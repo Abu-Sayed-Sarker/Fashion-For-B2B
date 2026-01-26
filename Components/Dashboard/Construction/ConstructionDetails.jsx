@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { AlertCircle, ArrowRight, Book } from "lucide-react";
 import { Input, Select } from "@/Libs/Form-components/FormComponent";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
 import { useEffect, useState } from "react";
 import { useIncludedConstructionDetailsMutation, useUpdateConstructionDetailsMutation } from "@/Apis/Poast-a-fashion/postAFashionApi";
@@ -262,8 +262,8 @@ const GARMENT_CONSTRUCTION_AREAS = {
 };
 
 export default function ConstructionDetails() {
-  const params = useSearchParams();
-  const techpack_id = params.get("id") || "";
+  
+  const {techpack_id} = useParams();
   const router = useRouter();
   const [haveId, setHaveId] = useState(null);
   const [garmentType, setGarmentType] = useState("");
@@ -580,7 +580,7 @@ export default function ConstructionDetails() {
           {/* Navigation */}
           <div className="flex justify-between items-center my-6">
             <Link
-              href="/dashboard/trims"
+              href={`/${techpack_id}/trims`}
               type="button"
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
