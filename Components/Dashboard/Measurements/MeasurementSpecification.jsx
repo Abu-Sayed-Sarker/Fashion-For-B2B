@@ -5,6 +5,7 @@ import { Plus, X, Info, ArrowRight } from "lucide-react";
 import { Select } from "@/Libs/Form-components/FormComponent";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
 
 // Garment-type-specific mandatory measurements
 const GARMENT_MEASUREMENTS = {
@@ -409,8 +410,27 @@ export default function MeasurementSpecification() {
   const params = useSearchParams();
   const techpack_id = params.get("id") || "";
   const route = useRouter();
-  const [garmentType] = useState("shirt");
+  const [garmentType, setGarmentType] = useState("shirt");
   const mandatoryMeasurements = getMeasurementsForGarmentType(garmentType);
+
+
+
+///////////////////// all api calls are here //////////////////////////////
+const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
+    techpack_id,
+    { skip: !techpack_id },
+  );
+  const garmentData = techpackData?.step_one || {};
+  const measurementData = techpackData?.step_two || {};
+
+
+////////--------------------------------------------------------------------//////////
+
+
+
+
+
+
 
   const {
     register,
@@ -509,6 +529,16 @@ export default function MeasurementSpecification() {
     route.push("/dashboard/fabrics");
   };
 
+
+
+
+
+  useEffect(() => {
+    if (garmentData && !isLoading) {
+      setValue("baseSize", garmentData?.base_size);
+      setGarmentType(garmentData?.garment_type?.toLowerCase());
+    }
+  }, [garmentData, isLoading, setValue]);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="max-w-7xl mx-auto">

@@ -1,32 +1,63 @@
 "use client";
-import { useForm, useFieldArray } from 'react-hook-form';
-import { Plus, X, Star, ArrowRight } from 'lucide-react';
-import { Input, Select } from '@/Libs/Form-components/FormComponent';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useForm, useFieldArray } from "react-hook-form";
+import { Plus, X, Star, ArrowRight, Loader2 } from "lucide-react";
+import { Input, Select } from "@/Libs/Form-components/FormComponent";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
+import React, { useEffect } from "react";
+import {
+  useIncludedFabricsMutation,
+  useUpdateFabricsMutation,
+} from "@/Apis/Poast-a-fashion/postAFashionApi";
+import { toast } from "react-toastify";
 
 export default function FabricMaterials() {
+  const params = useSearchParams();
+  const techpack_id = params.get("id") || "";
   const route = useRouter();
-  const { register, control, handleSubmit, formState: { errors, isValid } } = useForm({
+  const [fabricId, setFabricId] = React.useState(null);
+
+  /////////////// All api call here //////////////
+
+  const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
+    techpack_id,
+    { skip: !techpack_id },
+  );
+  const fabricData = techpackData?.step_three || [];
+  const [includedFabrics, { isLoading: isFabricLoading }] =
+    useIncludedFabricsMutation();
+  const [updateFabrics, { isLoading: isUpdatingFabrics }] =
+    useUpdateFabricsMutation();
+  /// ------------------------------------------ ////////
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors, isValid },
+    setValue,
+  } = useForm({
     defaultValues: {
       fabrics: [
         {
+          id: "",
           isPrimary: true,
-          composition: '',
-          gsm: '',
-          construction: '',
-          finish: '',
-          color: '',
-          shrinkage: '',
-          stretch: '',
-          faceback: '',
-          direction: '',
-          moq: '',
-          testing: '',
-          width: '',
-          yarnType: '',
-          countryOfOrigin: '',
-          sustainability: '',
+          composition: "",
+          gsm: "",
+          construction: "",
+          finish: "",
+          color: "",
+          shrinkage: "",
+          stretch: "",
+          faceback: "",
+          direction: "",
+          moq: "",
+          testing: "",
+          width: "",
+          yarnType: "",
+          countryOfOrigin: "",
+          sustainability: "",
         },
       ],
     },
@@ -34,85 +65,176 @@ export default function FabricMaterials() {
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'fabrics',
+    name: "fabrics",
   });
 
   const handleAddFabric = () => {
     append({
       isPrimary: false,
-      composition: '',
-      gsm: '',
-      construction: '',
-      finish: '',
-      color: '',
-      shrinkage: '',
-      stretch: '',
-      faceback: '',
-      direction: '',
-      moq: '',
-      testing: '',
-      width: '',
-      yarnType: '',
-      countryOfOrigin: '',
-      sustainability: '',
+      id: "",
+      composition: "",
+      gsm: "",
+      construction: "",
+      finish: "",
+      color: "",
+      shrinkage: "",
+      stretch: "",
+      faceback: "",
+      direction: "",
+      moq: "",
+      testing: "",
+      width: "",
+      yarnType: "",
+      countryOfOrigin: "",
+      sustainability: "",
     });
   };
 
-  const onSubmit = (data) => {
-    console.log('Fabric Data:', data);
-    console.log('Total Fabrics:', data.fabrics.length);
-    console.log('Primary Fabric:', data.fabrics.find(f => f.isPrimary));
-    route.push('/dashboard/trims');
+  const onSubmit = async (data) => {
+    const payload = {
+      techpack_id: techpack_id,
+      data: data.fabrics.map((fabric) => ({
+        fabric_type: fabric.isPrimary ? "primary" : "secondary",
+        composition: fabric.composition,
+        gsm: fabric.gsm,
+        construction: fabric.construction,
+        finish: fabric.finish,
+        color: fabric.color,
+        shrinkage: fabric.shrinkage,
+        stretch: fabric.stretch,
+        face_back: fabric.faceback,
+        testing_required: fabric.testing,
+        fabric_direction: fabric.direction,
+        moq: fabric.moq,
+        fabric_width: fabric.width,
+        yarn_type: fabric.yarnType,
+        country_of_origin: fabric.countryOfOrigin,
+        sustainability_certifications: fabric.sustainability,
+      })),
+    };
+
+    if (fabricId) {
+            // add id in all payload
+      const updatePayload = {
+      techpack_id: techpack_id,
+      data: data.fabrics.map((fabric) => ({
+        fabric_type: fabric.isPrimary ? "primary" : "secondary",
+        id: fabric.id,
+        composition: fabric.composition,
+        gsm: fabric.gsm,
+        construction: fabric.construction,
+        finish: fabric.finish,
+        color: fabric.color,
+        shrinkage: fabric.shrinkage,
+        stretch: fabric.stretch,
+        face_back: fabric.faceback,
+        testing_required: fabric.testing,
+        fabric_direction: fabric.direction,
+        moq: fabric.moq,
+        fabric_width: fabric.width,
+        yarn_type: fabric.yarnType,
+        country_of_origin: fabric.countryOfOrigin,
+        sustainability_certifications: fabric.sustainability,
+      })),
+    };
+      try {
+        await updateFabrics(updatePayload).unwrap();
+        toast.success("Fabrics updated successfully");
+        route.push(`/dashboard/trims?id=${techpack_id}`);
+      } catch (error) {
+        toast.error("Failed to update fabrics");
+      }
+    } else {
+      try {
+        await includedFabrics(payload).unwrap();
+        toast.success("Fabrics included successfully");
+        route.push(`/dashboard/trims?id=${techpack_id}`);
+      } catch (error) {
+        toast.error("Failed to include fabrics");
+      }
+    }
   };
 
   const constructionOptions = [
-    { value: 'plain-weave', label: 'Plain Weave' },
-    { value: 'twill', label: 'Twill' },
-    { value: 'satin', label: 'Satin' },
-    { value: 'jersey', label: 'Jersey Knit' },
-    { value: 'rib', label: 'Rib Knit' },
-    { value: 'interlock', label: 'Interlock' },
-    { value: 'fleece', label: 'Fleece' },
-    { value: 'french-terry', label: 'French Terry' },
-    { value: 'pique', label: 'Pique' },
+    { value: "plain-weave", label: "Plain Weave" },
+    { value: "twill", label: "Twill" },
+    { value: "satin", label: "Satin" },
+    { value: "jersey", label: "Jersey Knit" },
+    { value: "rib", label: "Rib Knit" },
+    { value: "interlock", label: "Interlock" },
+    { value: "fleece", label: "Fleece" },
+    { value: "french-terry", label: "French Terry" },
+    { value: "pique", label: "Pique" },
   ];
 
   const finishOptions = [
-    { value: 'none', label: 'None' },
-    { value: 'enzyme-wash', label: 'Enzyme Wash' },
-    { value: 'stone-wash', label: 'Stone Wash' },
-    { value: 'sand-wash', label: 'Sand Wash' },
-    { value: 'brushed', label: 'Brushed' },
-    { value: 'peached', label: 'Peached' },
-    { value: 'mercerized', label: 'Mercerized' },
-    { value: 'calendered', label: 'Calendered' },
-    { value: 'water-repellent', label: 'Water Repellent' },
-    { value: 'anti-pilling', label: 'Anti-Pilling' },
+    { value: "none", label: "None" },
+    { value: "enzyme-wash", label: "Enzyme Wash" },
+    { value: "stone-wash", label: "Stone Wash" },
+    { value: "sand-wash", label: "Sand Wash" },
+    { value: "brushed", label: "Brushed" },
+    { value: "peached", label: "Peached" },
+    { value: "mercerized", label: "Mercerized" },
+    { value: "calendered", label: "Calendered" },
+    { value: "water-repellent", label: "Water Repellent" },
+    { value: "anti-pilling", label: "Anti-Pilling" },
   ];
 
   const stretchOptions = [
-    { value: 'none', label: 'None' },
-    { value: 'warp', label: 'Warp (Lengthwise)' },
-    { value: 'weft', label: 'Weft (Widthwise)' },
-    { value: '4-way', label: '4-Way Stretch' },
-    { value: '2-way', label: '2-Way Stretch' },
+    { value: "none", label: "None" },
+    { value: "warp", label: "Warp (Lengthwise)" },
+    { value: "weft", label: "Weft (Widthwise)" },
+    { value: "4-way", label: "4-Way Stretch" },
+    { value: "2-way", label: "2-Way Stretch" },
   ];
 
   const directionOptions = [
-    { value: 'non-directional', label: 'Non-Directional' },
-    { value: 'one-way', label: 'One-Way (Nap/Print)' },
-    { value: 'two-way', label: 'Two-Way' },
+    { value: "non-directional", label: "Non-Directional" },
+    { value: "one-way", label: "One-Way (Nap/Print)" },
+    { value: "two-way", label: "Two-Way" },
   ];
 
   const yarnTypeOptions = [
-    { value: 'carded', label: 'Carded' },
-    { value: 'combed', label: 'Combed' },
-    { value: 'ring-spun', label: 'Ring Spun' },
-    { value: 'open-end', label: 'Open End' },
-    { value: 'air-jet', label: 'Air Jet' },
-    { value: 'compact', label: 'Compact' },
+    { value: "carded", label: "Carded" },
+    { value: "combed", label: "Combed" },
+    { value: "ring-spun", label: "Ring Spun" },
+    { value: "open-end", label: "Open End" },
+    { value: "air-jet", label: "Air Jet" },
+    { value: "compact", label: "Compact" },
   ];
 
+
+  useEffect(() => {
+    if (fabricData && fabricData.length > 0 && !isLoading) {
+      const formattedFabrics = fabricData.map((fabric) => ({
+        isPrimary: fabric.fabric_type === "primary",
+        id: fabric.id,
+        composition: fabric.composition,
+        gsm: fabric.gsm,
+        construction: fabric.construction,
+        color: fabric.color,
+        finish: fabric.finish,
+        shrinkage: fabric.shrinkage,
+        stretch: fabric.stretch,
+        faceback: fabric.face_back,
+        direction: fabric.fabric_direction,
+        moq: fabric.moq,
+        testing: fabric.testing_required,
+        width: fabric.fabric_width,
+        yarnType: fabric.yarn_type,
+        countryOfOrigin: fabric.country_of_origin,
+        sustainability: fabric.sustainability_certifications,
+      }));
+      setValue("fabrics", formattedFabrics);
+      // Assuming the first fabric is primary
+      const primaryFabric = fabricData.find(
+        (fabric) => fabric.fabric_type === "primary",
+      );
+      if (primaryFabric) {
+        setFabricId(primaryFabric.id);
+      }
+    }
+  }, [fabricData, isLoading]);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="container mx-auto">
@@ -132,17 +254,21 @@ export default function FabricMaterials() {
             <div
               key={field.id}
               className={`bg-white rounded-lg border-2 overflow-hidden ${
-                field.isPrimary ? 'border-amber-300' : 'border-gray-200'
+                field.isPrimary ? "border-amber-300" : "border-gray-200"
               }`}
             >
               {/* Card Header */}
               <div
                 className={`px-4 md:px-6 py-3 md:py-4 border-b flex items-center justify-between ${
-                  field.isPrimary ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200'
+                  field.isPrimary
+                    ? "bg-amber-50 border-amber-200"
+                    : "bg-gray-50 border-gray-200"
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  {field.isPrimary && <Star className="w-4 h-4 fill-amber-500 text-amber-500" />}
+                  {field.isPrimary && (
+                    <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                  )}
                   <h3 className="text-base font-semibold text-gray-900">
                     Fabric {index + 1}
                   </h3>
@@ -335,7 +461,7 @@ export default function FabricMaterials() {
         </button>
 
         {/* Navigation Buttons */}
-       <div className="flex justify-between items-center my-6">
+        <div className="flex justify-between items-center my-6">
           <Link
             href="/dashboard/measurements"
             type="button"
@@ -346,15 +472,14 @@ export default function FabricMaterials() {
           <div className="flex flex-col items-end gap-2">
             <button
               type="submit"
-              disabled={!isValid}
+              disabled={!isValid || isFabricLoading || isUpdatingFabrics}
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
-                !isValid
+                !isValid || isFabricLoading || isUpdatingFabrics
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-gray-900 text-white hover:bg-gray-800"
               }`}
             >
-              Next: Trims & Accessories
-              <ArrowRight className="w-4 h-4" />
+              Next: Trims & Accessories {isFabricLoading || isUpdatingFabrics ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
             </button>
             {!isValid && (
               <p className="text-sm text-red-600">

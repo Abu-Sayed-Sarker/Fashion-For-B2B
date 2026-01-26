@@ -202,8 +202,8 @@ const GarmentSetup = () => {
       setValue("season", garmentData.season || "");
       setValue("baseSize", garmentData.base_size || "");
       setValue("styleCode", garmentData.style_code || "");
-      setValue("dateCreated", garmentData.date_created || "");
-      setValue("version", garmentData.version || "");
+      setValue("dateCreated", garmentData.date_created || new Date().toISOString().split("T")[0]);
+      setValue("version", garmentData.version || 1.0);
     }
   }, [garmentData, isLoading, setValue]);
 
