@@ -375,15 +375,15 @@ const GarmentSetup = () => {
           <div className="flex flex-col items-end gap-2">
             <button
               type="submit"
-              disabled={hasErrors || isSubmitting}
+              disabled={hasErrors || isSubmitting || isUpdating}
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
-                hasErrors || isSubmitting
+                hasErrors || isSubmitting || isUpdating
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-gray-900 text-white hover:bg-gray-800"
               }`}
             >
               Next: Measurements{" "}
-              {isSubmitting ? (
+              {isSubmitting || isUpdating ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <ArrowRight className="w-4 h-4" />
