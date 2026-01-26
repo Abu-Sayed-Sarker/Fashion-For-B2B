@@ -3,79 +3,289 @@ import { useForm } from "react-hook-form";
 import { AlertCircle, ArrowRight, Book } from "lucide-react";
 import { Input, Select } from "@/Libs/Form-components/FormComponent";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
+import { useEffect, useState } from "react";
+import { useIncludedConstructionDetailsMutation, useUpdateConstructionDetailsMutation } from "@/Apis/Poast-a-fashion/postAFashionApi";
 
 // Garment-type specific construction areas
 const GARMENT_CONSTRUCTION_AREAS = {
-  't-shirt': [
-    { area: 'neck', title: 'Neck Construction', icon: '👔', description: 'Collar, neckline, and neck binding specifications', required: true },
-    { area: 'sleeve', title: 'Sleeve Construction', icon: '👕', description: 'Sleeve attachment, armhole, and sleeve hem details', required: true },
-    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem and hemline finishing', required: true },
-    { area: 'side', title: 'Side Seam Construction', icon: '📐', description: 'Side seam assembly and finishing', required: false },
+  "t-shirt": [
+    {
+      area: "neck",
+      title: "Neck Construction",
+      icon: "👔",
+      description: "Collar, neckline, and neck binding specifications",
+      required: true,
+    },
+    {
+      area: "sleeve",
+      title: "Sleeve Construction",
+      icon: "👕",
+      description: "Sleeve attachment, armhole, and sleeve hem details",
+      required: true,
+    },
+    {
+      area: "hem",
+      title: "Hem Construction",
+      icon: "📏",
+      description: "Bottom hem and hemline finishing",
+      required: true,
+    },
+    {
+      area: "side",
+      title: "Side Seam Construction",
+      icon: "📐",
+      description: "Side seam assembly and finishing",
+      required: false,
+    },
   ],
-  'polo': [
-    { area: 'neck', title: 'Neck/Collar Construction', icon: '👔', description: 'Collar attachment and placket specifications', required: true },
-    { area: 'sleeve', title: 'Sleeve Construction', icon: '👕', description: 'Sleeve attachment and cuff details', required: true },
-    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem and side vents', required: true },
-    { area: 'side', title: 'Side Seam Construction', icon: '📐', description: 'Side seam assembly', required: false },
+  polo: [
+    {
+      area: "neck",
+      title: "Neck/Collar Construction",
+      icon: "👔",
+      description: "Collar attachment and placket specifications",
+      required: true,
+    },
+    {
+      area: "sleeve",
+      title: "Sleeve Construction",
+      icon: "👕",
+      description: "Sleeve attachment and cuff details",
+      required: true,
+    },
+    {
+      area: "hem",
+      title: "Hem Construction",
+      icon: "📏",
+      description: "Bottom hem and side vents",
+      required: true,
+    },
+    {
+      area: "side",
+      title: "Side Seam Construction",
+      icon: "📐",
+      description: "Side seam assembly",
+      required: false,
+    },
   ],
-  'hoodie': [
-    { area: 'hoodCuff', title: 'Hood Construction', icon: '🧢', description: 'Hood assembly, lining, and drawstring details', required: true },
-    { area: 'sleeve', title: 'Sleeve Construction', icon: '👕', description: 'Sleeve attachment and cuff details', required: true },
-    { area: 'hem', title: 'Hem/Waistband Construction', icon: '📏', description: 'Bottom rib or hem finishing', required: true },
-    { area: 'side', title: 'Side Seam Construction', icon: '📐', description: 'Side seam assembly', required: false },
+  hoodie: [
+    {
+      area: "hoodCuff",
+      title: "Hood Construction",
+      icon: "🧢",
+      description: "Hood assembly, lining, and drawstring details",
+      required: true,
+    },
+    {
+      area: "sleeve",
+      title: "Sleeve Construction",
+      icon: "👕",
+      description: "Sleeve attachment and cuff details",
+      required: true,
+    },
+    {
+      area: "hem",
+      title: "Hem/Waistband Construction",
+      icon: "📏",
+      description: "Bottom rib or hem finishing",
+      required: true,
+    },
+    {
+      area: "side",
+      title: "Side Seam Construction",
+      icon: "📐",
+      description: "Side seam assembly",
+      required: false,
+    },
   ],
-  'jacket': [
-    { area: 'neck', title: 'Collar/Neckline Construction', icon: '👔', description: 'Collar, lapel, and neck facing details', required: true },
-    { area: 'sleeve', title: 'Sleeve Construction', icon: '👕', description: 'Sleeve attachment and lining details', required: true },
-    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem and lining hem', required: true },
-    { area: 'side', title: 'Side Seam Construction', icon: '📐', description: 'Side seam and lining assembly', required: false },
+  jacket: [
+    {
+      area: "neck",
+      title: "Collar/Neckline Construction",
+      icon: "👔",
+      description: "Collar, lapel, and neck facing details",
+      required: true,
+    },
+    {
+      area: "sleeve",
+      title: "Sleeve Construction",
+      icon: "👕",
+      description: "Sleeve attachment and lining details",
+      required: true,
+    },
+    {
+      area: "hem",
+      title: "Hem Construction",
+      icon: "📏",
+      description: "Bottom hem and lining hem",
+      required: true,
+    },
+    {
+      area: "side",
+      title: "Side Seam Construction",
+      icon: "📐",
+      description: "Side seam and lining assembly",
+      required: false,
+    },
   ],
-  'jeans': [
-    { area: 'waistband', title: 'Waistband Construction', icon: '⚡', description: 'Waistband assembly, button, and fly specifications', required: true },
-    { area: 'inseam', title: 'Inseam Construction', icon: '📏', description: 'Inner leg seam assembly', required: true },
-    { area: 'outseam', title: 'Outseam Construction', icon: '📐', description: 'Outer leg seam assembly', required: true },
-    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem finishing', required: true },
+  jeans: [
+    {
+      area: "waistband",
+      title: "Waistband Construction",
+      icon: "⚡",
+      description: "Waistband assembly, button, and fly specifications",
+      required: true,
+    },
+    {
+      area: "inseam",
+      title: "Inseam Construction",
+      icon: "📏",
+      description: "Inner leg seam assembly",
+      required: true,
+    },
+    {
+      area: "outseam",
+      title: "Outseam Construction",
+      icon: "📐",
+      description: "Outer leg seam assembly",
+      required: true,
+    },
+    {
+      area: "hem",
+      title: "Hem Construction",
+      icon: "📏",
+      description: "Bottom hem finishing",
+      required: true,
+    },
   ],
-  'pants': [
-    { area: 'waistband', title: 'Waistband Construction', icon: '⚡', description: 'Waistband assembly and closure', required: true },
-    { area: 'inseam', title: 'Inseam Construction', icon: '📏', description: 'Inner leg seam assembly', required: true },
-    { area: 'outseam', title: 'Outseam Construction', icon: '📐', description: 'Outer leg seam assembly', required: true },
-    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem finishing', required: true },
+  pants: [
+    {
+      area: "waistband",
+      title: "Waistband Construction",
+      icon: "⚡",
+      description: "Waistband assembly and closure",
+      required: true,
+    },
+    {
+      area: "inseam",
+      title: "Inseam Construction",
+      icon: "📏",
+      description: "Inner leg seam assembly",
+      required: true,
+    },
+    {
+      area: "outseam",
+      title: "Outseam Construction",
+      icon: "📐",
+      description: "Outer leg seam assembly",
+      required: true,
+    },
+    {
+      area: "hem",
+      title: "Hem Construction",
+      icon: "📏",
+      description: "Bottom hem finishing",
+      required: true,
+    },
   ],
-  'shorts': [
-    { area: 'waistband', title: 'Waistband Construction', icon: '⚡', description: 'Waistband assembly and closure', required: true },
-    { area: 'inseam', title: 'Inseam Construction', icon: '📏', description: 'Inner leg seam assembly', required: true },
-    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem finishing', required: true },
+  shorts: [
+    {
+      area: "waistband",
+      title: "Waistband Construction",
+      icon: "⚡",
+      description: "Waistband assembly and closure",
+      required: true,
+    },
+    {
+      area: "inseam",
+      title: "Inseam Construction",
+      icon: "📏",
+      description: "Inner leg seam assembly",
+      required: true,
+    },
+    {
+      area: "hem",
+      title: "Hem Construction",
+      icon: "📏",
+      description: "Bottom hem finishing",
+      required: true,
+    },
   ],
-  'dress': [
-    { area: 'neck', title: 'Neckline Construction', icon: '👔', description: 'Neckline and collar specifications', required: true },
-    { area: 'sleeve', title: 'Sleeve Construction', icon: '👕', description: 'Sleeve attachment details (if applicable)', required: false },
-    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem and lining hem', required: true },
-    { area: 'side', title: 'Side Seam Construction', icon: '📐', description: 'Side seam and zipper assembly', required: false },
+  dress: [
+    {
+      area: "neck",
+      title: "Neckline Construction",
+      icon: "👔",
+      description: "Neckline and collar specifications",
+      required: true,
+    },
+    {
+      area: "sleeve",
+      title: "Sleeve Construction",
+      icon: "👕",
+      description: "Sleeve attachment details (if applicable)",
+      required: false,
+    },
+    {
+      area: "hem",
+      title: "Hem Construction",
+      icon: "📏",
+      description: "Bottom hem and lining hem",
+      required: true,
+    },
+    {
+      area: "side",
+      title: "Side Seam Construction",
+      icon: "📐",
+      description: "Side seam and zipper assembly",
+      required: false,
+    },
   ],
-  'skirt': [
-    { area: 'waistband', title: 'Waistband Construction', icon: '⚡', description: 'Waistband assembly and closure', required: true },
-    { area: 'hem', title: 'Hem Construction', icon: '📏', description: 'Bottom hem finishing', required: true },
+  skirt: [
+    {
+      area: "waistband",
+      title: "Waistband Construction",
+      icon: "⚡",
+      description: "Waistband assembly and closure",
+      required: true,
+    },
+    {
+      area: "hem",
+      title: "Hem Construction",
+      icon: "📏",
+      description: "Bottom hem finishing",
+      required: true,
+    },
   ],
 };
 
-
-
-
-
-
-
-
-
-
 export default function ConstructionDetails() {
+  const params = useSearchParams();
+  const techpack_id = params.get("id") || "";
+  const router = useRouter();
+  const [haveId, setHaveId] = useState(null);
+  const [garmentType, setGarmentType] = useState("");
+  const currentAreas =
+    GARMENT_CONSTRUCTION_AREAS[garmentType] ||
+    GARMENT_CONSTRUCTION_AREAS["t-shirt"];
 
-  const garmentType = "dress"; // This would typically come from props or context
-  const currentAreas = GARMENT_CONSTRUCTION_AREAS[garmentType] || GARMENT_CONSTRUCTION_AREAS['t-shirt'];
+  ///////////////////// all api calls are here //////////////////////////////
+  const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
+    techpack_id,
+    { skip: !techpack_id },
+  );
+  const garmentData = techpackData?.step_one || {};
+  const constructionData = techpackData?.step_five || [];
 
+  console.log("construction data", constructionData);
+  const [includedConstructionDetails, { isLoading: isIncludingConstruction }] =
+    useIncludedConstructionDetailsMutation();
+  const [updateConstructionDetails, { isLoading: isUpdatingConstruction }] =
+    useUpdateConstructionDetailsMutation();
+  // ---------------------------------------//
 
-const router = useRouter();
   const {
     register,
     control,
@@ -106,19 +316,39 @@ const router = useRouter();
   currentAreas.forEach((area) => {
     if (area.required) {
       const areaValues = formValues[area.area] || {};
-      if (!areaValues.stitchType) missingFields.push(`${area.title} Stitch Type is required`);
+      if (!areaValues.stitchType)
+        missingFields.push(`${area.title} Stitch Type is required`);
       if (!areaValues.spi) missingFields.push(`${area.title} SPI is required`);
     }
   });
 
   const hasErrors = missingFields.length > 0;
 
-  const onSubmit = (data) => {
+  // "construction_name": "Nechk Type",
+  //       "stitch_type": "Tank df step -5 ",
+  //       "spi": "18"
+  const onSubmit = async(data) => {
     if (hasErrors) {
       return;
     }
-    console.log("Construction Details:", data);
-    router.push("/dashboard/artwork");
+    const payload = {
+      techpack_id,
+      data: {
+        construction_details: currentAreas.map((area) => ({
+          construction_name: area.title,
+          stitch_type: data[area.area].stitchType,
+          spi: data[area.area].spi,
+          seam_allowance: data[area.area].seamAllowance,
+          reinforcement: data[area.area].reinforcement,
+          topstitch: data[area.area].topstitch,
+        })),
+        special_instructions: data.specialInstructions,
+      },
+    };
+
+
+    // console.log("Construction Details:", data);
+    // router.push("/dashboard/artwork");
   };
 
   const stitchTypeOptions = [
@@ -152,6 +382,11 @@ const router = useRouter();
     { value: "none", label: "None" },
   ];
 
+  useEffect(() => {
+    if (garmentData) {
+      setGarmentType(garmentData?.garment_type?.toLowerCase() || "t-shirt");
+    }
+  }, [garmentData]);
   return (
     <>
       <div className="container mx-auto">
@@ -199,11 +434,10 @@ const router = useRouter();
                 </div>
                 <div>
                   <h3 className="text-base font-semibold text-gray-900">
-                    {area.title} {area.required && <span className="text-red-500">*</span>}
+                    {area.title}{" "}
+                    {area.required && <span className="text-red-500">*</span>}
                   </h3>
-                  <p className="text-xs text-gray-600">
-                    {area.description}
-                  </p>
+                  <p className="text-xs text-gray-600">{area.description}</p>
                 </div>
               </div>
 

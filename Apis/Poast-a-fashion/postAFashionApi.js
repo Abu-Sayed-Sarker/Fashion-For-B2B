@@ -78,6 +78,59 @@ const postAFashionApi = api.injectEndpoints({
       }),
       invalidatesTags: ["includedTrims"],
     }),
+    ////////// Construction Details //////////
+
+    includedConstructionDetails: build.mutation({
+      query: (data) => ({
+        url: `fashion/techpacks/${data?.techpack_id}/step-5/`,
+        method: "POST",
+        body: data.data,
+      }),
+      invalidatesTags: ["includedConstructionDetails"],
+    }),
+    updateConstructionDetails: build.mutation({
+      query: (data) => ({
+        url: `fashion/techpacks/${data?.techpack_id}/step-5/`,
+        method: "PATCH",
+        body: data.data,
+      }),
+      invalidatesTags: ["includedConstructionDetails"],
+    }),
+    ////////// Artwork Placement //////////
+
+    includedArtworkPlacement: build.mutation({
+      query: (data) => ({
+        url: `fashion/techpacks/${data?.techpack_id}/step-6/`,
+        method: "POST",
+        body: data.data,
+      }),
+      invalidatesTags: ["includedArtworkPlacement"],
+    }),
+    updateArtworkPlacement: build.mutation({
+      query: (data) => ({
+        url: `fashion/techpacks/${data?.techpack_id}/step-6/`,
+        method: "PATCH",
+        body: data.data,
+      }),
+      invalidatesTags: ["includedArtworkPlacement"],
+    }),
+    ////////// Bill of Materials //////////
+    includedBillOfMaterials: build.mutation({
+      query: (data) => ({
+        url: `fashion/techpacks/${data?.techpack_id}/step-7/`,
+        method: "POST",
+        body: data.data,
+      }),
+      invalidatesTags: ["includedBillOfMaterials"],
+    }),
+    updateBillOfMaterials: build.mutation({
+      query: (data) => ({
+        url: `fashion/techpacks/${data?.techpack_id}/step-7/`,
+        method: "PATCH",
+        body: data.data,  
+      }),
+      invalidatesTags: ["includedBillOfMaterials"],
+    }),
   }),
 });
 
@@ -91,4 +144,10 @@ export const {
   useUpdateFabricsMutation,
   useIncludedTrimsMutation,
   useUpdateTrimsMutation,
+  useIncludedConstructionDetailsMutation,
+  useUpdateConstructionDetailsMutation,
+  useIncludedArtworkPlacementMutation,
+  useUpdateArtworkPlacementMutation,
+  useIncludedBillOfMaterialsMutation,
+  useUpdateBillOfMaterialsMutation,
 } = postAFashionApi;
