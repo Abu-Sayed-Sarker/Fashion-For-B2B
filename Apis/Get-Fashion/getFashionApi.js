@@ -5,7 +5,11 @@ const getFashionApi = api.injectEndpoints({
       query: () => "fashion/techpacks/table/",
         providesTags: ["fashionTechpacks"]
     }),
+    getFashionTechpackById: build.query({
+      query: (techpack_id) => `fashion/techpacks/${techpack_id}/`,
+      providesTags: ["fashionTechpacks"]
+    }),
   }),
 });
 
-export const { useGetAllFashionTechpacksQuery } = getFashionApi;
+export const { useGetAllFashionTechpacksQuery, useGetFashionTechpackByIdQuery } = getFashionApi;

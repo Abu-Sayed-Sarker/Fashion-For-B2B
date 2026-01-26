@@ -45,4 +45,4 @@ const postAFashionApi = api.injectEndpoints({
   }),
 });
 
-export const { useCreateInitialFashionLibraryMutation } = postAFashionApi;
+export const { useCreateInitialFashionLibraryMutation, usePostGarmentSetupMutation, useUpdateGarmentSetupMutation, useIncludedMaterialsMutation, useUpdateIncludedMaterialsMutation } = postAFashionApi;
