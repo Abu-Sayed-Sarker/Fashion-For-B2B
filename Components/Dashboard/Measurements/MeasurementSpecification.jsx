@@ -425,8 +425,7 @@ export default function MeasurementSpecification() {
     { skip: !techpack_id },
   );
   const garmentData = techpackData?.step_one || {};
-  const measurementData = techpackData?.step_two || {};
-  console.log("Techpack Data:", techpackData);
+  const measurementData = techpackData?.step_two || [];
 
   const [includedMaterials, { isLoading: isIncludingMaterials }] =
     useIncludedMaterialsMutation();

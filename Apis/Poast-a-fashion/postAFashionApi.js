@@ -61,6 +61,23 @@ const postAFashionApi = api.injectEndpoints({
       }),
       invalidatesTags: ["includedFabrics"],
     }),
+    ////////// Included Trims //////////
+    includedTrims: build.mutation({
+      query: (data) => ({
+        url: `fashion/techpacks/${data?.techpack_id}/step-4/`,
+        method: "POST",
+        body: data.data,
+      }),
+      invalidatesTags: ["includedTrims"],
+    }),
+    updateTrims: build.mutation({
+      query: (data) => ({
+        url: `fashion/techpacks/${data?.techpack_id}/step-4/`,
+        method: "PATCH",
+        body: data.data,
+      }),
+      invalidatesTags: ["includedTrims"],
+    }),
   }),
 });
 
@@ -72,4 +89,6 @@ export const {
   useUpdateIncludedMaterialsMutation,
   useIncludedFabricsMutation,
   useUpdateFabricsMutation,
+  useIncludedTrimsMutation,
+  useUpdateTrimsMutation,
 } = postAFashionApi;
