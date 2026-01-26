@@ -1,11 +1,16 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { Plus, X, Info, ArrowRight } from "lucide-react";
+import { Plus, X, Info, ArrowRight, Loader2 } from "lucide-react";
 import { Select } from "@/Libs/Form-components/FormComponent";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
+import {
+  useIncludedMaterialsMutation,
+  useUpdateIncludedMaterialsMutation,
+} from "@/Apis/Poast-a-fashion/postAFashionApi";
+import { toast } from "react-toastify";
 
 // Garment-type-specific mandatory measurements
 const GARMENT_MEASUREMENTS = {
@@ -412,26 +417,23 @@ export default function MeasurementSpecification() {
   const route = useRouter();
   const [garmentType, setGarmentType] = useState("shirt");
   const mandatoryMeasurements = getMeasurementsForGarmentType(garmentType);
+  const [measurementId, setMeasurementId] = useState(null);
 
-
-
-///////////////////// all api calls are here //////////////////////////////
-const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
+  ///////////////////// all api calls are here //////////////////////////////
+  const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
     techpack_id,
     { skip: !techpack_id },
   );
   const garmentData = techpackData?.step_one || {};
   const measurementData = techpackData?.step_two || {};
+  console.log("Techpack Data:", techpackData);
 
+  const [includedMaterials, { isLoading: isIncludingMaterials }] =
+    useIncludedMaterialsMutation();
+  const [updateIncludedMaterials, { isLoading: isUpdatingMaterials }] =
+    useUpdateIncludedMaterialsMutation();
 
-////////--------------------------------------------------------------------//////////
-
-
-
-
-
-
-
+  // Form handling logic
   const {
     register,
     control,
@@ -445,6 +447,7 @@ const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
       baseSize: "M",
       measurementUnit: "cm",
       measurements: mandatoryMeasurements.map((m) => ({
+        id: "",
         pom: m.pom,
         value: "0.2",
         tolerance: m.defaultTolerance,
@@ -519,19 +522,70 @@ const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
 
   const requiredCount = fields.filter((f) => f.required).length;
 
-  const onSubmit = (data) => {
-    console.log("Form Data:", data);
-    // console.log('Base Size:', data.baseSize);
-    // console.log('Measurement Unit:', data.measurementUnit);
-    // console.log('Measurements:', data.measurements);
-    // console.log('Total Measurements:', data.measurements.length);
-    // console.log('Required Measurements:', data.measurements.filter(m => m.required).length);
-    route.push("/dashboard/fabrics");
+  const onSubmit = async (data) => {
+    if (measurementId) {
+      const updatePayload = {
+        techpack_id,
+        data: data.measurements.map((m) => ({
+          id: m.id,
+          pom_name: m.pom,
+          value: m.value,
+          tolerance: m.tolerance,
+          unit: m.unit,
+          measurement_instruction: m.instruction,
+        })),
+      };
+    try {
+       await updateIncludedMaterials(updatePayload).unwrap();
+      toast.success("Included Materials updated successfully!");
+      route.push(`/dashboard/fabrics?id=${techpack_id}`);
+    } catch (error) {
+      toast.error("Failed to update included materials.");
+      console.error("Error updating included materials:", error);
+    }
+    } else {
+      const payload = {
+        techpack_id,
+        data: [
+          ...data.measurements.map((m) => ({
+            pom_name: m.pom,
+            value: m.value,
+            tolerance: m.tolerance,
+            unit: m.unit,
+            measurement_instruction: m.instruction,
+          })),
+        ],
+      };
+      try {
+        await includedMaterials(payload).unwrap();
+        toast.success("Included Materials submitted successfully!");
+        route.push(`/dashboard/fabrics?id=${techpack_id}`);
+      } catch (error) {
+        toast.error("Failed to submit included materials.");
+        console.error("Error submitting included materials:", error);
+      }
+    }
+
+    // route.push("/dashboard/fabrics");
   };
 
+  /// set measurement data
 
-
-
+  useEffect(() => {
+    if (measurementData && !isLoading && measurementData.length > 0) {
+      const formattedMeasurements = measurementData.map((m) => ({
+        id: m.id,
+        pom: m.pom_name,
+        value: m.value,
+        tolerance: m.tolerance,
+        unit: m.unit,
+        instruction: m.measurement_instruction,
+        required: true,
+      }));
+      setValue("measurements", formattedMeasurements);
+      setMeasurementId(formattedMeasurements[0]?.id || null);
+    }
+  }, [measurementData, isLoading, setValue]);
 
   useEffect(() => {
     if (garmentData && !isLoading) {
@@ -860,15 +914,19 @@ const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
           <div className="flex flex-col items-end gap-2">
             <button
               type="submit"
-              disabled={!isValid}
+              disabled={!isValid || isUpdatingMaterials || isIncludingMaterials}
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
-                !isValid
+                !isValid || isUpdatingMaterials || isIncludingMaterials
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-gray-900 text-white hover:bg-gray-800"
               }`}
             >
-              Next: Fabrics
-              <ArrowRight className="w-4 h-4" />
+              Next: Fabrics{" "}
+              {isUpdatingMaterials || isIncludingMaterials ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <ArrowRight className="w-4 h-4" />
+              )}
             </button>
             {!isValid && (
               <p className="text-sm text-red-600">

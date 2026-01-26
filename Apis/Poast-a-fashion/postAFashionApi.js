@@ -44,6 +44,7 @@ const postAFashionApi = api.injectEndpoints({
       }),
       invalidatesTags: ["includedMaterials"],
     }),
+    ////////// Included Fabrics //////////
     includedFabrics: build.mutation({
       query: (data) => ({
         url: `fashion/techpacks/${data?.techpack_id}/step-3/`,
