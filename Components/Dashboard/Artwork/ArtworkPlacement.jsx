@@ -1,31 +1,49 @@
 "use client";
-import React, { useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
-import { Plus, X, Image as ImageIcon, Upload, Trash2, ArrowRight } from 'lucide-react';
+import React, { useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import {
+  Plus,
+  X,
+  Image as ImageIcon,
+  Upload,
+  Trash2,
+  ArrowRight,
+} from "lucide-react";
 
-import { Input, Select } from '@/Libs/Form-components/FormComponent';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Input, Select } from "@/Libs/Form-components/FormComponent";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
+import {
+  useIncludedArtworkPlacementMutation,
+  useUpdateArtworkPlacementMutation,
+} from "@/Apis/Poast-a-fashion/postAFashionApi";
+import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
 // Image Upload Component
 const ImageUpload = ({ index, preview, onImageChange, onImageRemove }) => {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       // Validate file type
-      const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf', 'image/svg+xml'];
+      const validTypes = [
+        "image/png",
+        "image/jpeg",
+        "image/jpg",
+        "application/pdf",
+        "image/svg+xml",
+      ];
       if (!validTypes.includes(file.type)) {
-        alert('Please upload AI, PDF, PNG, JPG, or SVG files only');
+        alert("Please upload AI, PDF, PNG, JPG, or SVG files only");
         return;
       }
-      
+
       // Validate file size (10MB)
       if (file.size > 10 * 1024 * 1024) {
-        alert('File size must be less than 10MB');
+        alert("File size must be less than 10MB");
         return;
       }
 
       // Create preview for images
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onloadend = () => {
           onImageChange(index, reader.result, file);
@@ -43,23 +61,37 @@ const ImageUpload = ({ index, preview, onImageChange, onImageRemove }) => {
       <label className="block text-sm font-medium text-gray-900 mb-2">
         Artwork Preview
       </label>
-      
+
       {preview ? (
         <div className="relative border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-50">
-          {preview.type === 'image' ? (
-            <img 
-              src={preview.url} 
-              alt="Artwork preview" 
+          {preview.type === "image" ? (
+            <img
+              src={preview.url}
+              alt="Artwork preview"
               className="w-full h-48 object-contain p-4"
             />
           ) : (
             <div className="flex items-center justify-center h-48 p-4">
               <div className="text-center">
-                <svg className="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                <svg
+                  className="w-12 h-12 text-gray-400 mx-auto mb-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  />
                 </svg>
-                <p className="text-sm font-medium text-gray-700">{preview.name}</p>
-                <p className="text-xs text-gray-500">{(preview.size / 1024).toFixed(2)} KB</p>
+                <p className="text-sm font-medium text-gray-700">
+                  {preview.name}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {(preview.size / 1024).toFixed(2)} KB
+                </p>
               </div>
             </div>
           )}
@@ -80,8 +112,12 @@ const ImageUpload = ({ index, preview, onImageChange, onImageRemove }) => {
             className="hidden"
           />
           <Upload className="w-8 h-8 text-gray-400 mb-2" />
-          <p className="text-sm text-gray-500 mb-1 font-medium">Upload artwork file</p>
-          <p className="text-xs text-gray-400">AI, PDF, PNG, JPG, SVG (Max 10MB)</p>
+          <p className="text-sm text-gray-500 mb-1 font-medium">
+            Upload artwork file
+          </p>
+          <p className="text-xs text-gray-400">
+            AI, PDF, PNG, JPG, SVG (Max 10MB)
+          </p>
         </label>
       )}
     </div>
@@ -89,118 +125,147 @@ const ImageUpload = ({ index, preview, onImageChange, onImageRemove }) => {
 };
 
 export default function ArtworkPlacement() {
+  
+  const {techpack_id} = useParams();
   const router = useRouter();
-  const { register, control, handleSubmit, watch, formState: { errors, isValid } } = useForm({
+
+  ////////////////// All api call are here //////////////////
+  const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
+    techpack_id,
+    { skip: !techpack_id },
+  );
+  const artworkData = techpackData?.step_six || [];
+  const [includeArtworkPlacement, { isLoading: isIncludingArtwork }] =
+    useIncludedArtworkPlacementMutation();
+  const [updateArtworkPlacement, { isLoading: isUpdatingArtwork }] =
+    useUpdateArtworkPlacementMutation();
+  /// -----------------------------------------------------///
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid },
+  } = useForm({
     defaultValues: {
-      artworks: []
-    }
+      artworks: [],
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'artworks',
+    name: "artworks",
   });
 
   const [artworkPreviews, setArtworkPreviews] = useState({});
 
   const handleAddArtwork = () => {
     append({
-      artworkName: '',
-      artworkType: '',
-      fileReference: '',
-      placementLocation: '',
-      coordinates: '',
-      artworkSize: '',
-      placementTolerance: '',
-      colorCount: '',
-      colorSeparation: '',
-      pantoneOrCMYK: '',
-      underbaseRequired: 'no',
-      perSizeOrGlobal: 'global',
-      method: '',
+      artworkName: "",
+      artworkType: "",
+      fileReference: "",
+      placementLocation: "",
+      coordinates: "",
+      artworkSize: "",
+      placementTolerance: "",
+      colorCount: "",
+      colorSeparation: "",
+      pantoneOrCMYK: "",
+      underbaseRequired: "no",
+      perSizeOrGlobal: "global",
+      method: "",
     });
   };
 
   const handleImageChange = (index, previewUrl, file) => {
-    setArtworkPreviews(prev => ({
+    setArtworkPreviews((prev) => ({
       ...prev,
       [index]: {
         url: previewUrl,
-        type: file.type.startsWith('image/') ? 'image' : 'pdf',
+        type: file.type.startsWith("image/") ? "image" : "pdf",
         name: file.name,
         size: file.size,
-        file: file
-      }
+        file: file,
+      },
     }));
   };
 
   const handleImageRemove = (index) => {
-    setArtworkPreviews(prev => {
+    setArtworkPreviews((prev) => {
       const updated = { ...prev };
       delete updated[index];
       return updated;
     });
   };
 
-  const onSubmit = (data) => {
-    console.log('Artwork Data:', data);
-    console.log('Artwork Files:', artworkPreviews);
-    console.log('Total Artworks:', data.artworks.length);
-    
-    // You can handle file upload here
+  const onSubmit = async (data) => {
+    const formData = new FormData();
+    formData.append("artworksData", JSON.stringify(data.artworks));
     Object.entries(artworkPreviews).forEach(([index, preview]) => {
-      console.log(`Artwork ${index} file:`, preview.file);
+      if (preview.file) {
+        formData.append(`artwork_${index}_file`, preview.file);
+        formData.append(`artwork_${index}_name`, preview.name);
+      }
     });
-    router.push('/dashboard/bom');
+    const payload = {
+      techpack_id,
+      data: formData,
+    };
+    try {
+      await includeArtworkPlacement(payload);
+    } catch (error) {
+      console.error("Error submitting artwork placement:", error);
+    }
   };
 
   const artworkTypeOptions = [
-    { value: 'print', label: 'Print' },
-    { value: 'embroidery', label: 'Embroidery' },
-    { value: 'patch', label: 'Patch' },
-    { value: 'applique', label: 'Appliqué' },
-    { value: 'heat-transfer', label: 'Heat Transfer' },
-    { value: 'screen-print', label: 'Screen Print' },
+    { value: "print", label: "Print" },
+    { value: "embroidery", label: "Embroidery" },
+    { value: "patch", label: "Patch" },
+    { value: "applique", label: "Appliqué" },
+    { value: "heat-transfer", label: "Heat Transfer" },
+    { value: "screen-print", label: "Screen Print" },
   ];
 
   const placementLocationOptions = [
-    { value: 'center-chest', label: 'Center Chest' },
-    { value: 'left-chest', label: 'Left Chest' },
-    { value: 'right-chest', label: 'Right Chest' },
-    { value: 'center-back', label: 'Center Back' },
-    { value: 'left-sleeve', label: 'Left Sleeve' },
-    { value: 'right-sleeve', label: 'Right Sleeve' },
-    { value: 'hood', label: 'Hood' },
-    { value: 'pocket', label: 'Pocket' },
-    { value: 'hem', label: 'Hem' },
+    { value: "center-chest", label: "Center Chest" },
+    { value: "left-chest", label: "Left Chest" },
+    { value: "right-chest", label: "Right Chest" },
+    { value: "center-back", label: "Center Back" },
+    { value: "left-sleeve", label: "Left Sleeve" },
+    { value: "right-sleeve", label: "Right Sleeve" },
+    { value: "hood", label: "Hood" },
+    { value: "pocket", label: "Pocket" },
+    { value: "hem", label: "Hem" },
   ];
 
   const pantoneOptions = [
-    { value: 'pantone', label: 'Pantone (Specify codes)' },
-    { value: 'cmyk', label: 'CMYK Process' },
-    { value: 'rgb', label: 'RGB (Digital Only)' },
-    { value: 'spot', label: 'Spot Color' },
+    { value: "pantone", label: "Pantone (Specify codes)" },
+    { value: "cmyk", label: "CMYK Process" },
+    { value: "rgb", label: "RGB (Digital Only)" },
+    { value: "spot", label: "Spot Color" },
   ];
 
   const underbaseOptions = [
-    { value: 'yes', label: 'Yes' },
-    { value: 'no', label: 'No' },
-    { value: 'white-only', label: 'White Underbase Only' },
+    { value: "yes", label: "Yes" },
+    { value: "no", label: "No" },
+    { value: "white-only", label: "White Underbase Only" },
   ];
 
   const scalingOptions = [
-    { value: 'global', label: 'Same Size All Sizes' },
-    { value: 'per-size', label: 'Scales Per Size' },
-    { value: 'custom', label: 'Custom Per Size' },
+    { value: "global", label: "Same Size All Sizes" },
+    { value: "per-size", label: "Scales Per Size" },
+    { value: "custom", label: "Custom Per Size" },
   ];
 
   const methodOptions = [
-    { value: 'screen-print', label: 'Screen Print' },
-    { value: 'heat-transfer', label: 'Heat Transfer' },
-    { value: 'dtg', label: 'Direct-to-Garment (DTG)' },
-    { value: 'embroidery', label: 'Embroidery' },
-    { value: 'sublimation', label: 'Sublimation' },
-    { value: 'applique', label: 'Appliqué' },
+    { value: "screen-print", label: "Screen Print" },
+    { value: "heat-transfer", label: "Heat Transfer" },
+    { value: "dtg", label: "Direct-to-Garment (DTG)" },
+    { value: "embroidery", label: "Embroidery" },
+    { value: "sublimation", label: "Sublimation" },
+    { value: "applique", label: "Appliqué" },
   ];
 
   return (
@@ -223,7 +288,10 @@ export default function ArtworkPlacement() {
             const artworkType = watch(`artworks.${index}.artworkType`);
 
             return (
-              <div key={field.id} className="bg-white rounded-lg border border-gray-200 p-4 md:p-6 shadow-sm">
+              <div
+                key={field.id}
+                className="bg-white rounded-lg border border-gray-200 p-4 md:p-6 shadow-sm"
+              >
                 {/* Card Header */}
                 <div className="flex items-start justify-between mb-6">
                   <div className="flex items-center gap-3">
@@ -235,13 +303,19 @@ export default function ArtworkPlacement() {
                         {artworkName || `Artwork ${index + 1}`}
                       </h3>
                       {artworkType && (
-                        <span className={`inline-block mt-1 px-2 py-0.5 rounded text-xs font-medium border ${
-                          artworkType === 'print' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-                          artworkType === 'embroidery' ? 'bg-purple-100 text-purple-700 border-purple-200' :
-                          artworkType === 'patch' ? 'bg-green-100 text-green-700 border-green-200' :
-                          'bg-gray-100 text-gray-700 border-gray-200'
-                        }`}>
-                          {artworkType.charAt(0).toUpperCase() + artworkType.slice(1)}
+                        <span
+                          className={`inline-block mt-1 px-2 py-0.5 rounded text-xs font-medium border ${
+                            artworkType === "print"
+                              ? "bg-blue-100 text-blue-700 border-blue-200"
+                              : artworkType === "embroidery"
+                                ? "bg-purple-100 text-purple-700 border-purple-200"
+                                : artworkType === "patch"
+                                  ? "bg-green-100 text-green-700 border-green-200"
+                                  : "bg-gray-100 text-gray-700 border-gray-200"
+                          }`}
+                        >
+                          {artworkType.charAt(0).toUpperCase() +
+                            artworkType.slice(1)}
                         </span>
                       )}
                     </div>
@@ -421,7 +495,7 @@ export default function ArtworkPlacement() {
         </button>
 
         {/* Navigation Buttons */}
-           {/* Navigation */}
+        {/* Navigation */}
         <div className="flex justify-between items-center my-6">
           <Link
             href="/dashboard/construction"

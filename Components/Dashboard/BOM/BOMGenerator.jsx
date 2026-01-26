@@ -1,13 +1,26 @@
-'use client';
-import React, { useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
-import { Plus, X, Package, ArrowLeft, ArrowRight } from 'lucide-react';
-import { Select, Input } from '@/Libs/Form-components/FormComponent';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+"use client";
+import React, { useEffect, useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { Plus, X, Package, ArrowRight, Loader2 } from "lucide-react";
+import { Select, Input } from "@/Libs/Form-components/FormComponent";
+import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
+import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
+import {
+  useIncludedBillOfMaterialsMutation,
+  useUpdateBillOfMaterialsMutation,
+} from "@/Apis/Poast-a-fashion/postAFashionApi";
+import { toast } from "react-toastify";
 
 // Textarea Component
-const Textarea = ({ label, name, register, errors, placeholder = '', helperText = '' }) => {
+const Textarea = ({
+  label,
+  name,
+  register,
+  errors,
+  placeholder = "",
+  helperText = "",
+}) => {
   return (
     <div>
       <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -20,97 +33,191 @@ const Textarea = ({ label, name, register, errors, placeholder = '', helperText 
         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
       />
       {helperText && <p className="text-xs text-gray-500 mt-1">{helperText}</p>}
-      {errors[name] && <p className="text-xs text-red-600 mt-1">{errors[name].message}</p>}
+      {errors[name] && (
+        <p className="text-xs text-red-600 mt-1">{errors[name].message}</p>
+      )}
     </div>
   );
 };
 
 export default function BOMGenerator() {
+  
+  const {techpack_id} = useParams();
+  const [haveId, setHaveId] = useState(null);
   const router = useRouter();
-  const { register, control, handleSubmit, watch, formState: { errors, isValid } } = useForm({
+
+  ///////////////////// All Api call are here /////////////////////
+
+  const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
+    techpack_id,
+    { skip: !techpack_id },
+  );
+  const bomData = techpackData?.step_seven || {};
+  const [includedMaterials, { isLoading: isIncludedMaterialsLoading }] =
+    useIncludedBillOfMaterialsMutation();
+  const [updateBillOfMaterials, { isLoading: isUpdateBillOfMaterialsLoading }] =
+    useUpdateBillOfMaterialsMutation();
+
+  //// --------------------------------------------------------- ////
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors, isValid },
+  } = useForm({
     defaultValues: {
       bomItems: [
         {
-          category: 'Fabric',
-          componentName: 'Primary Fabric 1',
-          material: 'Dolore a voluptate a -',
-          unit: 'Meter',
-          consumption: '1.50',
-          wastage: '10',
-          supplier: 'In dolore magni nisi',
-          moq: '335',
-          leadTime: 'e.g., 30 days, 2 weeks',
-          costPerUnit: 'e.g., 10.00, 5.50',
-          currency: 'USD',
-          notes: 'GSM: Aut eiusmod at quaer, Color: Ut esse omnis qui q, Finish:'
+          category: "Fabric",
+          componentName: "Primary Fabric 1",
+          material: "Dolore a voluptate a -",
+          unit: "Meter",
+          consumption: "1.50",
+          wastage: "10",
+          supplier: "In dolore magni nisi",
+          moq: "335",
+          leadTime: "e.g., 30 days, 2 weeks",
+          costPerUnit: "e.g., 10.00, 5.50",
+          currency: "USD",
+          notes:
+            "GSM: Aut eiusmod at quaer, Color: Ut esse omnis qui q, Finish:",
         },
-        {
-          category: 'Thread',
-          componentName: 'Sewing Thread',
-          material: 'Polyester',
-          unit: '',
-          consumption: '0.1',
-          wastage: '5',
-          supplier: 'e.g., ABC Textiles Ltd.',
-          moq: 'e.g., 500 meters, 100 pieces',
-          leadTime: 'e.g., 30 days, 2 weeks',
-          costPerUnit: 'e.g., 10.00, 5.50',
-          currency: 'USD',
-          notes: 'Standard sewing thread'
-        }
-      ]
-    }
+      ],
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'bomItems',
+    name: "bomItems",
   });
 
   const handleAddBOM = () => {
     append({
-      category: '',
-      componentName: '',
-      material: '',
-      unit: '',
-      consumption: '',
-      wastage: '',
-      supplier: '',
-      moq: '',
-      leadTime: '',
-      costPerUnit: '',
-      currency: 'USD',
-      notes: ''
+      id: "",
+      category: "",
+      componentName: "",
+      material: "",
+      unit: "",
+      consumption: "",
+      wastage: "",
+      supplier: "",
+      moq: "",
+      leadTime: "",
+      costPerUnit: "",
+      currency: "USD",
+      notes: "",
     });
   };
 
-  const onSubmit = (data) => {
-    console.log('BOM Data:', data);
-    router.push('/dashboard/review');
+  const onSubmit = async (data) => {
+    if (haveId) {
+      const updatePayload = {
+        techpack_id,
+        data: data.bomItems.map((item) => ({
+          id: item.id,
+          category: item.category,
+          component_name: item.componentName,
+          material_composition: item.material,
+          unit: item.unit,
+          consumption: item.consumption,
+          wastage: item.wastage,
+          supplier: item.supplier,
+          moq: item.moq,
+          lead_time: item.leadTime,
+          cost_per_unit: item.costPerUnit,
+          currency: item.currency,
+          notes: item.notes,
+        })),
+      };
+      try {
+        await updateBillOfMaterials(updatePayload).unwrap();
+        toast.success("BOM data updated successfully!");
+        router.push(`/${techpack_id}/review/`);
+      } catch (error) {
+        toast.error("Failed to update BOM data.");
+        console.error("Error updating BOM data:", error);
+      }
+    } else {
+      const payload = {
+        techpack_id,
+        data: data.bomItems.map((item) => ({
+          category: item.category,
+          component_name: item.componentName,
+          material_composition: item.material,
+          unit: item.unit,
+          consumption: item.consumption,
+          cost_per_unit: item.costPerUnit,
+          currency: item.currency,
+          notes: item.notes,
+          wastage: item.wastage,
+          supplier: item.supplier,
+          moq: item.moq,
+          lead_time: item.leadTime,
+        })),
+      };
+      try {
+        await includedMaterials(payload).unwrap();
+        toast.success("BOM data submitted successfully!");
+        router.push(`/${techpack_id}/review/`);
+      } catch (error) {
+        toast.error("Failed to submit BOM data.");
+        console.error("Error submitting BOM data:", error);
+      }
+    }
+
+    // console.log('BOM Data:', data);
+    // router.push('/dashboard/review');
   };
 
+  useEffect(() => {
+    if (bomData && bomData.length > 0) {
+      setHaveId(true);
+      const mappedBOMItems = bomData.map((item) => ({
+        id: item.id,
+        category: item.category,
+        componentName: item.component_name,
+        material: item.material_composition,
+        unit: item.unit,
+        consumption: item.consumption,
+        wastage: item.wastage,
+        supplier: item.supplier,
+        moq: item.moq,
+        leadTime: item.lead_time,
+        costPerUnit: item.cost_per_unit,
+        currency: item.currency,
+        notes: item.notes,
+      }));
+      setValue("bomItems", mappedBOMItems);
+    } else {
+      setHaveId(false);
+    }
+  }, [bomData]);
+
   const categoryOptions = [
-    { value: 'Fabric', label: 'Fabric' },
-    { value: 'Thread', label: 'Thread' },
-    { value: 'Trim', label: 'Trim' },
-    { value: 'Accessory', label: 'Accessory' },
-    { value: 'Packaging', label: 'Packaging' },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Thread", label: "Thread" },
+    { value: "Trim", label: "Trim" },
+    { value: "Accessory", label: "Accessory" },
+    { value: "Packaging", label: "Packaging" },
   ];
 
   const unitOptions = [
-    { value: 'Meter', label: 'Meter' },
-    { value: 'Piece', label: 'Piece' },
-    { value: 'Yard', label: 'Yard' },
-    { value: 'Kilogram', label: 'Kilogram' },
-    { value: 'Set', label: 'Set' },
+    { value: "Meter", label: "Meter" },
+    { value: "Piece", label: "Piece" },
+    { value: "Yard", label: "Yard" },
+    { value: "Kilogram", label: "Kilogram" },
+    { value: "Set", label: "Set" },
   ];
 
   const currencyOptions = [
-    { value: 'USD', label: 'USD' },
-    { value: 'EUR', label: 'EUR' },
-    { value: 'GBP', label: 'GBP' },
-    { value: 'INR', label: 'INR' },
-    { value: 'CNY', label: 'CNY' },
+    { value: "USD", label: "USD" },
+    { value: "EUR", label: "EUR" },
+    { value: "GBP", label: "GBP" },
+    { value: "INR", label: "INR" },
+    { value: "CNY", label: "CNY" },
   ];
 
   return (
@@ -122,7 +229,8 @@ export default function BOMGenerator() {
             Bill of Materials (BOM)
           </h1>
           <p className="text-gray-600 text-xs md:text-sm">
-            Comprehensive material breakdown with supplier and costing information
+            Comprehensive material breakdown with supplier and costing
+            information
           </p>
         </div>
 
@@ -131,9 +239,12 @@ export default function BOMGenerator() {
           {fields.map((field, index) => {
             const category = watch(`bomItems.${index}.category`);
             const itemErrors = errors.bomItems?.[index] || {};
-            
+
             return (
-              <div key={field.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+              <div
+                key={field.id}
+                className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"
+              >
                 {/* Card Header */}
                 <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
                   <div className="flex items-center justify-between">
@@ -141,7 +252,11 @@ export default function BOMGenerator() {
                       <Package className="w-5 h-5 text-gray-600" />
                       <h3 className="font-medium text-gray-900">
                         BOM Item {index + 1}
-                        {category && <span className="text-gray-600 font-normal ml-2">({category})</span>}
+                        {category && (
+                          <span className="text-gray-600 font-normal ml-2">
+                            ({category})
+                          </span>
+                        )}
                       </h3>
                     </div>
                     <button
@@ -158,7 +273,9 @@ export default function BOMGenerator() {
                 <div className="p-6 space-y-6">
                   {/* Basic Information */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-4">Basic Information</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-4">
+                      Basic Information
+                    </h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Select
                         label="Category"
@@ -195,7 +312,9 @@ export default function BOMGenerator() {
 
                   {/* Quantities & Consumption */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-4">Quantities & Consumption</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-4">
+                      Quantities & Consumption
+                    </h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Select
                         label="Unit"
@@ -231,7 +350,9 @@ export default function BOMGenerator() {
 
                   {/* Supplier Information */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-4">Supplier Information</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-4">
+                      Supplier Information
+                    </h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Input
                         label="Supplier"
@@ -264,7 +385,9 @@ export default function BOMGenerator() {
 
                   {/* Costing Information */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-4">Costing Information</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-4">
+                      Costing Information
+                    </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Input
                         label="Cost per Unit"
@@ -318,7 +441,7 @@ export default function BOMGenerator() {
         {/* Navigation */}
         <div className="flex justify-between items-center my-6">
           <Link
-            href="/dashboard/artwork"
+            href={`/${techpack_id}/artwork`}
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
@@ -327,15 +450,25 @@ export default function BOMGenerator() {
           <div className="flex flex-col items-end gap-2">
             <button
               type="submit"
-              disabled={!isValid}
+              disabled={
+                !isValid ||
+                isIncludedMaterialsLoading ||
+                isUpdateBillOfMaterialsLoading
+              }
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
-                !isValid
+                !isValid ||
+                isIncludedMaterialsLoading ||
+                isUpdateBillOfMaterialsLoading
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-gray-900 text-white hover:bg-gray-800"
               }`}
             >
-              Next: Review & Submit
-              <ArrowRight className="w-4 h-4" />
+              Next: Review & Submit{" "}
+              {isIncludedMaterialsLoading || isUpdateBillOfMaterialsLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <ArrowRight className="w-4 h-4" />
+              )}
             </button>
             {!isValid && (
               <p className="text-sm text-red-600">

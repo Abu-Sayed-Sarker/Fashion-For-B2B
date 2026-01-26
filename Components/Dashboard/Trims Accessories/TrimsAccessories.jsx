@@ -1,9 +1,16 @@
 "use client";
-import { useForm, useFieldArray } from 'react-hook-form';
-import { Plus, X, Tag, Zap, Scissors, Package, ArrowRight } from 'lucide-react';
-import { Input, Select } from '@/Libs/Form-components/FormComponent';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useForm, useFieldArray } from "react-hook-form";
+import { Plus, X, Tag, Zap, Scissors, Package, ArrowRight, Loader2 } from "lucide-react";
+import { Input, Select } from "@/Libs/Form-components/FormComponent";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
+import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
+import React from "react";
+import {
+  useIncludedTrimsMutation,
+  useUpdateTrimsMutation,
+} from "@/Apis/Poast-a-fashion/postAFashionApi";
+import { toast } from "react-toastify";
 
 const trimIcons = {
   button: Tag,
@@ -19,63 +26,156 @@ const trimIcons = {
 };
 
 export default function TrimsAccessories() {
-const router = useRouter();
-  const { register, control, handleSubmit, watch, formState: { errors, isValid } } = useForm({
+  const router = useRouter();
+  
+  const {techpack_id} = useParams();
+  const [haveId, setHaveId] = React.useState(null);
+  //////// All api call are here ////////
+  const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
+    techpack_id,
+    { skip: !techpack_id },
+  );
+  const trimData = techpackData?.step_four || [];
+
+  const [includedTrims, { isLoading: isIncludingTrims }] =
+    useIncludedTrimsMutation();
+  const [updateTrims, { isLoading: isUpdatingTrims }] =
+    useUpdateTrimsMutation();
+
+  ///----------------------------------------///
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid },
+    setValue,
+  } = useForm({
     defaultValues: {
-      trims: []
-    }
+      trims: [],
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'trims',
+    name: "trims",
   });
 
   const handleAddTrim = () => {
     append({
-      trimType: '',
-      material: '',
-      size: '',
-      color: '',
-      finish: '',
-      placement: '',
-      consumption: '',
-      brandOrGeneric: 'generic',
-      supplier: '',
-      colorLogic: 'match',
+      trimType: "",
+      material: "",
+      size: "",
+      color: "",
+      finish: "",
+      placement: "",
+      consumption: "",
+      brandOrGeneric: "generic",
+      supplier: "",
+      colorLogic: "match",
     });
   };
 
-  const onSubmit = (data) => {
-    console.log('Trims Data:', data);
-    console.log('Total Trims:', data.trims.length);
-    router.push('/dashboard/construction');
+  const onSubmit = async (data) => {
+    if (haveId) {
+      const updatePayload = {
+        techpack_id,
+        data: data.trims.map((trim) => ({
+          id: trim.id,
+          trim_type: trim.trimType,
+          material: trim.material,
+          placement: trim.placement,
+          finish: trim.finish,
+          consumption: trim.consumption,
+          size: trim.size,
+          color: trim.color,
+          brand: trim.brandOrGeneric,
+          color_logic: trim.colorLogic,
+          supplier: trim.supplier,
+        })),
+      };
+      try {
+        await updateTrims(updatePayload).unwrap();
+        toast.success("Trims & Accessories updated successfully!");
+        router.push(`/${techpack_id}/construction`);
+      } catch (error) {
+        toast.error("Failed to update Trims & Accessories.");
+        console.error("Error updating Trims & Accessories:", error);
+      }
+    } else {
+      const payload = {
+        techpack_id,
+        data: data.trims.map((trim) => ({
+          trim_type: trim.trimType,
+          material: trim.material,
+          placement: trim.placement,
+          consumption: trim.consumption,
+          size: trim.size,
+          finish: trim.finish,
+          color: trim.color,
+          brand: trim.brandOrGeneric,
+          color_logic: trim.colorLogic,
+          supplier: trim.supplier,
+        })),
+      };
+      try {
+        console.log("payload", payload);
+        await includedTrims(payload).unwrap();
+        toast.success("Trims & Accessories added successfully!");
+        router.push(`/${techpack_id}/construction`);
+      } catch (error) {
+        toast.error("Failed to add Trims & Accessories.");
+        console.error("Error adding Trims & Accessories:", error);
+      }
+    }
   };
 
   const trimTypeOptions = [
-    { value: 'button', label: 'Button' },
-    { value: 'zipper', label: 'Zipper' },
-    { value: 'label', label: 'Label' },
-    { value: 'thread', label: 'Thread' },
-    { value: 'elastic', label: 'Elastic' },
-    { value: 'drawcord', label: 'Drawcord' },
-    { value: 'snap', label: 'Snap' },
-    { value: 'hook', label: 'Hook & Eye' },
-    { value: 'velcro', label: 'Velcro' },
-    { value: 'rivet', label: 'Rivet' },
+    { value: "button", label: "Button" },
+    { value: "zipper", label: "Zipper" },
+    { value: "label", label: "Label" },
+    { value: "thread", label: "Thread" },
+    { value: "elastic", label: "Elastic" },
+    { value: "drawcord", label: "Drawcord" },
+    { value: "snap", label: "Snap" },
+    { value: "hook", label: "Hook & Eye" },
+    { value: "velcro", label: "Velcro" },
+    { value: "rivet", label: "Rivet" },
   ];
 
   const brandOptions = [
-    { value: 'generic', label: 'Generic' },
-    { value: 'branded', label: 'Branded' },
+    { value: "generic", label: "Generic" },
+    { value: "branded", label: "Branded" },
   ];
 
   const colorLogicOptions = [
-    { value: 'match', label: 'Match Garment' },
-    { value: 'contrast', label: 'Contrast' },
-    { value: 'pantone', label: 'Pantone (Specify)' },
-    { value: 'custom', label: 'Custom Color' },
+    { value: "match", label: "Match Garment" },
+    { value: "contrast", label: "Contrast" },
+    { value: "pantone", label: "Pantone (Specify)" },
+    { value: "custom", label: "Custom Color" },
   ];
+
+
+  React.useEffect(() => {
+    if (trimData && trimData.length > 0 && !isLoading) {
+      setHaveId(trimData[0].id);
+      const formattedTrims = trimData.map((trim) => ({
+        id: trim.id,
+        trimType: trim.trim_type || "",
+        material: trim.material || "",
+        placement: trim.placement || "",
+        consumption: trim.consumption || "",
+        size: trim.size || "",
+        color: trim.color || "",
+        finish: trim.finish || "",
+        brandOrGeneric: trim.brand || "",
+        supplier: trim.supplier || "",
+        colorLogic: trim.color_logic || "",
+      }));
+      setValue("trims", formattedTrims);
+    }
+  }, [trimData]);
 
   return (
     <>
@@ -97,7 +197,10 @@ const router = useRouter();
             const Icon = trimIcons[trimType] || Tag;
 
             return (
-              <div key={field.id} className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden">
+              <div
+                key={field.id}
+                className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden"
+              >
                 {/* Card Header */}
                 <div className="px-4 md:px-6 py-3 md:py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -242,10 +345,10 @@ const router = useRouter();
           Add Trim / Accessory
         </button>
 
-          {/* Navigation */}
+        {/* Navigation */}
         <div className="flex justify-between items-center my-6">
           <Link
-            href="/dashboard/fabrics"
+            href={`/${techpack_id}/fabrics`}
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
@@ -254,15 +357,14 @@ const router = useRouter();
           <div className="flex flex-col items-end gap-2">
             <button
               type="submit"
-              disabled={!isValid}
+              disabled={!isValid || isIncludingTrims || isUpdatingTrims}
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
-                !isValid
+                !isValid || isIncludingTrims || isUpdatingTrims
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-gray-900 text-white hover:bg-gray-800"
               }`}
             >
-              Next: Construction Details
-              <ArrowRight className="w-4 h-4" />
+              Next: Construction Details {isIncludingTrims || isUpdatingTrims ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
             </button>
             {!isValid && (
               <p className="text-sm text-red-600">
