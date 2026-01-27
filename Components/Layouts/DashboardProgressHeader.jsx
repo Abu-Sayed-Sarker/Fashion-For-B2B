@@ -1,36 +1,36 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Check } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 
 const DashboardProgressHeader = () => {
   const pathname = usePathname();
+  const {techpack_id} = useParams();
   const [currentStep, setCurrentStep] = useState(1);
-
-
+  
   const getPathStep = (path) => {
     switch (path) {
       case "/dashboard":
         return 1;
-      case "/dashboard/measurements":
+      case `/${techpack_id}/measurements`:
         return 2;
-      case "/dashboard/fabrics":
-        return 3;
-      case "/dashboard/trims":
+        case `/${techpack_id}/fabrics`:
+          return 3;
+          case `/${techpack_id}/trims`:
         return 4;
-      case "/dashboard/construction":
+      case `/${techpack_id}/construction`:
         return 5;
-      case "/dashboard/artwork":
+      case `/${techpack_id}/artwork`:
         return 6;
-      case "/dashboard/bom":
+        case `/${techpack_id}/bom`:
         return 7;
-      case "/dashboard/review":
+      case `/${techpack_id}/review`:
         return 8;
-      default:
-        return 1;
-    }
-  };
-
+        default:
+          return 1;
+        }
+      };
+      
   const steps = [
     { id: 1, label: "Setup" },
     { id: 2, label: "Measurements" },

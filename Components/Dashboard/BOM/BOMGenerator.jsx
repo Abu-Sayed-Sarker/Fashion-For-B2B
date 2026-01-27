@@ -173,7 +173,7 @@ export default function BOMGenerator() {
   };
 
   useEffect(() => {
-    if (bomData && bomData.length > 0) {
+    if (bomData && bomData.length > 0 && !isLoading) {
       setHaveId(true);
       const mappedBOMItems = bomData.map((item) => ({
         id: item.id,
@@ -194,7 +194,7 @@ export default function BOMGenerator() {
     } else {
       setHaveId(false);
     }
-  }, [bomData]);
+  }, [bomData, isLoading]);
 
   const categoryOptions = [
     { value: "Fabric", label: "Fabric" },

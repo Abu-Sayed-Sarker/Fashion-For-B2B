@@ -39,7 +39,7 @@ const postAFashionApi = api.injectEndpoints({
     updateIncludedMaterials: build.mutation({
       query: (data) => ({
         url: `fashion/techpacks/${data?.techpack_id}/step-2/`,
-        method: "PATCH",
+        method: "PUT",
         body: data.data,
       }),
       invalidatesTags: ["includedMaterials"],
