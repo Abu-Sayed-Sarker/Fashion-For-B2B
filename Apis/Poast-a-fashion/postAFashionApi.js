@@ -52,6 +52,13 @@ const postAFashionApi = api.injectEndpoints({
       }),
       invalidatesTags: ["includedMaterials", "fashionTechpacks"],
     }),
+    deleteAMaterialObject: build.mutation({
+      query: (data) => ({
+        url: `fashion/techpacks/${data?.techpack_id}/step-2/${data?.material_id}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["includedMaterials", "fashionTechpacks"],
+    }),
     ////////// Included Fabrics //////////
     getIncludedFabrics: build.query({
       query: (techpack_id) => `fashion/techpacks/${techpack_id}/step-3/`,
