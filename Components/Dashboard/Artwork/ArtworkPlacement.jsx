@@ -8,6 +8,7 @@ import {
   Upload,
   Trash2,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 
 import { Input, Select } from "@/Libs/Form-components/FormComponent";
@@ -140,7 +141,6 @@ export default function ArtworkPlacement() {
   const [updateArtworkPlacement, { isLoading: isUpdatingArtwork }] =
     useUpdateArtworkPlacementMutation();
   /// -----------------------------------------------------///
-
   const {
     register,
     control,
@@ -498,7 +498,7 @@ export default function ArtworkPlacement() {
         {/* Navigation */}
         <div className="flex justify-between items-center my-6">
           <Link
-            href="/dashboard/construction"
+            href={`/${techpack_id}/construction`}
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
@@ -507,15 +507,15 @@ export default function ArtworkPlacement() {
           <div className="flex flex-col items-end gap-2">
             <button
               type="submit"
-              disabled={!isValid}
+              disabled={!isValid || isIncludingArtwork || isUpdatingArtwork}
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
-                !isValid
+                !isValid || isIncludingArtwork || isUpdatingArtwork
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-gray-900 text-white hover:bg-gray-800"
               }`}
             >
-              Next: Bill of Materials
-              <ArrowRight className="w-4 h-4" />
+              Next: Bill of Materials {isIncludingArtwork || isUpdatingArtwork ? <Loader2 className="w-4 h-4 animate-spin" /> : 
+              <ArrowRight className="w-4 h-4" />}
             </button>
             {!isValid && (
               <p className="text-sm text-red-600">

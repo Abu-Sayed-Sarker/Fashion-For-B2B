@@ -111,7 +111,7 @@ const GarmentSetup = () => {
       try {
         await postGarmentSetup(payload).unwrap();
         toast.success("Garment setup submitted successfully!");
-        route.push(`/dashboard/measurements?id=${techpack_id}`);
+        route.push(`/${techpack_id}/measurements`);
       } catch (error) {
         toast.error("Failed to submit garment setup.");
         console.error("Error submitting garment setup:", error);

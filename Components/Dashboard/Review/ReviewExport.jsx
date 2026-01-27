@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ArrowLeft, Download, FileText, AlertCircle, Home, ChevronRight } from 'lucide-react';
 import { useCheckReviewDataValidation } from '@/Hooks/useCheckReviewDataValidation';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 // Mock data for demonstration
 const mockData = {
@@ -50,6 +51,7 @@ const mockData = {
 const mockValidation = useCheckReviewDataValidation(mockData);
 
 export default function ReviewExport() {
+  const {techpack_id} = useParams();
   const [confirmed, setConfirmed] = useState(false);
   const data = mockData;
   const validation = mockValidation;

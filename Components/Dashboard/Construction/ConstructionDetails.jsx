@@ -6,7 +6,11 @@ import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
 import { useEffect, useState } from "react";
-import { useIncludedConstructionDetailsMutation, useUpdateConstructionDetailsMutation } from "@/Apis/Poast-a-fashion/postAFashionApi";
+import {
+  useIncludedConstructionDetailsMutation,
+  useUpdateConstructionDetailsMutation,
+} from "@/Apis/Poast-a-fashion/postAFashionApi";
+import { toast } from "react-toastify";
 
 // Garment-type specific construction areas
 const GARMENT_CONSTRUCTION_AREAS = {
@@ -262,8 +266,7 @@ const GARMENT_CONSTRUCTION_AREAS = {
 };
 
 export default function ConstructionDetails() {
-  
-  const {techpack_id} = useParams();
+  const { techpack_id } = useParams();
   const router = useRouter();
   const [haveId, setHaveId] = useState(null);
   const [garmentType, setGarmentType] = useState("");
@@ -279,7 +282,6 @@ export default function ConstructionDetails() {
   const garmentData = techpackData?.step_one || {};
   const constructionData = techpackData?.step_five || [];
 
-  console.log("construction data", constructionData);
   const [includedConstructionDetails, { isLoading: isIncludingConstruction }] =
     useIncludedConstructionDetailsMutation();
   const [updateConstructionDetails, { isLoading: isUpdatingConstruction }] =
@@ -291,6 +293,7 @@ export default function ConstructionDetails() {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -300,6 +303,7 @@ export default function ConstructionDetails() {
         acc[area.area] = {
           stitchType: "",
           spi: "",
+          id: "",
           seamAllowance: "",
           reinforcement: "",
           topstitch: "",
@@ -323,29 +327,59 @@ export default function ConstructionDetails() {
   });
 
   const hasErrors = missingFields.length > 0;
-
-  // "construction_name": "Nechk Type",
-  //       "stitch_type": "Tank df step -5 ",
-  //       "spi": "18"
-  const onSubmit = async(data) => {
+  const onSubmit = async (data) => {
     if (hasErrors) {
       return;
     }
-    const payload = {
-      techpack_id,
-      data: {
-        construction_details: currentAreas.map((area) => ({
-          construction_name: area.title,
-          stitch_type: data[area.area].stitchType,
-          spi: data[area.area].spi,
-          seam_allowance: data[area.area].seamAllowance,
-          reinforcement: data[area.area].reinforcement,
-          topstitch: data[area.area].topstitch,
-        })),
-        special_instructions: data.specialInstructions,
-      },
-    };
 
+    if (haveId) {
+      const updatePayload = {
+        techpack_id,
+        data: {
+          items: currentAreas.map((area) => ({
+            id: data[area.area].id,
+            construction_name: area.title,
+            stitch_type: data[area.area].stitchType,
+            spi: data[area.area].spi,
+            seam_allowance: data[area.area].seamAllowance,
+            reinforcement_points: data[area.area].reinforcement,
+            topstitch_logic: data[area.area].topstitch,
+          })),
+          step_five_notes: data.specialInstructions,
+        },
+      };
+      try {
+        await updateConstructionDetails(updatePayload).unwrap();
+        toast.success("Construction details updated successfully!");
+        router.push(`/${techpack_id}/artwork`);
+      } catch (error) {
+        toast.error("Failed to update construction details.");
+        console.error("Error updating construction details:", error);
+      }
+    } else {
+      const payload = {
+        techpack_id,
+        data: {
+          items: currentAreas.map((area) => ({
+            construction_name: area.title,
+            stitch_type: data[area.area].stitchType,
+            spi: data[area.area].spi,
+            seam_allowance: data[area.area].seamAllowance,
+            reinforcement_points: data[area.area].reinforcement,
+            topstitch_logic: data[area.area].topstitch,
+          })),
+          step_five_notes: data.specialInstructions,
+        },
+      };
+      try {
+        await includedConstructionDetails(payload).unwrap();
+        toast.success("Construction details included successfully!");
+        router.push(`/${techpack_id}/artwork`);
+      } catch (error) {
+        toast.error("Failed to include construction details.");
+        console.error("Error including construction details:", error);
+      }
+    }
 
     // console.log("Construction Details:", data);
     // router.push("/dashboard/artwork");
@@ -381,12 +415,37 @@ export default function ConstructionDetails() {
     { value: "tape", label: "Reinforcement Tape" },
     { value: "none", label: "None" },
   ];
-
   useEffect(() => {
     if (garmentData) {
       setGarmentType(garmentData?.garment_type?.toLowerCase() || "t-shirt");
     }
   }, [garmentData]);
+
+
+
+  useEffect(() => {
+    if (constructionData && !isLoading) {
+      setValue("specialInstructions", constructionData?.step_five_notes || "");
+      setHaveId(constructionData?.items?.length > 0 ? true : false);
+      if (constructionData.length > 0) {
+        constructionData.forEach((item) => {
+          const matchingArea = currentAreas.find(
+            (area) => area.title === item.construction_name
+          );
+          if (matchingArea) {
+            setValue(`${matchingArea.area}.id`, item?.id);
+            setValue(`${matchingArea.area}.stitchType`, item?.stitch_type);
+            setValue(`${matchingArea.area}.spi`, item?.spi);
+            setValue(`${matchingArea.area}.seamAllowance`, item?.seam_allowance);
+            setValue(`${matchingArea.area}.reinforcement`, item?.reinforcement_points);
+            setValue(`${matchingArea.area}.topstitch`, item?.topstitch_logic);
+          }
+        });
+      }
+    }
+  }, [constructionData, isLoading, setValue, currentAreas]); 
+
+
   return (
     <>
       <div className="container mx-auto">

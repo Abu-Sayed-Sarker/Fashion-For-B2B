@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { Plus, X, Info, ArrowRight, Loader2 } from "lucide-react";
+import { Plus, X, Info, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { Select } from "@/Libs/Form-components/FormComponent";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -448,8 +448,8 @@ export default function MeasurementSpecification() {
       measurements: mandatoryMeasurements.map((m) => ({
         id: "",
         pom: m.pom,
-        value: "0.2",
-        tolerance: String(m.defaultTolerance),
+        value: 0.2,
+        tolerance: m.defaultTolerance,
         unit: "cm",
         instruction: m.instruction,
         required: true,
@@ -469,39 +469,43 @@ export default function MeasurementSpecification() {
     }, {});
   }, [mandatoryMeasurements]);
 
-  const handlePomChange = (event, index) => {
+  const handlePomChange = useCallback((event, index) => {
     const newPom = event.target.value.toLowerCase();
     const instruction = pomInstructionMap[newPom];
 
-    if (fields[index].required) {
-      // For originally mandatory rows, keep instruction in sync or clear it.
+    if (fields[index]?.required) {
       setValue(`measurements.${index}.instruction`, instruction || "");
     } else {
-      // For custom rows, only fill if a match is found. Don't clear user input.
       if (instruction) {
         setValue(`measurements.${index}.instruction`, instruction);
       }
     }
-  };
+  }, [pomInstructionMap, setValue]);
+
   const measurementUnit = watch("measurementUnit");
 
   // Update all measurement units when the global unit changes
   useEffect(() => {
-    fields.forEach((_, index) => {
-      setValue(`measurements.${index}.unit`, measurementUnit);
-    });
-  }, [measurementUnit, fields, setValue]);
+    if (fields.length > 0 && measurementUnit) {
+      const timer = setTimeout(() => {
+        fields.forEach((_, index) => {
+          setValue(`measurements.${index}.unit`, measurementUnit);
+        });
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [measurementUnit, fields.length, setValue]);
 
-  const handleAddRow = () => {
+  const handleAddRow = useCallback(() => {
     append({
       pom: "",
-      value: "0.2",
-      tolerance: "±0.5",
+      value: 0.2,
+      tolerance: 0.5,
       unit: measurementUnit,
       instruction: "",
       required: false,
     });
-  };
+  }, [append, measurementUnit]);
 
   const baseSizeOptions = [
     { value: "XXS", label: "XXS" },
@@ -520,6 +524,7 @@ export default function MeasurementSpecification() {
   ];
 
   const requiredCount = fields.filter((f) => f.required).length;
+  console.log("Required count:", measurementId);
 
   const onSubmit = async (data) => {
     if (measurementId) {
@@ -537,7 +542,7 @@ export default function MeasurementSpecification() {
     try {
        await updateIncludedMaterials(updatePayload).unwrap();
       toast.success("Included Materials updated successfully!");
-      route.push(`/dashboard/fabrics?id=${techpack_id}`);
+      route.push(`/${techpack_id}/fabrics`);
     } catch (error) {
       toast.error("Failed to update included materials.");
       console.error("Error updating included materials:", error);
@@ -558,7 +563,7 @@ export default function MeasurementSpecification() {
       try {
         await includedMaterials(payload).unwrap();
         toast.success("Included Materials submitted successfully!");
-        route.push(`/dashboard/fabrics?id=${techpack_id}`);
+        route.push(`/${techpack_id}/fabrics`);
       } catch (error) {
         toast.error("Failed to submit included materials.");
         console.error("Error submitting included materials:", error);
@@ -575,8 +580,8 @@ export default function MeasurementSpecification() {
       const formattedMeasurements = measurementData.map((m) => ({
         id: m.id,
         pom: m.pom_name,
-        value: m.value,
-        tolerance: m.tolerance,
+        value: m.value ? parseFloat(m.value) : 0.2,
+        tolerance: m.tolerance ? parseFloat(m.tolerance) : 0.5,
         unit: m.unit,
         instruction: m.measurement_instruction,
         required: true,
@@ -594,7 +599,7 @@ export default function MeasurementSpecification() {
   }, [garmentData, isLoading, setValue]);
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)} className="max-w-7xl mx-auto">
+      <form onSubmit={handleSubmit(onSubmit)} className="container mx-auto">
         {/* Header */}
         <div className="mb-4 md:mb-6">
           <h1 className="text-xl md:text-2xl font-semibold text-gray-900 mb-1">
@@ -686,10 +691,20 @@ export default function MeasurementSpecification() {
                   </label>
                   <input
                     {...register(`measurements.${index}.value`, {
-                      required: true,
+                      required: "Value is required",
+                      min: { value: 0.1, message: "Value must be greater than 0" },
+                      validate: (val) => (val !== "" && val !== null && val !== undefined && !isNaN(val)) || "Value cannot be empty",
+                      valueAsNumber: true,
+                      onChange: (e) => {
+                        const val = e.target.value;
+                        if (val === "" || val === null) {
+                          e.target.value = "0.2";
+                        }
+                      },
                     })}
                     type="number"
                     step="0.1"
+                    min="0.1"
                     placeholder="0.2"
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -702,9 +717,21 @@ export default function MeasurementSpecification() {
                   </label>
                   <input
                     {...register(`measurements.${index}.tolerance`, {
-                      required: true,
+                      required: "Tolerance is required",
+                      min: { value: 0.1, message: "Tolerance must be greater than 0" },
+                      validate: (val) => (val !== "" && val !== null && val !== undefined && !isNaN(val)) || "Tolerance cannot be empty",
+                      valueAsNumber: true,
+                      onChange: (e) => {
+                        const val = e.target.value;
+                        if (val === "" || val === null) {
+                          e.target.value = "0.5";
+                        }
+                      },
                     })}
-                    placeholder="±0.5"
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    placeholder="0.5"
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -753,6 +780,32 @@ export default function MeasurementSpecification() {
 
         {/* Desktop: Table View */}
         <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden mb-6">
+          {/* Error Summary at Top */}
+          {errors.measurements && Object.keys(errors.measurements).length > 0 && (
+            <div className="bg-red-50 border-b border-red-200 p-4">
+              <div className="flex gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-red-900 mb-2">Validation Errors</h3>
+                  <ul className="text-sm text-red-800 space-y-1 list-disc list-inside">
+                    {fields.map((field, index) => {
+                      const fieldErrors = errors.measurements?.[index];
+                      if (!fieldErrors) return null;
+                      return (
+                        <li key={`error-${index}`}>
+                          <strong>{field.pom || `Row ${index + 1}`}:</strong>
+                          {fieldErrors.pom && ` ${fieldErrors.pom.message}`}
+                          {fieldErrors.value && ` ${fieldErrors.value.message}`}
+                          {fieldErrors.tolerance && ` ${fieldErrors.tolerance.message}`}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -809,12 +862,26 @@ export default function MeasurementSpecification() {
                       <td className="px-4 py-3">
                         <input
                           {...register(`measurements.${index}.value`, {
-                            required: true,
+                            required: "Value is required",
+                            min: { value: 0.1, message: "Value must be greater than 0" },
+                            validate: (val) => (val !== "" && val !== null && val !== undefined && !isNaN(val)) || "Value cannot be empty",
+                            valueAsNumber: true,
+                            onChange: (e) => {
+                              const val = e.target.value;
+                              if (val === "" || val === null) {
+                                e.target.value = "0.2";
+                              }
+                            },
                           })}
                           type="number"
                           step="0.1"
+                          min="0.1"
                           placeholder="0.2"
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            errors.measurements?.[index]?.value
+                              ? "border-red-500 bg-red-50"
+                              : "border-gray-300"
+                          }`}
                         />
                       </td>
 
@@ -822,10 +889,26 @@ export default function MeasurementSpecification() {
                       <td className="px-4 py-3">
                         <input
                           {...register(`measurements.${index}.tolerance`, {
-                            required: true,
+                            required: "Tolerance is required",
+                            min: { value: 0.1, message: "Tolerance must be greater than 0" },
+                            validate: (val) => (val !== "" && val !== null && val !== undefined && !isNaN(val)) || "Tolerance cannot be empty",
+                            valueAsNumber: true,
+                            onChange: (e) => {
+                              const val = e.target.value;
+                              if (val === "" || val === null) {
+                                e.target.value = "0.5";
+                              }
+                            },
                           })}
+                          type="number"
+                          step="0.1"
+                          min="0.1"
                           placeholder="0.5"
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            errors.measurements?.[index]?.tolerance
+                              ? "border-red-500 bg-red-50"
+                              : "border-gray-300"
+                          }`}
                         />
                       </td>
 
