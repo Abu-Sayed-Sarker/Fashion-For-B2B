@@ -7,7 +7,7 @@ const baseQuery = fetchBaseQuery({
     // Retrieve token from Redux state
     const token = getState().auth?.accessToken || null;
 
-    headers.set("ngrok-skip-browser-warning", "true"); // Set ngrok header  
+    headers.set("ngrok-skip-browser-warning", "true"); // Set ngrok header
     // If token is available, set it in the headers
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
@@ -26,6 +26,15 @@ const baseQuery = fetchBaseQuery({
 export const api = createApi({
   reducerPath: "baseApi",
   baseQuery,
-  tagTypes: ["fashionTechpacks"], // Define your tags here
+  tagTypes: [
+    "fashionTechpacks",
+    "garmentSetup",
+    "includedMaterials",
+    "includedFabrics",
+    "includedTrims",
+    "includedConstructionDetails",
+    "includedArtworkPlacement",
+    "includedBillOfMaterials"
+  ], 
   endpoints: () => ({}), // Define your API endpoints here
 });
