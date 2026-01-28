@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import {
   Plus,
@@ -19,6 +19,7 @@ import {
   useUpdateArtworkPlacementMutation,
 } from "@/Apis/Poast-a-fashion/postAFashionApi";
 import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
+import { toast } from "react-toastify";
 // Image Upload Component
 const ImageUpload = ({ index, preview, onImageChange, onImageRemove }) => {
   const handleFileChange = (e) => {
@@ -51,7 +52,6 @@ const ImageUpload = ({ index, preview, onImageChange, onImageRemove }) => {
         };
         reader.readAsDataURL(file);
       } else {
-        // For PDFs, just store the file info
         onImageChange(index, null, file);
       }
     }
@@ -126,9 +126,9 @@ const ImageUpload = ({ index, preview, onImageChange, onImageRemove }) => {
 };
 
 export default function ArtworkPlacement() {
-  
-  const {techpack_id} = useParams();
+  const { techpack_id } = useParams();
   const router = useRouter();
+  const [haveId, setHaveId] = useState(null);
 
   ////////////////// All api call are here //////////////////
   const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
@@ -146,6 +146,7 @@ export default function ArtworkPlacement() {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
@@ -162,18 +163,18 @@ export default function ArtworkPlacement() {
 
   const handleAddArtwork = () => {
     append({
-      artworkName: "",
-      artworkType: "",
+      artwork_name: "",
+      artwork_type: "",
       fileReference: "",
-      placementLocation: "",
+      placement_location: "",
       coordinates: "",
-      artworkSize: "",
-      placementTolerance: "",
-      colorCount: "",
-      colorSeparation: "",
-      pantoneOrCMYK: "",
-      underbaseRequired: "no",
-      perSizeOrGlobal: "global",
+      artwork_size: "",
+      placement_tolerance: "",
+      color_count: "",
+      color_separation: "",
+      pantone_cmyk: "",
+      underbase_required: "no",
+      artwork_scaling: "global",
       method: "",
     });
   };
@@ -201,25 +202,52 @@ export default function ArtworkPlacement() {
 
   const onSubmit = async (data) => {
     const formData = new FormData();
-    formData.append("artworksData", JSON.stringify(data.artworks));
+
+    const artworksWithImageRef = data.artworks.map((artwork, index) => ({
+      ...artwork,
+      file_reference: `artwork_${index}_file`,
+    }));
+
+    // Append artwork metadata with image references
+    formData.append("artworksData", JSON.stringify(artworksWithImageRef));
     Object.entries(artworkPreviews).forEach(([index, preview]) => {
       if (preview.file) {
-        formData.append(`artwork_${index}_file`, preview.file);
-        formData.append(`artwork_${index}_name`, preview.name);
+        const fileKey = `artwork_${index}_file`;
+        formData.append(fileKey, preview.file);
       }
     });
-    const payload = {
-      techpack_id,
-      data: formData,
-    };
-    try {
-      await includeArtworkPlacement(payload);
-    } catch (error) {
-      console.error("Error submitting artwork placement:", error);
+
+    if (haveId) {
+      const updatePayload = {
+        techpack_id,
+        data: formData,
+      };
+      try {
+        await updateArtworkPlacement(updatePayload).unwrap();
+        toast.success("Artwork placement updated successfully!");
+        router.push(`/${techpack_id}/bom`);
+      } catch (error) {
+        toast.error("Failed to update artwork placement.");
+        console.error("Error updating artwork placement:", error);
+      }
+    } else {
+      const payload = {
+        techpack_id,
+        data: formData,
+      };
+
+      try {
+        await includeArtworkPlacement(payload).unwrap();
+        toast.success("Artwork placement submitted successfully!");
+        router.push(`/${techpack_id}/bom`);
+      } catch (error) {
+        toast.error("Failed to submit artwork placement.");
+        console.error("Error submitting artwork placement:", error);
+      }
     }
   };
 
-  const artworkTypeOptions = [
+  const artwork_typeOptions = [
     { value: "print", label: "Print" },
     { value: "embroidery", label: "Embroidery" },
     { value: "patch", label: "Patch" },
@@ -228,7 +256,7 @@ export default function ArtworkPlacement() {
     { value: "screen-print", label: "Screen Print" },
   ];
 
-  const placementLocationOptions = [
+  const placement_locationOptions = [
     { value: "center-chest", label: "Center Chest" },
     { value: "left-chest", label: "Left Chest" },
     { value: "right-chest", label: "Right Chest" },
@@ -268,6 +296,92 @@ export default function ArtworkPlacement() {
     { value: "applique", label: "Appliqué" },
   ];
 
+  /// set default values for the form
+  //  [
+  //     {
+  //         "id": 11,
+  //         "artwork_preview_url": "http://tripersonal-homelessly-felecia.ngrok-free.app/media/techpack/artworks/Screenshot_2025-09-16_105459.png",
+  //         "artwork_name": "Janna Keller",
+  //         "artwork_type": "heat-transfer",
+  //         "file_reference": "artwork_0_file",
+  //         "placement_location": "center-chest",
+  //         "color_count": "Laboris est id culp",
+  //         "pantone_cmyk": "rgb",
+  //         "artwork_scaling": "global",
+  //         "artwork_size": "Ut occaecat voluptat",
+  //         "color_separation": "Ullamco quia laudant",
+  //         "underbase_required": "white-only",
+  //         "coordinates": "Ea adipisci commodo",
+  //         "application_method": null,
+  //         "placement_tolerance": "Adipisci in dolore v",
+  //         "artwork_preview": "http://tripersonal-homelessly-felecia.ngrok-free.app/media/techpack/artworks/Screenshot_2025-09-16_105459.png",
+  //         "status": "in_progress",
+  //         "created_at": "2026-01-28T04:32:36.592714Z"
+  //     },
+  //     {
+  //         "id": 12,
+  //         "artwork_preview_url": "http://tripersonal-homelessly-felecia.ngrok-free.app/media/techpack/artworks/Screenshot_2025-09-16_105514.png",
+  //         "artwork_name": "Dorothy Dennis",
+  //         "artwork_type": "heat-transfer",
+  //         "file_reference": "artwork_1_file",
+  //         "placement_location": "right-chest",
+  //         "color_count": "Ipsum adipisci dolo",
+  //         "pantone_cmyk": "rgb",
+  //         "artwork_scaling": "per-size",
+  //         "artwork_size": "Non sunt ut qui dist",
+  //         "color_separation": "Id magnam excepteur",
+  //         "underbase_required": "yes",
+  //         "coordinates": "Voluptas non sint re",
+  //         "application_method": null,
+  //         "placement_tolerance": "Ipsum ipsum consequ",
+  //         "artwork_preview": "http://tripersonal-homelessly-felecia.ngrok-free.app/media/techpack/artworks/Screenshot_2025-09-16_105514.png",
+  //         "status": "in_progress",
+  //         "created_at": "2026-01-28T04:32:36.600583Z"
+  //     }
+  // ]
+
+  useEffect(() => {
+    if (artworkData && artworkData.length > 0 && !isLoading) {
+      setHaveId(artworkData[0]?.id || null);
+
+      const defaultValues = artworkData.map((artwork) => ({
+        id: artwork.id,
+        artwork_name: artwork.artwork_name,
+        artwork_type: artwork.artwork_type || "",
+        fileReference: artwork.file_reference,
+        placement_location: artwork.placement_location,
+        color_count: artwork.color_count,
+        pantone_cmyk: artwork.pantone_cmyk,
+        artwork_scaling: artwork.artwork_scaling,
+        artwork_size: artwork.artwork_size,
+        color_separation: artwork.color_separation,
+        underbase_required: artwork.underbase_required,
+        coordinates: artwork.coordinates,
+        method: artwork.application_method,
+        placement_tolerance: artwork.placement_tolerance,
+      }));
+
+      setValue("artworks", defaultValues);
+
+      // Load artwork preview images
+      const previews = {};
+      artworkData.forEach((artwork, index) => {
+        if (artwork.artwork_preview_url) {
+          previews[index] = {
+            url: artwork.artwork_preview_url,
+            type: artwork.artwork_preview_url.includes(".pdf")
+              ? "pdf"
+              : "image",
+            name: artwork.artwork_name,
+            size: 0,
+            file: null,
+          };
+        }
+      });
+      setArtworkPreviews(previews);
+    }
+  }, [artworkData, isLoading, setValue]);
+
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="container mx-auto">
@@ -284,8 +398,8 @@ export default function ArtworkPlacement() {
         {/* Artworks List */}
         <div className="space-y-6">
           {fields.map((field, index) => {
-            const artworkName = watch(`artworks.${index}.artworkName`);
-            const artworkType = watch(`artworks.${index}.artworkType`);
+            const artwork_name = watch(`artworks.${index}.artwork_name`);
+            const artwork_type = watch(`artworks.${index}.artwork_type`);
 
             return (
               <div
@@ -300,22 +414,22 @@ export default function ArtworkPlacement() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">
-                        {artworkName || `Artwork ${index + 1}`}
+                        {artwork_name || `Artwork ${index + 1}`}
                       </h3>
-                      {artworkType && (
+                      {artwork_type && (
                         <span
                           className={`inline-block mt-1 px-2 py-0.5 rounded text-xs font-medium border ${
-                            artworkType === "print"
+                            artwork_type === "print"
                               ? "bg-blue-100 text-blue-700 border-blue-200"
-                              : artworkType === "embroidery"
+                              : artwork_type === "embroidery"
                                 ? "bg-purple-100 text-purple-700 border-purple-200"
-                                : artworkType === "patch"
+                                : artwork_type === "patch"
                                   ? "bg-green-100 text-green-700 border-green-200"
                                   : "bg-gray-100 text-gray-700 border-gray-200"
                           }`}
                         >
-                          {artworkType.charAt(0).toUpperCase() +
-                            artworkType.slice(1)}
+                          {artwork_type.charAt(0).toUpperCase() +
+                            artwork_type.slice(1)}
                         </span>
                       )}
                     </div>
@@ -338,7 +452,7 @@ export default function ArtworkPlacement() {
                   <div className="space-y-4">
                     <Input
                       label="Artwork Name"
-                      name={`artworks.${index}.artworkName`}
+                      name={`artworks.${index}.artwork_name`}
                       register={register}
                       errors={errors.artworks?.[index] || {}}
                       required={true}
@@ -348,16 +462,16 @@ export default function ArtworkPlacement() {
 
                     <Select
                       label="Artwork Type"
-                      name={`artworks.${index}.artworkType`}
+                      name={`artworks.${index}.artwork_type`}
                       control={control}
                       errors={errors.artworks?.[index] || {}}
-                      options={artworkTypeOptions}
+                      options={artwork_typeOptions}
                       required={true}
                       placeholder="Select type"
                       helperText="Production method for this artwork"
                     />
 
-                    <Input
+                    {/* <Input
                       label="File Reference"
                       name={`artworks.${index}.fileReference`}
                       register={register}
@@ -365,14 +479,14 @@ export default function ArtworkPlacement() {
                       required={true}
                       placeholder="e.g., Logo_V2_Final.ai, Print_A_2024.pdf"
                       helperText="Artwork file name or reference code"
-                    />
+                    /> */}
 
                     <Select
                       label="Placement Location"
-                      name={`artworks.${index}.placementLocation`}
+                      name={`artworks.${index}.placement_location`}
                       control={control}
                       errors={errors.artworks?.[index] || {}}
-                      options={placementLocationOptions}
+                      options={placement_locationOptions}
                       required={true}
                       placeholder="Select location"
                       helperText="Garment location for artwork"
@@ -389,7 +503,7 @@ export default function ArtworkPlacement() {
 
                     <Input
                       label="Artwork Size (W × H)"
-                      name={`artworks.${index}.artworkSize`}
+                      name={`artworks.${index}.artwork_size`}
                       register={register}
                       errors={errors.artworks?.[index] || {}}
                       required={true}
@@ -399,7 +513,7 @@ export default function ArtworkPlacement() {
 
                     <Input
                       label="Placement Tolerance"
-                      name={`artworks.${index}.placementTolerance`}
+                      name={`artworks.${index}.placement_tolerance`}
                       register={register}
                       errors={errors.artworks?.[index] || {}}
                       placeholder="e.g., ±5mm, ±0.2 inches"
@@ -411,7 +525,7 @@ export default function ArtworkPlacement() {
                   <div className="space-y-4">
                     <Input
                       label="Color Count"
-                      name={`artworks.${index}.colorCount`}
+                      name={`artworks.${index}.color_count`}
                       register={register}
                       errors={errors.artworks?.[index] || {}}
                       required={true}
@@ -421,7 +535,7 @@ export default function ArtworkPlacement() {
 
                     <Input
                       label="Color Separation"
-                      name={`artworks.${index}.colorSeparation`}
+                      name={`artworks.${index}.color_separation`}
                       register={register}
                       errors={errors.artworks?.[index] || {}}
                       placeholder="e.g., C1: Black, C2: Red, C3: White"
@@ -430,7 +544,7 @@ export default function ArtworkPlacement() {
 
                     <Select
                       label="Pantone / CMYK"
-                      name={`artworks.${index}.pantoneOrCMYK`}
+                      name={`artworks.${index}.pantone_cmyk`}
                       control={control}
                       errors={errors.artworks?.[index] || {}}
                       options={pantoneOptions}
@@ -441,7 +555,7 @@ export default function ArtworkPlacement() {
 
                     <Select
                       label="Underbase Required"
-                      name={`artworks.${index}.underbaseRequired`}
+                      name={`artworks.${index}.underbase_required`}
                       control={control}
                       errors={errors.artworks?.[index] || {}}
                       options={underbaseOptions}
@@ -451,7 +565,7 @@ export default function ArtworkPlacement() {
 
                     <Select
                       label="Artwork Scaling"
-                      name={`artworks.${index}.perSizeOrGlobal`}
+                      name={`artworks.${index}.artwork_scaling`}
                       control={control}
                       errors={errors.artworks?.[index] || {}}
                       options={scalingOptions}
@@ -514,8 +628,12 @@ export default function ArtworkPlacement() {
                   : "bg-gray-900 text-white hover:bg-gray-800"
               }`}
             >
-              Next: Bill of Materials {isIncludingArtwork || isUpdatingArtwork ? <Loader2 className="w-4 h-4 animate-spin" /> : 
-              <ArrowRight className="w-4 h-4" />}
+              Next: Bill of Materials{" "}
+              {isIncludingArtwork || isUpdatingArtwork ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <ArrowRight className="w-4 h-4" />
+              )}
             </button>
             {!isValid && (
               <p className="text-sm text-red-600">
