@@ -7,14 +7,14 @@ import Link from "next/link";
 import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
 import React, { useEffect } from "react";
 import {
+  // useDeleteAFabricObjectMutation,
   useIncludedFabricsMutation,
   useUpdateFabricsMutation,
 } from "@/Apis/Poast-a-fashion/postAFashionApi";
 import { toast } from "react-toastify";
 
 export default function FabricMaterials() {
-  
-  const {techpack_id} = useParams();
+  const { techpack_id } = useParams();
   const route = useRouter();
   const [fabricId, setFabricId] = React.useState(null);
 
@@ -29,6 +29,9 @@ export default function FabricMaterials() {
     useIncludedFabricsMutation();
   const [updateFabrics, { isLoading: isUpdatingFabrics }] =
     useUpdateFabricsMutation();
+
+  // const [deleteAFabricObject, { isLoading: isDeletingFabric }] =
+  //   useDeleteAFabricObjectMutation();
   /// ------------------------------------------ ////////
 
   const {
@@ -114,29 +117,29 @@ export default function FabricMaterials() {
     };
 
     if (fabricId) {
-            // add id in all payload
+      // add id in all payload
       const updatePayload = {
-      techpack_id: techpack_id,
-      data: data.fabrics.map((fabric) => ({
-        fabric_type: fabric.isPrimary ? "primary" : "secondary",
-        id: fabric.id,
-        composition: fabric.composition,
-        gsm: fabric.gsm,
-        construction: fabric.construction,
-        finish: fabric.finish,
-        color: fabric.color,
-        shrinkage: fabric.shrinkage,
-        stretch: fabric.stretch,
-        face_back: fabric.faceback,
-        testing_required: fabric.testing,
-        fabric_direction: fabric.direction,
-        moq: fabric.moq,
-        fabric_width: fabric.width,
-        yarn_type: fabric.yarnType,
-        country_of_origin: fabric.countryOfOrigin,
-        sustainability_certifications: fabric.sustainability,
-      })),
-    };
+        techpack_id: techpack_id,
+        data: data.fabrics.map((fabric) => ({
+          fabric_type: fabric.isPrimary ? "primary" : "secondary",
+          id: fabric.id,
+          composition: fabric.composition,
+          gsm: fabric.gsm,
+          construction: fabric.construction,
+          finish: fabric.finish,
+          color: fabric.color,
+          shrinkage: fabric.shrinkage,
+          stretch: fabric.stretch,
+          face_back: fabric.faceback,
+          testing_requirements: fabric.testing,
+          fabric_direction: fabric.direction,
+          moq: fabric.moq,
+          fabric_width: fabric.width,
+          yarn_type: fabric.yarnType,
+          country_of_origin: fabric.countryOfOrigin,
+          sustainability_certifications: fabric.sustainability,
+        })),
+      };
       try {
         await updateFabrics(updatePayload).unwrap();
         toast.success("Fabrics updated successfully");
@@ -203,7 +206,6 @@ export default function FabricMaterials() {
     { value: "compact", label: "Compact" },
   ];
 
-
   useEffect(() => {
     if (fabricData && fabricData.length > 0 && !isLoading) {
       const formattedFabrics = fabricData.map((fabric) => ({
@@ -219,7 +221,7 @@ export default function FabricMaterials() {
         faceback: fabric.face_back,
         direction: fabric.fabric_direction,
         moq: fabric.moq,
-        testing: fabric.testing_required,
+        testing: fabric.testing_requirements,
         width: fabric.fabric_width,
         yarnType: fabric.yarn_type,
         countryOfOrigin: fabric.country_of_origin,
@@ -479,7 +481,12 @@ export default function FabricMaterials() {
                   : "bg-gray-900 text-white hover:bg-gray-800"
               }`}
             >
-              Next: Trims & Accessories {isFabricLoading || isUpdatingFabrics ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+              Next: Trims & Accessories{" "}
+              {isFabricLoading || isUpdatingFabrics ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <ArrowRight className="w-4 h-4" />
+              )}
             </button>
             {!isValid && (
               <p className="text-sm text-red-600">

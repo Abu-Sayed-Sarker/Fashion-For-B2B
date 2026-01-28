@@ -48,6 +48,7 @@ export const store = configureStore({
         ignoredActionPaths: [
           "meta.baseQueryMeta.request",
           "meta.baseQueryMeta.response",
+          "meta.arg.originalArgs.data",
         ],
       },
     }).concat(api.middleware),

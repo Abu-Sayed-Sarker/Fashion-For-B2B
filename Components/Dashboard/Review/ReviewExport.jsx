@@ -1,60 +1,89 @@
 "use client";
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ArrowLeft, Download, FileText, AlertCircle, Home, ChevronRight } from 'lucide-react';
-import { useCheckReviewDataValidation } from '@/Hooks/useCheckReviewDataValidation';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useGetFashionTechpackByIdQuery } from '@/Apis/Get-Fashion/getFashionApi';
 
-// Mock data for demonstration
-const mockData = {
-  styleCode: 'SKU',
-  garmentType: 'patch',
-  garmentCategory: 'bottoms',
-  fitSilhouette: 'M / Silhouette',
-  targetGender: 'Unisex',
-  season: 'Season',
-  baseSize: 'M',
-  measurementUnit: 'cm',
-  version: '1.0',
-  date: '2025-01-10',
-  measurements: [
-    { id: 1, name: 'Waist', value: '34', tolerance: '1.5cm measurement ±t', unit: 'cm' },
-    { id: 2, name: 'Hip', value: '54', tolerance: '1.5(digit not at tempus)', unit: 'cm' },
-    { id: 3, name: 'Inseam', value: '68', tolerance: '1.Cum nascunt nist eq', unit: 'cm' },
-    { id: 4, name: 'Outseam', value: '86', tolerance: '1.5fitium dolore iusto et', unit: 'cm' },
-    { id: 5, name: 'Thigh', value: '10', tolerance: '1.Ad odio nasciant it', unit: 'cm' },
-    { id: 6, name: 'Knee', value: '93', tolerance: '1.Enim malis discoetat an', unit: 'cm' },
-    { id: 7, name: 'Leg Opening', value: '86', tolerance: '1.fitium consequatur el', unit: 'cm' },
-    { id: 8, name: 'Front Rise', value: '30', tolerance: '1.5aert aliquam neino ta', unit: 'cm' },
-    { id: 9, name: 'Back Rise', value: '91', tolerance: '1.5fite voluptaten odio t', unit: 'cm' },
-    { id: 10, name: 'Super do quis incurato', value: '29', tolerance: '1. Accusantium amet nd', unit: 'cm' },
-    { id: 11, name: 'Aut qui iflerictos as', value: '43', tolerance: '1. Voluptatem inventore', unit: 'cm' },
-    { id: 12, name: 'Quis sit sunt nemo se', value: '93', tolerance: '1.Error in ad dolor fi', unit: 'cm' },
-    { id: 13, name: 'Dolor dolore iusto do', value: '91', tolerance: '1.Molestiae quis duis i', unit: 'cm' },
-    { id: 14, name: 'Ut aspernatur magni', value: '40', tolerance: '1?Vlosam modestius uti', unit: 'cm' },
-    { id: 15, name: 'Odio as lahoretu ut i', value: '16', tolerance: '1. Vitae rescasellae Est', unit: 'cm' },
-    { id: 16, name: 'Esse eggificitur artis', value: '10', tolerance: '1.Oload facilis rerum eft', unit: 'cm' }
-  ],
-  fabrics: [
-    { id: 1, fabricName: 'Fabric 1', composition: 'Et excepturi iacune', gsm: 'Quasi consequatist.' }
-  ],
-  trims: [],
-  construction: {
-    neck: { stitchType: '571', seamAllowance: '—', reinforcement: '—' },
-    sleeve: { stitchType: '—', spi: '571' },
-    hem: { stitchType: '—', spi: '571' }
-  },
-  artworks: [],
-  bomItems: []
-};
-
-const mockValidation = useCheckReviewDataValidation(mockData);
 
 export default function ReviewExport() {
   const {techpack_id} = useParams();
   const [confirmed, setConfirmed] = useState(false);
-  const data = mockData;
-  const validation = mockValidation;
+
+  /////////////// all api call are here//////////////
+  const { data: techpackData = {}, isLoading } = useGetFashionTechpackByIdQuery(
+    techpack_id,
+    { skip: !techpack_id },
+  );
+
+  // Check for incomplete steps and generate validation errors
+  const validationErrors = useMemo(() => {
+    const errors = [];
+    const stepLabels = {
+      step_one: 'Garment Setup',
+      step_two: 'Measurements',
+      step_three: 'Fabrics',
+      step_four: 'Trims',
+      step_five: 'Construction',
+      step_six: 'Artwork',
+      step_seven: 'Bill of Materials'
+    };
+
+    // Check each step for in_progress status
+    const stepsToCheck = ['step_one', 'step_two', 'step_three', 'step_four', 'step_five', 'step_six', 'step_seven'];
+    
+    stepsToCheck.forEach((step) => {
+      const stepData = techpackData[step];
+      
+      if (!stepData) {
+        errors.push({
+          message: `${stepLabels[step]}: No data provided`,
+          step: stepLabels[step]
+        });
+      } else if (Array.isArray(stepData)) {
+        // For array steps, check if any item is in_progress
+        const inProgressItems = stepData.filter(item => item.status === 'in_progress');
+        if (inProgressItems.length > 0) {
+          errors.push({
+            message: `${stepLabels[step]}: ${inProgressItems.length} item(s) still in progress`,
+            step: stepLabels[step]
+          });
+        }
+      } else if (typeof stepData === 'object') {
+        // For single object steps, check status
+        if (stepData.status === 'in_progress') {
+          errors.push({
+            message: `${stepLabels[step]}: Still in progress`,
+            step: stepLabels[step]
+          });
+        }
+      }
+    });
+
+    return {
+      errors,
+      isValid: errors.length === 0,
+      hasData: Object.keys(techpackData).length > 0
+    };
+  }, [techpackData]);
+
+  const data = {
+    styleCode: techpackData?.step_one?.style_code || 'N/A',
+    garmentType: techpackData?.step_one?.garment_type || 'N/A',
+    garmentCategory: techpackData?.step_one?.garment_category || 'N/A',
+    fitSilhouette: techpackData?.step_one?.fit || 'N/A',
+    targetGender: techpackData?.step_one?.target_gender || 'N/A',
+    date: techpackData?.step_one?.date_created || 'N/A',
+    season: techpackData?.step_one?.season || 'N/A',
+    baseSize: techpackData?.step_one?.base_size || 'N/A',
+    version: techpackData?.step_one?.version || 'N/A',
+    measurements: techpackData?.step_two || [],
+    fabrics: techpackData?.step_three || [],
+    trims: techpackData?.step_four || [],
+    constructions: techpackData?.step_five || [],
+    artworks: techpackData?.step_six || [],
+    bomItems: techpackData?.step_seven || [],
+  }; 
 
   return (
       <div className="container mx-auto">
@@ -65,25 +94,31 @@ export default function ReviewExport() {
         </div>
 
         {/* Not Factory-Ready Alert */}
-        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+        {/* <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="font-semibold text-red-900 mb-1">Not Factory-Ready</p>
-              <p className="text-sm text-red-700">{validation.errors.length} error(s) must be fixed before export</p>
+              <p className="font-semibold text-red-900 mb-1">
+                {validationErrors.isValid ? '✓ Factory-Ready' : 'Not Factory-Ready'}
+              </p>
+              <p className="text-sm text-red-700">
+                {validationErrors.isValid 
+                  ? 'All steps completed. Ready for export.' 
+                  : `${validationErrors.errors.length} error(s) must be fixed before export`}
+              </p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Validation Errors */}
-        {validation.errors.length > 0 && (
+        {/* {validationErrors.errors.length > 0 && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-red-900 mb-3">Click on any error to navigate to that section:</p>
+                <p className="text-sm font-medium text-red-900 mb-3">Steps in Progress or Incomplete:</p>
                 <ul className="space-y-2">
-                  {validation.errors.map((error, index) => (
+                  {validationErrors.errors.map((error, index) => (
                     <li key={index}>
                       <button className="flex items-center gap-2 text-sm text-left hover:underline w-full group text-red-800">
                         <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform flex-shrink-0" />
@@ -98,7 +133,7 @@ export default function ReviewExport() {
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Garment Information */}
         <div className="mb-6 border border-gray-200 rounded-lg overflow-hidden">
@@ -135,10 +170,10 @@ export default function ReviewExport() {
                 <p className="text-xs text-gray-500 mb-1">Base Size</p>
                 <p className="text-sm text-gray-900">{data.baseSize}</p>
               </div>
-              <div>
+              {/* <div>
                 <p className="text-xs text-gray-500 mb-1">Measurement Unit</p>
                 <p className="text-sm text-gray-900">{data.measurementUnit}</p>
-              </div>
+              </div> */}
               <div>
                 <p className="text-xs text-gray-500 mb-1">Version</p>
                 <p className="text-sm text-gray-900">{data.version}</p>
@@ -158,14 +193,18 @@ export default function ReviewExport() {
           </div>
           <div className="p-6">
             <div className="space-y-3">
-              {data.measurements.map((m) => (
-                <div key={m.id} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-700">{m.name}</span>
-                  <span className="text-sm text-gray-900">
-                    {m.value} {m.unit} <span className="text-gray-500">({m.tolerance})</span>
-                  </span>
-                </div>
-              ))}
+              {data.measurements.length > 0 ? (
+                data.measurements.map((m) => (
+                  <div key={m.id} className="flex items-center justify-between pb-2 border-b border-gray-100">
+                    <span className="text-sm text-gray-700">{m.pom_name}</span>
+                    <span className="text-sm text-gray-900">
+                      {m.value} {m.unit} <span className="text-gray-500">(±{m.tolerance})</span>
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No measurements defined</p>
+              )}
             </div>
           </div>
         </div>
@@ -176,21 +215,33 @@ export default function ReviewExport() {
             <h2 className="font-semibold text-gray-900">Fabrics & Materials</h2>
           </div>
           <div className="p-6">
-            {data.fabrics.map((fabric, index) => (
-              <div key={fabric.id} className="mb-4 last:mb-0">
-                <p className="text-sm font-medium text-gray-900 mb-2">{fabric.fabricName}</p>
-                <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                  <div className="text-sm">
-                    <span className="text-gray-500">Composition:</span>
-                    <span className="ml-2 text-gray-900">{fabric.composition}</span>
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-gray-500">GSM:</span>
-                    <span className="ml-2 text-gray-900">{fabric.gsm}</span>
+            {data.fabrics.length > 0 ? (
+              data.fabrics.map((fabric, index) => (
+                <div key={fabric.id} className="mb-4 last:mb-0">
+                  <p className="text-sm font-medium text-gray-900 mb-2">{fabric.composition}</p>
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                    <div className="text-sm">
+                      <span className="text-gray-500">GSM:</span>
+                      <span className="ml-2 text-gray-900">{fabric.gsm}</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-gray-500">Construction:</span>
+                      <span className="ml-2 text-gray-900">{fabric.construction}</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-gray-500">Color:</span>
+                      <span className="ml-2 text-gray-900">{fabric.color}</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-gray-500">Stretch:</span>
+                      <span className="ml-2 text-gray-900">{fabric.stretch}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No fabrics defined</p>
+            )}
           </div>
         </div>
 
@@ -200,7 +251,87 @@ export default function ReviewExport() {
             <h2 className="font-semibold text-gray-900">Trims & Accessories</h2>
           </div>
           <div className="p-6">
-            <p className="text-sm text-gray-500">No trims defined</p>
+            {data.trims.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {data.trims.map((trim) => (
+                  <div 
+                    key={trim.id}
+                    className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                  >
+                    {/* Color Header */}
+                    <div 
+                      className="h-12 flex items-center px-4"
+                      style={{
+                        backgroundColor: trim.color || '#f3f4f6',
+                        borderBottom: '1px solid #e5e7eb'
+                      }}
+                    >
+                      {trim.color && (
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-6 h-6 rounded border border-white shadow-sm"
+                            style={{ backgroundColor: trim.color }}
+                          />
+                          <span className="text-sm font-semibold text-gray-900">{trim.color}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Trim Details */}
+                    <div className="p-4 space-y-2">
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs font-medium text-gray-600">Type</span>
+                        <span className="text-sm font-semibold text-gray-900 capitalize">{trim.trim_type}</span>
+                      </div>
+
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs font-medium text-gray-600">Material</span>
+                        <span className="text-sm text-gray-900">{trim.material}</span>
+                      </div>
+
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs font-medium text-gray-600">Size</span>
+                        <span className="text-sm text-gray-900">{trim.size}</span>
+                      </div>
+
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs font-medium text-gray-600">Finish</span>
+                        <span className="text-sm text-gray-900">{trim.finish}</span>
+                      </div>
+
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs font-medium text-gray-600">Placement</span>
+                        <span className="text-sm text-gray-900">{trim.placement}</span>
+                      </div>
+
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs font-medium text-gray-600">Consumption</span>
+                        <span className="text-sm text-gray-900">{trim.consumption}</span>
+                      </div>
+
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs font-medium text-gray-600">Brand Type</span>
+                        <span className="text-sm text-gray-900">{trim.brand_type}</span>
+                      </div>
+
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs font-medium text-gray-600">Color Logic</span>
+                        <span className="inline-block px-2 py-1 bg-blue-100 text-blue-900 text-xs font-semibold rounded capitalize">
+                          {trim.color_logic}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs font-medium text-gray-600">Supplier</span>
+                        <span className="text-sm text-gray-900">{trim.supplier}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No trims defined</p>
+            )}
           </div>
         </div>
 
@@ -209,65 +340,61 @@ export default function ReviewExport() {
           <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900">Construction Details</h2>
           </div>
-          <div className="p-6 space-y-6">
-            {/* Neck Construction */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-                <span className="text-blue-600">👔</span> Neck Construction
-              </h3>
-              <div className="grid grid-cols-2 gap-x-8 gap-y-3 pl-7">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Stitch Type</p>
-                  <p className="text-sm text-gray-900">{data.construction.neck.stitchType}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">SPI</p>
-                  <p className="text-sm text-gray-900">—</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Seam Allowance</p>
-                  <p className="text-sm text-gray-900">{data.construction.neck.seamAllowance}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Reinforcement</p>
-                  <p className="text-sm text-gray-900">{data.construction.neck.reinforcement}</p>
-                </div>
-              </div>
-            </div>
+          <div className="p-6">
+            {data.constructions.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {data.constructions.map((construction) => (
+                  <div 
+                    key={construction.id} 
+                    className="border border-gray-200 rounded-lg p-5 hover:shadow-lg transition-shadow"
+                  >
+                    {/* Header */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center border font-bold">
+                        {data.constructions.indexOf(construction) + 1}
+                      </div>
+                      <h3 className="text-sm font-bold text-gray-900">
+                        {construction.construction_name}
+                      </h3>
+                    </div>
 
-            {/* Sleeve Construction */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-                <span className="text-green-600">👕</span> Sleeve Construction
-              </h3>
-              <div className="grid grid-cols-2 gap-x-8 gap-y-3 pl-7">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Stitch Type</p>
-                  <p className="text-sm text-gray-900">{data.construction.sleeve.stitchType}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">SPI</p>
-                  <p className="text-sm text-gray-900">{data.construction.sleeve.spi}</p>
-                </div>
-              </div>
-            </div>
+                    {/* Details Grid */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start bg-white rounded px-3 py-2">
+                        <span className="text-xs font-medium text-gray-600">Stitch Type</span>
+                        <span className="text-sm font-semibold text-gray-900">{construction.stitch_type}</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-start bg-white rounded px-3 py-2">
+                        <span className="text-xs font-medium text-gray-600">SPI</span>
+                        <span className="text-sm font-semibold text-gray-900">{construction.spi}</span>
+                      </div>
 
-            {/* Hem Construction */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-                <span className="text-orange-600">📏</span> Hem Construction
-              </h3>
-              <div className="grid grid-cols-2 gap-x-8 gap-y-3 pl-7">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Stitch Type</p>
-                  <p className="text-sm text-gray-900">{data.construction.hem.stitchType}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">SPI</p>
-                  <p className="text-sm text-gray-900">{data.construction.hem.spi}</p>
-                </div>
+                      <div className="flex justify-between items-start bg-white rounded px-3 py-2">
+                        <span className="text-xs font-medium text-gray-600">Seam Allowance</span>
+                        <span className="text-sm font-semibold text-blue-600">{construction.seam_allowance}</span>
+                      </div>
+
+                      <div className="flex justify-between items-start bg-white rounded px-3 py-2">
+                        <span className="text-xs font-medium text-gray-600">Reinforcement</span>
+                        <span className="inline-block px-2 py-1 bg-blue-200 text-blue-900 text-xs font-semibold rounded">
+                          {construction.reinforcement_points}
+                        </span>
+                      </div>
+
+                      <div className="bg-white rounded px-3 py-2">
+                        <p className="text-xs font-medium text-gray-600 mb-1">Topstitch Logic</p>
+                        <p className="text-sm text-gray-800 line-clamp-2">{construction.topstitch_logic}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-sm text-gray-500">No construction details defined</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -277,7 +404,46 @@ export default function ReviewExport() {
             <h2 className="font-semibold text-gray-900">Artwork & Placement</h2>
           </div>
           <div className="p-6">
-            <p className="text-sm text-gray-500">No artwork defined</p>
+            {data.artworks.length > 0 ? (
+              <div className="space-y-4">
+                {data.artworks.map((artwork) => (
+                  <div key={artwork.id} className="border-b border-gray-200 pb-4 last:border-0">
+                    <div className="flex items-start gap-4">
+                      {artwork.artwork_preview_url && (
+                        <img 
+                          src={artwork.artwork_preview_url} 
+                          alt={artwork.artwork_name}
+                          className="w-20 h-20 object-cover rounded border border-gray-200"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <h4 className="text-sm font-medium text-gray-900 mb-2">{artwork.artwork_name}</h4>
+                        <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+                          <div>
+                            <span className="text-gray-500">Type:</span>
+                            <span className="ml-2 text-gray-900">{artwork.artwork_type}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Location:</span>
+                            <span className="ml-2 text-gray-900">{artwork.placement_location}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Size:</span>
+                            <span className="ml-2 text-gray-900">{artwork.artwork_size}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Pantone/CMYK:</span>
+                            <span className="ml-2 text-gray-900">{artwork.pantone_cmyk}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No artwork defined</p>
+            )}
           </div>
         </div>
 
@@ -287,7 +453,34 @@ export default function ReviewExport() {
             <h2 className="font-semibold text-gray-900">Bill of Materials Summary</h2>
           </div>
           <div className="p-6">
-            <p className="text-sm text-gray-500">No BOM items defined</p>
+            {data.bomItems.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left text-xs font-medium text-gray-600 py-2 px-4">Component</th>
+                      <th className="text-left text-xs font-medium text-gray-600 py-2 px-4">Material</th>
+                      <th className="text-left text-xs font-medium text-gray-600 py-2 px-4">Unit</th>
+                      <th className="text-left text-xs font-medium text-gray-600 py-2 px-4">Consumption</th>
+                      <th className="text-left text-xs font-medium text-gray-600 py-2 px-4">Cost</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.bomItems.map((item) => (
+                      <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="text-sm text-gray-900 py-2 px-4">{item.component_name}</td>
+                        <td className="text-sm text-gray-700 py-2 px-4">{item.material_composition}</td>
+                        <td className="text-sm text-gray-700 py-2 px-4">{item.unit}</td>
+                        <td className="text-sm text-gray-700 py-2 px-4">{item.consumption}</td>
+                        <td className="text-sm text-gray-700 py-2 px-4">{item.cost_per_unit} {item.currency}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No BOM items defined</p>
+            )}
           </div>
         </div>
 
@@ -299,24 +492,29 @@ export default function ReviewExport() {
               id="confirm"
               checked={confirmed}
               onChange={(e) => setConfirmed(e.target.checked)}
-              disabled={!validation.isValid}
+              // disabled={!validationErrors.isValid}
               className="mt-1 w-4 h-4 rounded border-gray-300 disabled:opacity-50"
             />
             <div className="flex-1">
               <label
                 htmlFor="confirm"
                 className={`text-sm font-medium cursor-pointer ${
-                  validation.isValid ? 'text-blue-900' : 'text-gray-400'
+                  confirmed ? 'text-blue-900' : 'text-gray-400'
                 }`}
+                // className="text-sm font-medium cursor-pointer text-gray-400"
               >
                 I confirm that all information is accurate and ready for export
               </label>
-              <p className={`text-xs mt-1 ${
-                validation.isValid ? 'text-blue-700' : 'text-gray-400'
-              }`}>
-                {validation.isValid 
+              <p
+               className={`text-xs mt-1 ${
+                confirmed ? 'text-blue-700' : 'text-gray-400'
+              }`}
+                // className="text-xs mt-1 text-gray-400"
+              >
+                {/* {validationErrors.isValid 
                   ? 'This tech pack will be saved and can be exported in multiple formats'
-                  : 'Please fix all errors before confirming'}
+                  : 'Please fix all errors before confirming'} */}
+                  This tech pack will be saved and can be exported in multiple formats
               </p>
             </div>
           </div>
@@ -325,37 +523,58 @@ export default function ReviewExport() {
         {/* Export Buttons */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <button
-            disabled={!confirmed || !validation.isValid}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors"
+            onClick={() => {
+              if (confirmed) {
+                window.open(techpackData.pdf_url, '_blank');
+              }
+            }}
+            disabled={!confirmed}
+            title={!confirmed ? 'Please confirm before exporting' : !validationErrors.isValid ? 'Please fix all errors before exporting' : 'Export Tech Pack PDF'}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all ${
+              !confirmed
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-50'
+                : 'bg-gray-800 text-white hover:bg-gray-700 cursor-pointer'
+            }`}
           >
             <FileText className="w-4 h-4" />
-            <span className="text-sm font-medium">Export Tech Pack PDF</span>
+            <span className="text-sm">Export Tech Pack PDF</span>
           </button>
           <button
-            disabled={!confirmed || !validation.isValid}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+            onClick={() => {
+              if (confirmed) {
+                window.open(techpackData.xlsx_url, '_blank');
+              }
+            }}
+            disabled={!confirmed}
+            title={!confirmed ? 'Please confirm before exporting' : !validationErrors.isValid ? 'Please fix all errors before exporting' : 'Export BOM XLSX'}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all ${
+              !confirmed
+                ? 'bg-gray-200 text-gray-400 border border-gray-300 cursor-not-allowed opacity-50'
+                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer'
+            }`}
           >
             <Download className="w-4 h-4" />
-            <span className="text-sm font-medium">Export BOM XLSX</span>
+            <span className="text-sm">Export BOM XLSX</span>
           </button>
         </div>
 
 
          <div className="flex justify-between items-center my-6">
           <Link
-            href="/dashboard/bom"
+            href={`/${techpack_id}/bom`}
             type="button"
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
           > <ArrowLeft className="w-4 h-4" />
             Back to Edit
           </Link>
           <div className="flex flex-col items-end gap-2">
-            <button
+            <Link
+            href={`/`}
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors bg-gray-900 text-white hover:bg-gray-800`}
             >
               <Home className="w-4 h-4" />
             Return to Library
-            </button>
+            </Link>
           </div>
         </div>
       </div>

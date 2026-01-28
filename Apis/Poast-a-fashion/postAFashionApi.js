@@ -11,13 +11,17 @@ const postAFashionApi = api.injectEndpoints({
       invalidatesTags: ["fashionLibrary"],
     }),
     ////////// Garment Setup //////////
+    getGarmentSetup: build.query({
+      query: (techpack_id) => `fashion/techpacks/${techpack_id}/step-1/`,
+      providesTags: ["garmentSetup"],
+    }),
     postGarmentSetup: build.mutation({
       query: (data) => ({
         url: `fashion/techpacks/${data?.techpack_id}/step-1/`,
         method: "POST",
         body: data.data,
       }),
-      invalidatesTags: ["garmentSetup"],
+      invalidatesTags: ["garmentSetup", "fashionTechpacks"],
     }),
     updateGarmentSetup: build.mutation({
       query: (data) => ({
@@ -25,16 +29,20 @@ const postAFashionApi = api.injectEndpoints({
         method: "PATCH",
         body: data.data,
       }),
-      invalidatesTags: ["garmentSetup"],
+      invalidatesTags: ["garmentSetup", "fashionTechpacks"],
     }),
     ////////// Included Materials //////////
+    // getIncludedMaterials: build.query({
+    //   query: (techpack_id) => `fashion/techpacks/${techpack_id}/step-2/`,
+    //   providesTags: ["includedMaterials"],
+    // }),
     includedMaterials: build.mutation({
       query: (data) => ({
         url: `fashion/techpacks/${data?.techpack_id}/step-2/`,
         method: "POST",
         body: data.data,
       }),
-      invalidatesTags: ["includedMaterials"],
+      invalidatesTags: ["includedMaterials", "fashionTechpacks"],
     }),
     updateIncludedMaterials: build.mutation({
       query: (data) => ({
@@ -42,43 +50,70 @@ const postAFashionApi = api.injectEndpoints({
         method: "PUT",
         body: data.data,
       }),
-      invalidatesTags: ["includedMaterials"],
+      invalidatesTags: ["includedMaterials", "fashionTechpacks"],
     }),
+    // deleteAMaterialObject: build.mutation({
+    //   query: (data) => ({
+    //     url: `fashion/techpacks/${data?.techpack_id}/step-2/${data?.material_id}/`,
+    //     method: "DELETE",
+    //   }),
+    //   invalidatesTags: ["includedMaterials", "fashionTechpacks"],
+    // }),
     ////////// Included Fabrics //////////
+    // getIncludedFabrics: build.query({
+    //   query: (techpack_id) => `fashion/techpacks/${techpack_id}/step-3/`,
+    //   providesTags: ["includedFabrics"],
+    // }),
     includedFabrics: build.mutation({
       query: (data) => ({
         url: `fashion/techpacks/${data?.techpack_id}/step-3/`,
         method: "POST",
         body: data.data,
       }),
-      invalidatesTags: ["includedFabrics"],
+      invalidatesTags: ["includedFabrics", "fashionTechpacks"],
     }),
     updateFabrics: build.mutation({
       query: (data) => ({
         url: `fashion/techpacks/${data?.techpack_id}/step-3/`,
-        method: "PATCH",
+        method: "PUT",
         body: data.data,
       }),
-      invalidatesTags: ["includedFabrics"],
+      invalidatesTags: ["includedFabrics", "fashionTechpacks"],
     }),
+    // deleteAFabricObject: build.mutation({
+    //   query: (data) => ({
+    //     url: `fashion/techpacks/${data?.techpack_id}/step-3/${data?.fabric_id}/`,
+    //     method: "DELETE",
+    //   }),
+    //   invalidatesTags: ["includedFabrics", "fashionTechpacks"],
+    // }),
     ////////// Included Trims //////////
+    // getIncludedTrims: build.query({
+    //   query: (techpack_id) => `fashion/techpacks/${techpack_id}/step-4/`,
+    //   providesTags: ["includedTrims"],
+    // }),
     includedTrims: build.mutation({
       query: (data) => ({
         url: `fashion/techpacks/${data?.techpack_id}/step-4/`,
         method: "POST",
         body: data.data,
       }),
-      invalidatesTags: ["includedTrims"],
+      invalidatesTags: ["includedTrims", "fashionTechpacks"],
     }),
     updateTrims: build.mutation({
       query: (data) => ({
         url: `fashion/techpacks/${data?.techpack_id}/step-4/`,
-        method: "PATCH",
+        method: "PUT",
         body: data.data,
       }),
-      invalidatesTags: ["includedTrims"],
+      invalidatesTags: ["includedTrims", "fashionTechpacks"],
     }),
     ////////// Construction Details //////////
+
+    // getIncludedConstructionDetails: build.query({
+    //   query: (techpack_id) => `fashion/techpacks/${techpack_id}/step-5/`,
+    //   providesTags: ["includedConstructionDetails"],
+    // }),
 
     includedConstructionDetails: build.mutation({
       query: (data) => ({
@@ -86,50 +121,59 @@ const postAFashionApi = api.injectEndpoints({
         method: "POST",
         body: data.data,
       }),
-      invalidatesTags: ["includedConstructionDetails"],
+      invalidatesTags: ["includedConstructionDetails", "fashionTechpacks"],
     }),
     updateConstructionDetails: build.mutation({
       query: (data) => ({
         url: `fashion/techpacks/${data?.techpack_id}/step-5/`,
-        method: "PATCH",
+        method: "PUT",
         body: data.data,
       }),
-      invalidatesTags: ["includedConstructionDetails"],
+      invalidatesTags: ["includedConstructionDetails", "fashionTechpacks"],
     }),
     ////////// Artwork Placement //////////
-
+    // getIncludedArtworkPlacement: build.query({
+    //   query: (techpack_id) => `fashion/techpacks/${techpack_id}/step-6/`,
+    //   providesTags: ["includedArtworkPlacement"],
+    // }),
     includedArtworkPlacement: build.mutation({
       query: (data) => ({
         url: `fashion/techpacks/${data?.techpack_id}/step-6/`,
         method: "POST",
         body: data.data,
       }),
-      invalidatesTags: ["includedArtworkPlacement"],
+      invalidatesTags: ["includedArtworkPlacement", "fashionTechpacks"],
     }),
     updateArtworkPlacement: build.mutation({
       query: (data) => ({
         url: `fashion/techpacks/${data?.techpack_id}/step-6/`,
-        method: "PATCH",
+        method: "PUT",
         body: data.data,
       }),
-      invalidatesTags: ["includedArtworkPlacement"],
+      invalidatesTags: ["includedArtworkPlacement", "fashionTechpacks"],
     }),
     ////////// Bill of Materials //////////
+
+    // getIncludedBillOfMaterials: build.query({
+    //   query: (techpack_id) => `fashion/techpacks/${techpack_id}/step-7/`,
+    //   providesTags: ["includedBillOfMaterials"],
+    // }),
+
     includedBillOfMaterials: build.mutation({
       query: (data) => ({
         url: `fashion/techpacks/${data?.techpack_id}/step-7/`,
         method: "POST",
         body: data.data,
       }),
-      invalidatesTags: ["includedBillOfMaterials"],
+      invalidatesTags: ["includedBillOfMaterials", "fashionTechpacks"],
     }),
     updateBillOfMaterials: build.mutation({
       query: (data) => ({
         url: `fashion/techpacks/${data?.techpack_id}/step-7/`,
-        method: "PATCH",
-        body: data.data,  
+        method: "PUT",
+        body: data.data,
       }),
-      invalidatesTags: ["includedBillOfMaterials"],
+      invalidatesTags: ["includedBillOfMaterials", "fashionTechpacks"],
     }),
   }),
 });
@@ -150,4 +194,19 @@ export const {
   useUpdateArtworkPlacementMutation,
   useIncludedBillOfMaterialsMutation,
   useUpdateBillOfMaterialsMutation,
+
+  /// all get queries
+
+  // useGetGarmentSetupQuery,
+  // useGetIncludedMaterialsQuery,
+  // useGetIncludedFabricsQuery,
+  // useGetIncludedTrimsQuery,
+  // useGetIncludedConstructionDetailsQuery,
+  // useGetIncludedArtworkPlacementQuery,
+  // useGetIncludedBillOfMaterialsQuery,
+
+  /// All delete queries
+
+  // useDeleteAMaterialObjectMutation,
+  // useDeleteAFabricObjectMutation,
 } = postAFashionApi;
