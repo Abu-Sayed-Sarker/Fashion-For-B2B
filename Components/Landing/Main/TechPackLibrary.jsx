@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useCreateInitialFashionLibraryMutation } from "@/Apis/Poast-a-fashion/postAFashionApi";
 import { toast } from "react-toastify";
+import Pagination from "@/Libs/Pagination/Pagination";
 
 const TechPackLibrary = () => {
   const [activeMenu, setActiveMenu] = useState(null);
@@ -70,6 +71,19 @@ const TechPackLibrary = () => {
   const handleClearSearch = () => {
     setSearchQuery("");
   };
+
+  /////// pagination
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 8;
+  const totalPages = Math.ceil(filteredTechPacks.length / usersPerPage);
+
+  // Calculate the current page's patients
+  const startIndex = (currentPage - 1) * usersPerPage;
+  const currentTechPacks = filteredTechPacks.slice(
+    startIndex,
+    startIndex + usersPerPage,
+  );
 
   return (
     <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -138,8 +152,8 @@ const TechPackLibrary = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {filteredTechPacks.length > 0 ? (
-              filteredTechPacks.map((pack) => (
+            {currentTechPacks.length > 0 ? (
+              currentTechPacks.map((pack) => (
                 <tr
                   key={pack.id}
                   className="hover:bg-gray-50 transition-colors"
@@ -195,7 +209,13 @@ const TechPackLibrary = () => {
                           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                         />
                       </svg>
-                      {new Intl.DateTimeFormat('default', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(pack.created_at)) || "N/A"}
+                      {new Intl.DateTimeFormat("default", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }).format(new Date(pack.created_at)) || "N/A"}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -226,7 +246,7 @@ const TechPackLibrary = () => {
                             >
                               Duplicate
                             </button>
-                            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            <button onClick={()=> window.open(pack?.pdf_url, '_blank')} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                               Export PDF
                             </button>
                             <button
@@ -260,8 +280,8 @@ const TechPackLibrary = () => {
 
       {/* Mobile Card View */}
       <div className="lg:hidden space-y-4">
-        {filteredTechPacks.length > 0 ? (
-          filteredTechPacks.map((pack) => (
+        {currentTechPacks.length > 0 ? (
+          currentTechPacks.map((pack) => (
             <div
               key={pack.id}
               className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
@@ -294,13 +314,19 @@ const TechPackLibrary = () => {
                         >
                           Open
                         </Link>
-                        <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        <button
+                          onClick={() => handleCloneFashionLibrary(pack.id)}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        >
                           Duplicate
                         </button>
-                        <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        <button onClick={()=> window.open(pack?.pdf_url, '_blank')} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                           Export PDF
                         </button>
-                        <button className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50">
+                        <button
+                          onClick={() => handleCloneFashionLibrary(pack.id)}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                        >
                           Delete
                         </button>
                       </div>
@@ -376,6 +402,11 @@ const TechPackLibrary = () => {
           </div>
         )}
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
+      />
     </main>
   );
 };
