@@ -2,7 +2,11 @@
 import React, { useState } from "react";
 import { Search, Plus, MoreVertical, FileText, X } from "lucide-react";
 import Link from "next/link";
-import { useGetAllFashionTechpacksQuery } from "@/Apis/Get-Fashion/getFashionApi";
+import {
+  useCloneFashionTechpackMutation,
+  useDeleteFashionTechpackMutation,
+  useGetAllFashionTechpacksQuery,
+} from "@/Apis/Get-Fashion/getFashionApi";
 import { useRouter } from "next/navigation";
 import { useCreateInitialFashionLibraryMutation } from "@/Apis/Poast-a-fashion/postAFashionApi";
 import { toast } from "react-toastify";
@@ -14,17 +18,41 @@ const TechPackLibrary = () => {
   ////////////// all api call here ///////////////
 
   const { data: techPacks = [] } = useGetAllFashionTechpacksQuery();
-const [createInitialFashion, {isLoading}] = useCreateInitialFashionLibraryMutation();
+  const [createInitialFashion, { isLoading }] =
+    useCreateInitialFashionLibraryMutation();
+  const [deleteFashionTechpack] = useDeleteFashionTechpackMutation();
+  const [cloneFashionLibrary] = useCloneFashionTechpackMutation();
   //////////---------------------------------------------/////
 
   const handleCreateInitialFashion = async () => {
     try {
-       const res = await createInitialFashion().unwrap();
+      const res = await createInitialFashion().unwrap();
       toast.success("New tech pack created successfully!");
       route.push(`/${res?.id}`);
     } catch (error) {
       toast.error("Failed to create initial fashion.");
       console.error("Error creating initial fashion:", error);
+    }
+  };
+
+  const handleDeleteFashionTechpack = async (id) => {
+    try {
+      await deleteFashionTechpack(id).unwrap();
+      toast.success("Tech pack deleted successfully!");
+      setActiveMenu(null);
+    } catch (error) {
+      toast.error("Failed to delete tech pack.");
+      console.error("Error deleting tech pack:", error);
+    }
+  };
+  const handleCloneFashionLibrary = async (id) => {
+    try {
+      await cloneFashionLibrary(id).unwrap();
+      toast.success("Tech pack cloned successfully!");
+      setActiveMenu(null);
+    } catch (error) {
+      toast.error("Failed to clone tech pack.");
+      console.error("Error cloning tech pack:", error);
     }
   };
 
@@ -167,7 +195,7 @@ const [createInitialFashion, {isLoading}] = useCreateInitialFashionLibraryMutati
                           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                         />
                       </svg>
-                      {pack.lastUpdated || "N/A"}
+                      {new Intl.DateTimeFormat('default', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(pack.created_at)) || "N/A"}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -192,13 +220,21 @@ const [createInitialFashion, {isLoading}] = useCreateInitialFashionLibraryMutati
                             >
                               Open
                             </Link>
-                            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            <button
+                              onClick={() => handleCloneFashionLibrary(pack.id)}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            >
                               Duplicate
                             </button>
                             <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                               Export PDF
                             </button>
-                            <button className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50">
+                            <button
+                              onClick={() =>
+                                handleDeleteFashionTechpack(pack.id)
+                              }
+                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                            >
                               Delete
                             </button>
                           </div>

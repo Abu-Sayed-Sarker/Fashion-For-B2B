@@ -175,7 +175,7 @@ export default function ArtworkPlacement() {
       pantone_cmyk: "",
       underbase_required: "no",
       artwork_scaling: "global",
-      method: "",
+      application_method: "",
     });
   };
 
@@ -357,7 +357,7 @@ export default function ArtworkPlacement() {
         color_separation: artwork.color_separation,
         underbase_required: artwork.underbase_required,
         coordinates: artwork.coordinates,
-        method: artwork.application_method,
+        application_method: artwork.application_method,
         placement_tolerance: artwork.placement_tolerance,
       }));
 
@@ -576,7 +576,7 @@ export default function ArtworkPlacement() {
 
                     <Select
                       label="Application Method"
-                      name={`artworks.${index}.method`}
+                      name={`artworks.${index}.application_method`}
                       control={control}
                       errors={errors.artworks?.[index] || {}}
                       options={methodOptions}

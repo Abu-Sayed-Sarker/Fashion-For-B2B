@@ -90,7 +90,7 @@ export default function TrimsAccessories() {
           consumption: trim.consumption,
           size: trim.size,
           color: trim.color,
-          brand: trim.brandOrGeneric,
+          brand_type: trim.brandOrGeneric,
           color_logic: trim.colorLogic,
           supplier: trim.supplier,
         })),
@@ -114,7 +114,7 @@ export default function TrimsAccessories() {
           size: trim.size,
           finish: trim.finish,
           color: trim.color,
-          brand: trim.brandOrGeneric,
+          brand_type: trim.brandOrGeneric,
           color_logic: trim.colorLogic,
           supplier: trim.supplier,
         })),
@@ -169,7 +169,7 @@ export default function TrimsAccessories() {
         size: trim.size || "",
         color: trim.color || "",
         finish: trim.finish || "",
-        brandOrGeneric: trim.brand || "",
+        brandOrGeneric: trim.brand_type || "",
         supplier: trim.supplier || "",
         colorLogic: trim.color_logic || "",
       }));
@@ -258,14 +258,39 @@ export default function TrimsAccessories() {
                     />
 
                     {/* Row 2: Color, Finish, Placement */}
-                    <Input
-                      label="Color"
-                      name={`trims.${index}.color`}
-                      register={register}
-                      errors={errors.trims?.[index] || {}}
-                      placeholder="e.g., Black, Silver, #33445F"
-                      helperText="Color name or code"
-                    />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Color
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          value={watch(`trims.${index}.color`) || '#000000'}
+                          onChange={(e) => {
+                            const hexValue = e.target.value;
+                            // Convert hex to a readable format but keep hex for picker
+                            const fieldValue = watch(`trims.${index}.color`);
+                            // If current value is hex-like, update it; otherwise preserve name
+                            if (!fieldValue || fieldValue.startsWith('#')) {
+                              setValue(`trims.${index}.color`, hexValue);
+                            }
+                          }}
+                          className="h-10 w-14 rounded border border-gray-300 cursor-pointer hover:border-gray-400"
+                          title="Pick a color"
+                        />
+                        <input
+                          type="text"
+                          value={watch(`trims.${index}.color`) || ''}
+                          onChange={(e) => {
+                            const textValue = e.target.value;
+                            setValue(`trims.${index}.color`, textValue);
+                          }}
+                          placeholder="e.g., Black, Silver, #33445F"
+                          className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Color name or code</p>
+                    </div>
 
                     <Input
                       label="Finish"
