@@ -152,7 +152,7 @@ export default function BOMGenerator() {
           cost_per_unit: item.costPerUnit,
           currency: item.currency,
           notes: item.notes,
-          wastage: item.wastage,
+          wastage_percentage: item.wastage,
           supplier: item.supplier,
           moq: item.moq,
           lead_time: item.leadTime,
@@ -456,10 +456,10 @@ export default function BOMGenerator() {
                 isUpdateBillOfMaterialsLoading
               }
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${!isValid ||
-                  isIncludedMaterialsLoading ||
-                  isUpdateBillOfMaterialsLoading
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-gray-900 text-white hover:bg-gray-800"
+                isIncludedMaterialsLoading ||
+                isUpdateBillOfMaterialsLoading
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-gray-900 text-white hover:bg-gray-800"
                 }`}
             >
               Next: Review & Submit{" "}
