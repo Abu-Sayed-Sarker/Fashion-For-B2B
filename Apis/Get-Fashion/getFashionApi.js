@@ -30,5 +30,6 @@ export const {
   useGetAllFashionTechpacksQuery,
   useGetFashionTechpackByIdQuery,
   useDeleteFashionTechpackMutation,
+  useLazyGetFashionTechpackByIdQuery,
   useCloneFashionTechpackMutation,
 } = getFashionApi;

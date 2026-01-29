@@ -6,6 +6,7 @@ import {
   useCloneFashionTechpackMutation,
   useDeleteFashionTechpackMutation,
   useGetAllFashionTechpacksQuery,
+  useLazyGetFashionTechpackByIdQuery,
 } from "@/Apis/Get-Fashion/getFashionApi";
 import { useRouter } from "next/navigation";
 import { useCreateInitialFashionLibraryMutation } from "@/Apis/Poast-a-fashion/postAFashionApi";
@@ -23,6 +24,7 @@ const TechPackLibrary = () => {
     useCreateInitialFashionLibraryMutation();
   const [deleteFashionTechpack] = useDeleteFashionTechpackMutation();
   const [cloneFashionLibrary] = useCloneFashionTechpackMutation();
+  const [getFashionTechpackById] = useLazyGetFashionTechpackByIdQuery();
   //////////---------------------------------------------/////
 
   const handleCreateInitialFashion = async () => {
@@ -60,6 +62,18 @@ const TechPackLibrary = () => {
   const toggleMenu = (id) => {
     setActiveMenu(activeMenu === id ? null : id);
   };
+
+
+  const handleExportPDF = async (id) => {
+    try {
+      const res = await getFashionTechpackById(id).unwrap();
+      if (res?.pdf_url) {
+        window.open(res?.pdf_url, "_blank");
+      }
+    } catch (error) {
+      console.error("Error exporting tech pack:", error);
+    }
+  }
 
   // Filter tech packs based on search query
   const filteredTechPacks = techPacks.filter(
@@ -234,19 +248,19 @@ const TechPackLibrary = () => {
                             onClick={() => setActiveMenu(null)}
                           />
                           <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
-                            <Link
-                              href={`/${pack.id}/review`}
+                            <button
+                              onClick={() => route.push(`/${pack.id}/review`)}
                               className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                             >
                               Open
-                            </Link>
+                            </button>
                             <button
                               onClick={() => handleCloneFashionLibrary(pack.id)}
                               className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                             >
                               Duplicate
                             </button>
-                            <button onClick={()=> window.open(pack?.pdf_url, '_blank')} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            <button onClick={() => handleExportPDF(pack.id)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                               Export PDF
                             </button>
                             <button
@@ -308,19 +322,19 @@ const TechPackLibrary = () => {
                         onClick={() => setActiveMenu(null)}
                       />
                       <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
-                        <Link
-                          href={`/dashboard/review`}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        <button
+                          onClick={() => route.push(`/${pack.id}/review`)}
+                          className="text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full"
                         >
                           Open
-                        </Link>
+                        </button>
                         <button
                           onClick={() => handleCloneFashionLibrary(pack.id)}
                           className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         >
                           Duplicate
                         </button>
-                        <button onClick={()=> window.open(pack?.pdf_url, '_blank')} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        <button onClick={() => handleExportPDF(pack.id)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                           Export PDF
                         </button>
                         <button
