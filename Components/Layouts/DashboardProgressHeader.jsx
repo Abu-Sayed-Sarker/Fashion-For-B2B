@@ -5,32 +5,32 @@ import { useParams, usePathname } from "next/navigation";
 
 const DashboardProgressHeader = () => {
   const pathname = usePathname();
-  const {techpack_id} = useParams();
+  const { techpack_id } = useParams();
   const [currentStep, setCurrentStep] = useState(1);
-  
+
   const getPathStep = (path) => {
     switch (path) {
-      case "/dashboard":
+      case `/${techpack_id}`:
         return 1;
       case `/${techpack_id}/measurements`:
         return 2;
-        case `/${techpack_id}/fabrics`:
-          return 3;
-          case `/${techpack_id}/trims`:
+      case `/${techpack_id}/fabrics`:
+        return 3;
+      case `/${techpack_id}/trims`:
         return 4;
       case `/${techpack_id}/construction`:
         return 5;
       case `/${techpack_id}/artwork`:
         return 6;
-        case `/${techpack_id}/bom`:
+      case `/${techpack_id}/bom`:
         return 7;
       case `/${techpack_id}/review`:
         return 8;
-        default:
-          return 1;
-        }
-      };
-      
+      default:
+        return 1;
+    }
+  };
+
   const steps = [
     { id: 1, label: "Setup" },
     { id: 2, label: "Measurements" },
@@ -43,7 +43,26 @@ const DashboardProgressHeader = () => {
   ];
 
   const handleStepClick = (stepId) => {
+    // only clickable if stepId <= currentStep
+    if (stepId > currentStep) return;
     setCurrentStep(stepId);
+    if (stepId === 1) {
+      router.push(`/${techpack_id}`);
+    } else if (stepId === 2) {
+      router.push(`/${techpack_id}/measurements`);
+    } else if (stepId === 3) {
+      router.push(`/${techpack_id}/fabrics`);
+    } else if (stepId === 4) {
+      router.push(`/${techpack_id}/trims`);
+    } else if (stepId === 5) {
+      router.push(`/${techpack_id}/construction`);
+    } else if (stepId === 6) {
+      router.push(`/${techpack_id}/artwork`);
+    } else if (stepId === 7) {
+      router.push(`/${techpack_id}/bom`);
+    } else if (stepId === 8) {
+      router.push(`/${techpack_id}/review`);
+    }
   };
 
   const getStepStatus = (stepId) => {
@@ -87,19 +106,18 @@ const DashboardProgressHeader = () => {
                   <div
                     key={step.id}
                     className="flex flex-col items-center cursor-pointer group"
-                    // onClick={() => handleStepClick(step.id)}
+                    onClick={() => handleStepClick(step.id)}
                   >
                     {/* Circle */}
                     <div
                       className={`
                         w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium
                         transition-all duration-300 ease-in-out
-                        ${
-                          status === "completed"
-                            ? "bg-gray-900 text-white scale-100"
-                            : status === "active"
-                              ? "bg-white border-2 border-gray-900 text-gray-900 scale-110 shadow-lg"
-                              : "bg-white border-2 border-gray-200 text-gray-400 scale-100"
+                        ${status === "completed"
+                          ? "bg-gray-900 text-white scale-100"
+                          : status === "active"
+                            ? "bg-white border-2 border-gray-900 text-gray-900 scale-110 shadow-lg"
+                            : "bg-white border-2 border-gray-200 text-gray-400 scale-100"
                         }
                         group-hover:scale-110 group-hover:shadow-md
                       `}
@@ -115,10 +133,9 @@ const DashboardProgressHeader = () => {
                     <span
                       className={`
                         mt-3 text-sm font-medium whitespace-nowrap transition-colors duration-300
-                        ${
-                          status === "completed" || status === "active"
-                            ? "text-gray-900"
-                            : "text-gray-400"
+                        ${status === "completed" || status === "active"
+                          ? "text-gray-900"
+                          : "text-gray-400"
                         }
                       `}
                     >

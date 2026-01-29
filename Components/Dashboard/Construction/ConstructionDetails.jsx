@@ -443,7 +443,7 @@ export default function ConstructionDetails() {
         });
       }
     }
-  }, [constructionData, isLoading, setValue, currentAreas]); 
+  }, [constructionData, isLoading, setValue, currentAreas]);
 
 
   return (
@@ -649,11 +649,10 @@ export default function ConstructionDetails() {
               <button
                 type="submit"
                 disabled={hasErrors}
-                className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
-                  hasErrors
+                className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${hasErrors
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-gray-900 text-white hover:bg-gray-800"
-                }`}
+                  }`}
               >
                 Next: Artwork & Graphics
                 <ArrowRight className="w-4 h-4" />
