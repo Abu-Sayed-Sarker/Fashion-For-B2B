@@ -41,7 +41,7 @@ const GARMENT_CONSTRUCTION_AREAS = {
       title: "Side Seam Construction",
       icon: "📐",
       description: "Side seam assembly and finishing",
-      required: false,
+      required: true,
     },
   ],
   polo: [
@@ -71,7 +71,7 @@ const GARMENT_CONSTRUCTION_AREAS = {
       title: "Side Seam Construction",
       icon: "📐",
       description: "Side seam assembly",
-      required: false,
+      required: true,
     },
   ],
   hoodie: [
@@ -101,7 +101,7 @@ const GARMENT_CONSTRUCTION_AREAS = {
       title: "Side Seam Construction",
       icon: "📐",
       description: "Side seam assembly",
-      required: false,
+      required: true,
     },
   ],
   jacket: [
@@ -131,7 +131,7 @@ const GARMENT_CONSTRUCTION_AREAS = {
       title: "Side Seam Construction",
       icon: "📐",
       description: "Side seam and lining assembly",
-      required: false,
+      required: true,
     },
   ],
   jeans: [
@@ -230,7 +230,7 @@ const GARMENT_CONSTRUCTION_AREAS = {
       title: "Sleeve Construction",
       icon: "👕",
       description: "Sleeve attachment details (if applicable)",
-      required: false,
+      required: true,
     },
     {
       area: "hem",
@@ -244,7 +244,7 @@ const GARMENT_CONSTRUCTION_AREAS = {
       title: "Side Seam Construction",
       icon: "📐",
       description: "Side seam and zipper assembly",
-      required: false,
+      required: true,
     },
   ],
   skirt: [
@@ -650,8 +650,8 @@ export default function ConstructionDetails() {
                 type="submit"
                 disabled={hasErrors}
                 className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${hasErrors
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-gray-900 text-white hover:bg-gray-800"
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-gray-900 text-white hover:bg-gray-800"
                   }`}
               >
                 Next: Artwork & Graphics

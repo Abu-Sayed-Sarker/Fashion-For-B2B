@@ -1,9 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Check } from "lucide-react";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 
 const DashboardProgressHeader = () => {
+  const router = useRouter();
   const pathname = usePathname();
   const { techpack_id } = useParams();
   const [currentStep, setCurrentStep] = useState(1);
