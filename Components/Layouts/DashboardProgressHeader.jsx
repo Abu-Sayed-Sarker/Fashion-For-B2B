@@ -2,12 +2,58 @@
 import React, { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { useParams, usePathname, useRouter } from "next/navigation";
+import { useGetFashionTechpackByIdQuery } from "@/Apis/Get-Fashion/getFashionApi";
 
 const DashboardProgressHeader = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { techpack_id } = useParams();
   const [currentStep, setCurrentStep] = useState(1);
+
+  //// api call here////
+  const { data: techpackData = {} } = useGetFashionTechpackByIdQuery(
+    techpack_id,
+    { skip: !techpack_id },
+  );
+
+  const getCompletedSteps = () => {
+    const completed = [];
+    if (!techpackData) return completed;
+
+    // Step 1: Check if step_one object has status "completed"
+    if (techpackData.step_one?.status === "completed") {
+      completed.push(1);
+    }
+
+    // Steps 2-7: Check if arrays have items and all items are "completed"
+    const stepKeys = [
+      { key: "step_two", id: 2 },
+      { key: "step_three", id: 3 },
+      { key: "step_four", id: 4 },
+      { key: "step_five", id: 5 },
+      { key: "step_six", id: 6 },
+      { key: "step_seven", id: 7 },
+    ];
+
+    stepKeys.forEach(({ key, id }) => {
+      const stepData = techpackData[key];
+      if (Array.isArray(stepData) && stepData.length > 0) {
+        if (stepData.every((item) => item.status === "completed")) {
+          completed.push(id);
+        }
+      }
+    });
+
+    // Step 8: Review step is complete if the whole techpack is marked as completed
+    if (techpackData.status === "completed") {
+      completed.push(8);
+    }
+
+    return completed;
+  };
+
+  const completedSteps = getCompletedSteps();
+
 
   const getPathStep = (path) => {
     switch (path) {
@@ -45,7 +91,7 @@ const DashboardProgressHeader = () => {
 
   const handleStepClick = (stepId) => {
     // only clickable if stepId <= currentStep
-    if (stepId > currentStep) return;
+    if (!completedSteps.includes(stepId)) return;
     setCurrentStep(stepId);
     if (stepId === 1) {
       router.push(`/${techpack_id}`);
@@ -68,6 +114,7 @@ const DashboardProgressHeader = () => {
 
   const getStepStatus = (stepId) => {
     if (stepId < currentStep) return "completed";
+    if (completedSteps.includes(stepId)) return "completed";
     if (stepId === currentStep) return "active";
     return "upcoming";
   };
