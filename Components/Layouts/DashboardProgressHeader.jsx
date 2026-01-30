@@ -138,7 +138,7 @@ const DashboardProgressHeader = () => {
 
             {/* Animated Progress Line */}
             <div
-              className="absolute top-5 left-0 h-0.5 bg-gray-900 transition-all duration-500 ease-in-out"
+              className="absolute top-5 -left-1 h-0.5 bg-gray-900 transition-all duration-500 ease-in-out"
               style={{
                 marginLeft: "2.5rem",
                 width: `calc(${((currentStep - 1) / (steps.length - 1)) * 100}% - 2.5rem)`,
